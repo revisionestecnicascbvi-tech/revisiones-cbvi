@@ -112,7 +112,7 @@
   .login-hint{font-size:12px;color:var(--faint);text-align:center}
 
   /* ===== App shell ===== */
-  #app{min-height:100%;display:grid;grid-template-columns:232px 1fr;grid-template-rows:auto 1fr}
+  #app{min-height:100%;display:grid;grid-template-columns:232px minmax(0,1fr);grid-template-rows:auto 1fr}
   .rail{grid-row:1 / span 2;background:var(--rail);color:var(--rail-ink);display:flex;flex-direction:column;
     padding:16px 12px calc(16px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));position:sticky;top:0;height:100vh}
   .rail .brand{display:flex;align-items:center;gap:11px;padding:6px 8px 18px}
@@ -136,7 +136,8 @@
 
   .topbar{grid-column:2;background:var(--surface);border-bottom:1px solid var(--line);
     padding:0 clamp(16px,3vw,28px);height:62px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
-  .topbar h2{font-size:19px;font-family:var(--ff-h);font-weight:600}
+  .topbar h2{font-size:19px;font-family:var(--ff-h);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar .sub:empty{display:none}          /* vacio igual ocupaba espacio (gap) */
   .topbar .sub{color:var(--muted);font-size:13px;margin-left:2px;align-self:center}
   .topbar .sp{flex:1}
   .icbtn{width:42px;height:42px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:16px;display:grid;place-items:center}
@@ -145,23 +146,52 @@
   .syncbadge.ok{color:var(--verde);background:var(--verde-bg);border-color:var(--verde)}
   .syncbadge.pend{color:var(--ambar);background:var(--ambar-bg);border-color:var(--ambar)}
   .syncbadge.off{color:var(--muted);background:var(--surface-2)}
-  main{grid-column:2;padding:clamp(16px,3vw,28px);padding-bottom:96px}
+  /* min-width:0 + clip: ningun contenido puede ensanchar la pagina. Antes un
+     nombre largo en una lista estiraba todo a 443px y el celular encogia la
+     app entera (barra cortada, letras diminutas). */
+  main{grid-column:2;padding:clamp(16px,3vw,28px);padding-bottom:96px;min-width:0;overflow-x:clip}
   .maxw{max-width:1080px;margin:0 auto}
 
   /* ===== Bottom tabs (móvil) ===== */
   .tabs{display:none}
   @media (max-width:860px){
-    #app{grid-template-columns:1fr}
+    #app{grid-template-columns:minmax(0,1fr)}
     .rail{display:none}
     .topbar{grid-column:1}
     main{grid-column:1;padding-bottom:84px}
+    /* Celular: la barra media 401px en pantallas de 390 y el navegador
+       encogia TODA la pagina. Menos espacio, titulo flexible, y Configuracion
+       y Tema pasan al menu "Mas". */
+    .topbar{gap:8px;padding:0 12px}
+    .topbar .sub,.topbar .sp{display:none}
+    .topbar h2{flex:1;font-size:17px}
+    .icbtn{width:40px;height:40px;flex:none}
+    #btnConfig,#btnTheme{display:none}
     .tabs{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--rail);
       padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));justify-content:space-around}
     .tabs button{background:none;border:0;color:var(--rail-faint);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:4px 8px;border-radius:10px;flex:1}
     .tabs button .ic{font-size:19px}
     .tabs button.on{color:#fff}
     .tabs button.on .ic{color:var(--ember)}
+    .tabs button{position:relative}
+    .tabs .tbadge{position:absolute;top:0;right:calc(50% - 22px);min-width:17px;height:17px;padding:0 4px;border-radius:9px;
+      background:var(--ember);color:#fff;font-size:10px;line-height:17px;font-weight:700}
   }
+  /* Hoja "Mas" (celular) */
+  .modal.sheetwrap{place-items:end center;padding:0}
+  .sheet{background:var(--surface);width:100%;max-width:520px;border-radius:22px 22px 0 0;
+    padding:10px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:var(--shadow);animation:subir .18s ease-out}
+  @keyframes subir{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+  .sheetbar{width:42px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 12px}
+  .sheett{display:block;font-family:var(--ff-h);font-size:16px;margin:0 4px 8px}
+  .sheetlist{display:grid;gap:4px}
+  .sheetlist button{display:flex;align-items:center;gap:13px;width:100%;padding:14px 12px;border:0;border-radius:12px;
+    background:transparent;color:var(--ink);font:600 15px var(--ff);text-align:left;cursor:pointer}
+  .sheetlist button:active,.sheetlist button.on{background:var(--surface-2)}
+  .sheetlist .ic{font-size:20px;width:26px;text-align:center}
+  .sheetlist .tx{flex:1}
+  .sheetlist .ch{color:var(--faint);font-size:20px}
+  .sheetlist .badge{background:var(--ember);color:#fff;border-radius:10px;padding:1px 8px;font-size:12px}
 
   /* ===== Componentes ===== */
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
@@ -218,7 +248,7 @@
   .row-item .meta{flex:1;min-width:0}
   .row-item .meta b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--ff-h);font-weight:600}
   .row-item .meta small{color:var(--muted);font-size:12.5px}
-  .listgrid{display:grid;gap:10px}
+  .listgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}   /* filas que recortan el nombre con "…" en vez de ensanchar */
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .search{flex:1;min-width:180px;position:relative}
   .search input{width:100%}
@@ -311,9 +341,14 @@
 
   .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:34px;text-align:center;color:var(--muted)}
   .seedtag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
-  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:3100;background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
-  .modal{position:fixed;inset:0;z-index:70;background:rgba(10,13,16,.55);display:grid;place-items:center;padding:20px}
+  .modal{position:fixed;inset:0;z-index:3000;background:rgba(10,13,16,.55);display:grid;place-items:center;padding:16px}
+  /* Formularios largos (censo): antes median mas que la pantalla y no se
+     desplazaban, y "Guardar" quedaba fuera de alcance en el celular. */
+  .modal .box{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:flex;flex-direction:column}
+  .modal .box header,.modal .box footer{flex:none}
+  .modal .box .c{overflow-y:auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .modal .box{background:var(--surface);border:1px solid var(--line);border-radius:18px;max-width:440px;width:100%;box-shadow:var(--shadow);overflow:hidden}
   .modal .box header{padding:16px 18px;border-bottom:1px solid var(--line-2);font-family:var(--ff-h);font-size:17px;font-weight:600}
   .modal .box .c{padding:18px;display:grid;gap:13px}
@@ -338,9 +373,15 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
   /* ===== Mapa real (Leaflet + OpenStreetMap) ===== */
-  .mapreal{height:min(56vh,460px);min-height:300px;border-radius:var(--radius);overflow:hidden;
+  /* position+z-index+isolation: las capas internas de Leaflet (z-index 400-1000)
+     quedan ENCERRADAS aqui y ya no tapan los avisos (antes el mapa quedaba
+     encima del formulario de censo). */
+  .mapreal{position:relative;z-index:0;isolation:isolate;height:min(56vh,460px);min-height:300px;border-radius:var(--radius);overflow:hidden;
     border:1px solid var(--line);background:var(--surface-2);box-shadow:var(--shadow);margin-bottom:10px}
   .mapreal .leaflet-container{height:100%;width:100%;background:var(--surface-2);font-family:var(--ff)}
+  .mapsingps{margin:0 0 12px;padding:11px 14px;border-radius:12px;font-size:13.5px;line-height:1.55;
+    background:color-mix(in srgb,var(--ambar) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--ambar) 55%,var(--line))}
+  .mapsingps .sgl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
   .mkpin{background:none;border:0}
   .mkpin .pin{display:block;width:20px;height:20px;border-radius:50%;border:2.5px solid #fff;
     box-shadow:0 1px 4px rgba(0,0,0,.45)}
@@ -491,9 +532,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.3"></script>
-<script src="form-inspeccion.js?v=1.3"></script>
-<script src="guias.js?v=1.3"></script>
+<script src="logos.js?v=1.4"></script>
+<script src="form-inspeccion.js?v=1.4"></script>
+<script src="guias.js?v=1.4"></script>
 <script>
 (function(){
 "use strict";
@@ -505,8 +546,12 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.3";
+var APP_VERSION="1.4";
 var APP_VERSION_NOTAS=[
+  "v1.4: El mapa del barrido ya no tapa el formulario de censo.",
+  "v1.4: El mapa solo muestra ubicaciones reales; los establecimientos sin GPS se listan aparte para ubicarlos.",
+  "v1.4: La inspeccion toma sola la ubicacion del establecimiento para que aparezca en el mapa.",
+  "v1.4: En el celular, el boton Mas da acceso a Vencimientos, Metas, Verificar, Configuracion y Usuarios.",
   "v1.3: Lista para la app instalable (APK): el certificado se guarda en Descargas y se abre para compartirlo.",
   "v1.3: En el APK, el boton atras del telefono vuelve a la pantalla anterior en vez de cerrar la app.",
   "v1.2: Si el servidor no puede recibir una foto, la foto ya no se pierde: queda guardada en la tablet y se vuelve a enviar sola.",
@@ -936,6 +981,7 @@ var NAVITEMS=[
   {id:"config",t:"Configuración",ic:"⚙",admin:true},
   {id:"usuarios",t:"Usuarios",ic:"👥",admin:true}
 ];
+var TABS_PRINC=["dashboard","barrido","establecimientos","conceptos"];
 var ICMAP={dashboard:"◉",barrido:"🗺",establecimientos:"▦",conceptos:"📄",metas:"◎",vencimientos:"⏳",verificar:"❖",config:"⚙",usuarios:"👥"};
 /* Historial de navegación para el botón Volver */
 var NAVHIST=[];
@@ -966,6 +1012,22 @@ function navAtras(){
   if(!p){VIEW="dashboard";FORM=null;render();window.scrollTo(0,0);return}
   VIEW=p.v;fichaId=p.ficha;FORM=p.form||null;render();window.scrollTo(0,0);
 }
+function abrirMas(venc){
+  var items=NAVITEMS.filter(function(n){return TABS_PRINC.indexOf(n.id)<0&&(!n.admin||isAdmin())});
+  var root=$("#modalRoot");
+  root.innerHTML='<div class="modal sheetwrap"><div class="sheet" role="dialog" aria-modal="true" aria-label="Más secciones">'+
+    '<div class="sheetbar"></div><b class="sheett">Más secciones</b><div class="sheetlist">'+
+    items.map(function(n){
+      return '<button type="button" data-v="'+n.id+'" class="'+(n.id===VIEW?"on":"")+'"><span class="ic">'+(ICMAP[n.id]||n.ic)+'</span><span class="tx">'+esc(n.t)+'</span>'+
+        (n.id==="vencimientos"&&venc?'<span class="badge">'+venc+'</span>':'')+'<span class="ch">›</span></button>'}).join("")+
+    '<button type="button" id="shTema"><span class="ic">◐</span><span class="tx">Tema claro / oscuro</span></button>'+
+    '</div><button type="button" class="btn btn-g" id="shSalir" style="width:100%;margin-top:6px">⎋ Cerrar sesión</button></div></div>';
+  var cerrar=function(){root.innerHTML=""};
+  root.querySelector(".sheetwrap").addEventListener("click",function(e){if(e.target===this)cerrar()});
+  $$(".sheetlist [data-v]",root).forEach(function(b){b.addEventListener("click",function(){cerrar();navTo(b.dataset.v)})});
+  $("#shSalir",root).addEventListener("click",function(){cerrar();logout()});
+  $("#shTema",root).addEventListener("click",function(){var t=$("#btnTheme");if(t)t.click()});
+}
 function renderNav(){
   var nav=$("#nav");nav.innerHTML="";var tabs=$("#tabs");tabs.innerHTML="";
   var venc=DB.establecimientos.filter(function(e){var s=estadoEst(e).k;return s==="vencido"||s==="porvencer"}).length;
@@ -975,13 +1037,19 @@ function renderNav(){
     b.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+n.t+(n.id==="vencimientos"&&venc?'<span class="badge">'+venc+'</span>':'');
     b.addEventListener("click",function(){navTo(n.id)});
     nav.appendChild(b);
-    // bottom tabs (primeros 5)
-    if(["dashboard","barrido","establecimientos","conceptos","vencimientos"].indexOf(n.id)>=0){
+    // pestanas de abajo (celular): las 4 principales + "Mas"
+    if(TABS_PRINC.indexOf(n.id)>=0){
       var t=el("button","");if(n.id===VIEW)t.className="on";
-      t.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+n.t;
+      t.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+(n.id==="establecimientos"?"Establec.":n.t);
       t.addEventListener("click",function(){navTo(n.id)});tabs.appendChild(t);
     }
   });
+  /* "Mas": en el celular no cabe el menu lateral; aqui quedan Vencimientos,
+     Metas, Verificar, Configuracion y Usuarios (antes no habia como llegar). */
+  var enMas=TABS_PRINC.indexOf(VIEW)<0&&NAVITEMS.some(function(n){return n.id===VIEW});
+  var tm=el("button",enMas?"on":"");
+  tm.innerHTML='<span class="ic">☰</span>Más'+(venc?'<span class="tbadge">'+venc+'</span>':'');
+  tm.addEventListener("click",function(){abrirMas(venc)});tabs.appendChild(tm);
   var who=$("#who");
   who.innerHTML='<div class="av">'+(SES&&SES.name?esc(SES.name.charAt(0).toUpperCase()):"?")+'</div><div class="nm"><b>'+esc(SES?SES.name:"")+'</b><small>'+esc(SES?rolLegible(SES.role):"")+'</small></div>';
   var lo=el("button","","⎋");lo.title="Salir";lo.addEventListener("click",logout);who.appendChild(lo);
@@ -1088,10 +1156,14 @@ var MAPA=null, CAPA=null, mapFiltro="todos", mapBarrio="todos";
 /* Coordenada estable para los que aún no tienen GPS: se deriva del id, así
    el punto no salta de lugar cada vez que se abre el mapa. */
 function hashNum(s){var h=0;s=String(s||"");for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0}return h}
+/* Solo coordenadas REALES (GPS del censo o de la inspeccion). Antes, sin GPS
+   se inventaba un punto cerca del centro: en un mapa real eso engana (un
+   local aparecia en el rio). Sin GPS -> null: no se dibuja y se cuenta aparte. */
 function coordDe(e){
-  if(e.lat&&e.lng&&!isNaN(+e.lat)&&!isNaN(+e.lng))return[+e.lat,+e.lng];
-  var h=hashNum(e.id||e.codigo||e.nombre);
-  return [INIRIDA[0]+(((h%1000)/1000)-0.5)*0.028, INIRIDA[1]+((((h>>10)%1000)/1000)-0.5)*0.034];
+  if(!e||e.lat===""||e.lng===""||e.lat==null||e.lng==null)return null;
+  var la=+e.lat, ln=+e.lng;
+  if(isNaN(la)||isNaN(ln)||(la===0&&ln===0)||Math.abs(la)>90||Math.abs(ln)>180)return null;
+  return [la,ln];
 }
 function barriosUnicos(){
   var m={};DB.establecimientos.forEach(function(e){var b=(e.barrio||"").trim();if(b&&b!=="—")m[b]=1});
@@ -1119,6 +1191,7 @@ function vBarrido(v){
 
   /* --- mapa --- */
   var mw=el("div","mapreal");mw.id="mapa";v.appendChild(mw);
+  v.insertAdjacentHTML("beforeend",'<p class="mapsingps" id="mapSinGps" hidden></p>');
   v.insertAdjacentHTML("beforeend",'<div class="maplegend lg2">'+
     '<span><i style="background:var(--verde)"></i>Vigente</span>'+
     '<span><i style="background:var(--ambar)"></i>Por vencer</span>'+
@@ -1182,12 +1255,13 @@ function pintarMapa(){
 function pintarMarcadores(){
   if(!MAPA||!CAPA||!window.L)return;
   CAPA.clearLayers();
-  var pts=[];
+  var pts=[], sinGps=[];
   DB.establecimientos.forEach(function(e){
     var st=estadoEst(e);
     if(mapFiltro!=="todos"&&st.k!==mapFiltro&&!(mapFiltro==="vencido"&&st.k==="nofav"))return;
     if(mapBarrio!=="todos"&&(e.barrio||"").trim()!==mapBarrio)return;
     var c=coordDe(e), col=STCOL[st.k]||"var(--gris)";
+    if(!c){sinGps.push(e);return}          // sin GPS real: no se inventa el punto
     var ic=L.divIcon({className:"mkpin",iconSize:[22,22],iconAnchor:[11,11],
       html:'<span class="pin" style="background:'+col+'"></span>'});
     var m=L.marker(c,{icon:ic,title:e.nombre}).addTo(CAPA);
@@ -1207,8 +1281,21 @@ function pintarMarcadores(){
     var b=ev.popup.getElement()&&ev.popup.getElement().querySelector("[data-ficha]");
     if(b)b.addEventListener("click",function(){openFicha(b.getAttribute("data-ficha"))});
   });
-  if(pts.length>1){try{MAPA.fitBounds(L.latLngBounds(pts).pad(0.18))}catch(e){}}
+  if(pts.length>1){try{MAPA.fitBounds(L.latLngBounds(pts).pad(0.18),{maxZoom:17})}catch(e){}}
   else if(pts.length===1){MAPA.setView(pts[0],16)}
+  else {MAPA.setView(INIRIDA,14)}            // sin puntos: se ve todo Inirida, no un acercamiento al azar
+  /* Aviso de los que no se pueden ubicar */
+  var av=document.getElementById("mapSinGps");
+  if(av){
+    if(sinGps.length){
+      av.hidden=false;
+      av.innerHTML='<b>📍 '+sinGps.length+(sinGps.length===1?' establecimiento sin ubicación GPS':' establecimientos sin ubicación GPS')+'</b> — no aparecen en el mapa. '+
+        'Se ubican solos al <b>censarlos</b> o al <b>hacerles la inspección</b> en el sitio.'+
+        '<span class="sgl">'+sinGps.slice(0,8).map(function(e){return '<button type="button" class="mini" data-ficha="'+esc(e.id)+'">'+esc(e.nombre||"(sin nombre)")+'</button>'}).join("")+
+        (sinGps.length>8?'<span class="note"> y '+(sinGps.length-8)+' más</span>':'')+'</span>';
+      $$("[data-ficha]",av).forEach(function(b){b.addEventListener("click",function(){openFicha(b.getAttribute("data-ficha"))})});
+    } else av.hidden=true;
+  }
 }
 
 /* ===================== CENSO ·  evidencia de que el barrido se hizo =====
@@ -1439,6 +1526,7 @@ function renderDatos(body,est){
     '<div><label class="lbl">Representante / responsable</label><input id="iRep" type="text" value="'+esc(est?est.rep:"")+'"></div>'+
     '<div><label class="lbl">Inspector</label><input id="iInsp" type="text" value="'+esc(FORM.inspector)+'"></div>'+
     '</div>'+
+    '<div class="gpsrow" id="gpsInsp" style="margin-top:12px"></div>'+
     '<label class="lbl" style="margin-top:14px">¿Qué tipo de negocio es? — atajo para ocupación y riesgo</label>'+
     '<div class="filterpills" id="ocupQuick" style="margin-bottom:8px">'+OCUP_QUICK.map(function(q,i){return '<button data-i="'+i+'">'+esc(q.label)+'</button>'}).join("")+'</div>'+
     '<div class="ff">'+
@@ -1447,6 +1535,8 @@ function renderDatos(body,est){
     '<div><label class="lbl">Clasificación del riesgo</label><select id="iRiesgo">'+["","Bajo","Moderado","Alto","Especial"].map(function(r){return '<option'+(FORM.clasifRiesgo===r?" selected":"")+'>'+(r||"Seleccione…")+'</option>'}).join("")+'</select></div>'+
     '</div><div class="guia" style="margin-top:8px">'+esc(GUIAS.ocupacion||"")+'</div><div class="guia">'+esc(GUIAS.clasifRiesgo||"")+'</div></div>';
   body.appendChild(top);
+  pintarGpsInsp();
+  if(!FORM.gps)tomarGpsInsp();               // primera vez: se toma sola
   function paintTramite(){
     var t=FORM.tramite;
     $("#tramiteGuia",top).textContent=t==="renovacion"?"Renovación: basta el formato diligenciado y la consignación según el nivel.":(t==="cambio"?"Cambio de razón social o propietario: se vuelve a pedir la documentación como primera vez.":"Primera vez: se piden RUT, cámara de comercio y uso del suelo, y la consignación según el nivel.");
@@ -1600,6 +1690,50 @@ function renderThumbs(id,c){
 }
 var _sv;function scheduleSave(){clearTimeout(_sv);_sv=setTimeout(saveInsp,400)}
 function saveInsp(){if(!FORM)return;if(FORM._nom!==undefined||FORM._dir!==undefined||FORM._rep!==undefined)syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
+/* ===================== UBICACION DE LA INSPECCION =====================
+   La inspeccion se hace EN el establecimiento: se toma la ubicacion sola al
+   abrir el paso Datos y, al generar el concepto, se le asigna al
+   establecimiento si aun no tenia (asi aparece en el mapa).
+   Resguardos: si la precision es peor que 150 m (p. ej. un computador que
+   se ubica por internet) NO se usa; y si el formulario se llena fuera del
+   sitio, el inspector marca "No usar". Nunca pisa la ubicacion del censo. */
+var GPS_MAX_M=150;
+function tomarGpsInsp(){
+  if(!FORM)return;
+  if(!navigator.geolocation){FORM.gps={estado:"nodisp"};pintarGpsInsp();return}
+  var f=FORM; f.gps={estado:"buscando"}; pintarGpsInsp();
+  navigator.geolocation.getCurrentPosition(function(p){
+    f.gps={estado:"ok",lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6),
+           prec:Math.round(p.coords.accuracy||99999),usar:true,fecha:new Date().toISOString()};
+    if(FORM===f){saveInsp();pintarGpsInsp()}
+  },function(){
+    f.gps={estado:"error"}; if(FORM===f){saveInsp();pintarGpsInsp()}
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+}
+function gpsUsable(g){return !!(g&&g.estado==="ok"&&g.usar!==false&&g.prec<=GPS_MAX_M)}
+function pintarGpsInsp(){
+  var r=document.getElementById("gpsInsp"); if(!r||!FORM)return;
+  var g=FORM.gps||{}, h, b='';
+  if(g.estado==="buscando") h='📍 Tomando la ubicación del establecimiento…';
+  else if(g.estado==="nodisp") h='Este equipo no da ubicación: el establecimiento no aparecerá en el mapa hasta censarlo.';
+  else if(g.estado==="error"){ h='No se pudo tomar la ubicación. Activa el GPS y da el permiso.'; b='<button type="button" class="mini" id="gpsOtra">📍 Intentar de nuevo</button>'; }
+  else if(g.estado==="ok"&&g.prec>GPS_MAX_M){ h='⚠ Ubicación imprecisa (±'+g.prec.toLocaleString("es-CO")+' m): <b>no se usará</b> en el mapa. Activa el GPS del equipo.'; b='<button type="button" class="mini" id="gpsOtra">📍 Tomar de nuevo</button>'; }
+  else if(g.estado==="ok"&&g.usar===false){ h='La ubicación <b>no se usará</b> (inspección diligenciada fuera del sitio).'; b='<button type="button" class="mini" id="gpsUsar">Usar ubicación</button>'; }
+  else if(g.estado==="ok"){ h='📍 Ubicación del establecimiento: <span class="mono">'+g.lat+', '+g.lng+'</span> (±'+g.prec+' m) · se usará en el mapa';
+    b='<button type="button" class="mini" id="gpsOtra">Tomar de nuevo</button><button type="button" class="mini" id="gpsNo">No usar</button>'; }
+  else { h='Sin ubicación.'; b='<button type="button" class="mini" id="gpsOtra">📍 Tomar ubicación</button>'; }
+  r.innerHTML=b+'<span class="note">'+h+'</span>';
+  var x;
+  if((x=document.getElementById("gpsOtra")))x.addEventListener("click",tomarGpsInsp);
+  if((x=document.getElementById("gpsNo")))x.addEventListener("click",function(){FORM.gps.usar=false;saveInsp();pintarGpsInsp()});
+  if((x=document.getElementById("gpsUsar")))x.addEventListener("click",function(){FORM.gps.usar=true;saveInsp();pintarGpsInsp()});
+}
+/* Al generar el concepto: el establecimiento queda ubicado si no lo estaba. */
+function aplicarGpsInsp(){
+  if(!FORM||!gpsUsable(FORM.gps))return;
+  var e=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0];
+  if(e&&!coordDe(e)){e.lat=FORM.gps.lat;e.lng=FORM.gps.lng;persist()}
+}
 function syncEst(){ // crea/actualiza el establecimiento desde el encabezado
   var e=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});
   if(!e&&FORM._nom){e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),lat:"",lng:"",creado:NOW.toISOString()};DB.establecimientos.push(e);FORM.establecimientoId=e.id}
@@ -1614,7 +1748,7 @@ function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
   $("#vd").textContent=r.got+"/"+r.tot+" campos · X "+r.X+" · Y "+r.Y+" · "+r.raw+"/"+r.max+" pts";
 }
 function finalizar(){
-  saveInsp();var r=compute(FORM);
+  saveInsp();aplicarGpsInsp();var r=compute(FORM);
   FORM.estado="finalizada";FORM.score100=r.s100;FORM.X=r.X;FORM.Y=r.Y;
   if(!FORM.inspector)FORM.inspector=SES?(SES.name||SES.email||""):"";   // el certificado nunca sale sin inspector
   FORM.concepto={favorable:r.band.favorable,riesgo:r.band.riesgo,texto:r.band.texto};
