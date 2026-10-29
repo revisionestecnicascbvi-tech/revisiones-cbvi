@@ -179,3 +179,154 @@ window.EJEMPLOS = {
   "m10_seguro":"Pregunta: «¿Tienen seguro contra incendio vigente?» Pide ver la póliza.",
   "m10_poliza":"Ej.: que la póliza cubra la actividad real del local (comercio, bodega…)."
 };
+
+/* =========================================================================
+   ACCIONES — qué debe hacer el propietario cuando un ítem NO cumple.
+   Es el texto que sale impreso en el PDF junto a la foto del hallazgo, para
+   que el dueño del establecimiento sepa exactamente qué corregir.
+   Si un ítem no está aquí, se usa ACCION_MODULO por el prefijo (m7_, m8_…).
+   ========================================================================= */
+window.ACCIONES = {
+  /* --- M3 · Antecedentes --- */
+  m3_reporte:  "Reporte toda emergencia al Cuerpo de Bomberos (línea 119) apenas ocurra; el reporte tardío agrava el riesgo.",
+  m3_sistemas: "Revise y reponga los equipos de protección que fallaron durante la emergencia anterior.",
+  m3_cumple:   "Cumpla las recomendaciones del informe anterior antes de la próxima revisión.",
+
+  /* --- M4 · Construcción y uso del suelo --- */
+  m4_lic:      "Tramite la licencia de construcción ante Planeación Municipal.",
+  m4_suelo:    "Solicite el certificado de uso del suelo ante Planeación Municipal.",
+  m4_nsr:      "La edificación debe cumplir la NSR-10. Haga evaluar la estructura por un ingeniero civil.",
+  m4_remod:    "Toda remodelación debe contar con licencia y respaldo técnico.",
+
+  /* --- M5 · Carga de fuego y fuentes de ignición --- */
+  m5_fuentes:  "Controle las fuentes de ignición detectadas: aléjelas de los materiales combustibles y manténgalas señalizadas.",
+  m5_inflam:   "Almacene los líquidos inflamables en recipientes cerrados y rotulados, en zona ventilada y lejos de fuentes de calor.",
+  m5_almac:    "Ordene el almacenamiento: separe pasillos, no obstruya salidas y mantenga 60 cm libres bajo el techo.",
+  m5_activ:    "Delimite y señalice las áreas donde se realiza la actividad de riesgo.",
+
+  /* --- M6 · Instalaciones eléctricas --- */
+  m6_retie:    "Obtenga el certificado RETIE del electricista o ingeniero que ejecutó la instalación.",
+  m6_estado:   "Contrate a un electricista certificado para corregir la instalación: tablero cerrado y rotulado, sin cables expuestos ni empalmes improvisados.",
+  m6_deter:    "Reemplace el cableado, tomas e interruptores deteriorados. El material envejecido es causa frecuente de incendio.",
+  m6_sobre:    "Elimine la sobrecarga: no conecte varios equipos en una sola toma ni use extensiones como instalación permanente.",
+  m6_uso:      "Use los equipos eléctricos conforme a su diseño y capacidad.",
+
+  /* --- M7 · Extintores --- */
+  m7_cuenta:   "Dote el establecimiento con extintores adecuados al riesgo (NTC 2885 / NFPA 10).",
+  m7_aprop:    "Cambie los extintores por el agente apropiado al tipo de fuego presente en el lugar.",
+  m7_distrib:  "Redistribuya los extintores: el recorrido hasta el más cercano no debe superar 15 m (riesgo bajo) o 23 m según clase.",
+  m7_instal:   "Instale los extintores entre 10 cm y 1,50 m del piso, sobre soporte firme y sin obstáculos delante.",
+  m7_visible:  "Deje los extintores a la vista y de fácil acceso; no los tape con mercancía, muebles ni puertas.",
+  m7_senal:    "Señalice cada extintor con la placa reglamentaria visible a distancia.",
+  m7_recarga:  "Recargue o haga mantenimiento a los extintores vencidos. La recarga es anual.",
+  m7_fisico:   "Reemplace los extintores con daño físico: manómetro fuera de rango, manguera rota, cilindro golpeado u oxidado.",
+  m7_superv:   "Lleve la hoja de vida de los extintores con la inspección mensual firmada.",
+
+  /* --- M8 · Evacuación y seguridad humana --- */
+  m8_salidanorma:  "Adecue las salidas de emergencia al ancho y número exigidos por la NSR-10 Título J y K según el aforo.",
+  m8_anchosalida:  "Amplíe el ancho libre de la salida; no debe reducirse con muebles, cajas ni puertas que invadan el paso.",
+  m8_puertanorma:  "Las puertas de evacuación deben abrir en el sentido de la salida y sin llave ni candado durante la jornada.",
+  m8_anchopuerta:  "Amplíe el ancho libre de la puerta de evacuación.",
+  m8_cierre:       "Instale cierrapuertas y herrajes antipánico donde la norma los exija.",
+  m8_despej:       "Mantenga permanentemente despejadas las rutas de evacuación. Retire todo lo que obstruya el paso.",
+  m8_visible:      "Señalice las rutas de evacuación y salidas con señales fotoluminiscentes visibles desde cualquier punto.",
+  m8_ilum:         "Instale iluminación de emergencia con batería de respaldo en rutas y salidas.",
+  m8_ilumnorma:    "Ajuste la iluminación de emergencia: autonomía mínima de 90 minutos y nivel suficiente en el piso.",
+  m8_luces:        "Reponga o repare las luces de emergencia que no encienden al cortar la energía.",
+  m8_corrnorma:    "Adecue el ancho y la altura libre de los corredores de evacuación.",
+  m8_anchocorr:    "Despeje y amplíe el corredor: debe permitir el paso del aforo sin estrechamientos.",
+  m8_escnorma:     "Adecue las escaleras: huella, contrahuella, pasamanos a ambos lados y superficie antideslizante.",
+  m8_anchoesc:     "Amplíe el ancho libre de la escalera de evacuación.",
+  m8_escext:       "Habilite o repare la escalera exterior de emergencia.",
+  m8_rampnorma:    "Adecue la rampa: pendiente máxima, pasamanos y piso antideslizante.",
+  m8_anchoramp:    "Amplíe el ancho libre de la rampa.",
+  m8_psalidanorma: "Adecue el punto de salida: debe desembocar en zona segura a nivel de la vía pública.",
+  m8_anchopsalida: "Amplíe el ancho del punto de salida.",
+  m8_descext:      "Garantice que la descarga de la evacuación llegue al exterior sin pasar por zonas de riesgo.",
+  m8_descaforo:    "La descarga debe tener capacidad suficiente para el aforo total del establecimiento.",
+  m8_cantdesc:     "Habilite el número de descargas que exige la norma para este aforo.",
+  m8_egreso:       "Garantice al menos dos medios de egreso independientes y remotos entre sí.",
+  m8_egresoevac:   "Verifique que los medios de egreso permitan evacuar a todo el aforo en el tiempo seguro.",
+  m8_aforo:        "Calcule y publique el aforo máximo en un aviso visible en la entrada.",
+  m8_aforonsr:     "Ajuste el aforo real al que permite la NSR-10 para esta ocupación y área.",
+  m8_cortafuego:   "Instale o repare los elementos cortafuego (muros, puertas, sellos) exigidos para separar áreas de riesgo.",
+  m8_movil:        "Retire o asegure el mobiliario que reduce el ancho de evacuación.",
+  m8_proced:       "Documente y divulgue el procedimiento de evacuación entre todo el personal.",
+  m8_autoensayo:   "Realice al menos un simulacro de evacuación al año y deje acta.",
+  m8_monitoreo:    "Instale detección y alarma de incendio conforme al riesgo, con monitoreo permanente.",
+
+  /* --- M9 · Preparación ante emergencias --- */
+  m9_plan:     "Elabore el Plan de Emergencias y Contingencias del establecimiento (Decreto 1072/2015) y manténgalo actualizado.",
+  m9_brigada:  "Conforme la brigada de emergencias con personal del establecimiento.",
+  m9_bricert:  "Capacite y certifique a los brigadistas en primeros auxilios, control de incendios y evacuación.",
+  m9_brinivel: "Eleve el nivel de formación de la brigada según el riesgo del establecimiento.",
+  m9_briclase: "Complete la brigada con las clases que faltan (incendios, primeros auxilios, evacuación).",
+  m9_bribom:   "Coordine con el Cuerpo de Bomberos la capacitación de la brigada.",
+  m9_simul:    "Realice simulacros periódicos y registre los resultados.",
+  m9_s_bom:    "Registre y divulgue la línea del Cuerpo de Bomberos (119) en un lugar visible.",
+  m9_s_bri:    "Publique los nombres y contactos de la brigada en cartelera.",
+  m9_s_com:    "Defina el canal de comunicación con la comunidad vecina ante una emergencia.",
+  m9_s_emp:    "Informe y entrene a todos los empleados sobre el plan de emergencias.",
+  m9_s_soc:    "Socialice el plan de emergencias con todos los ocupantes del establecimiento.",
+
+  /* --- M10 · Seguros --- */
+  m10_seguro:  "Contrate una póliza de incendio que ampare el inmueble y su contenido.",
+  m10_poliza:  "Mantenga la póliza vigente y a disposición en el establecimiento.",
+  m10_aseg:    "Ajuste el valor asegurado al valor real del inmueble y su contenido."
+};
+
+/* Acción por defecto según el módulo, cuando el ítem no tiene una específica. */
+window.ACCION_MODULO = {
+  m2:  "Corrija lo observado en los datos del establecimiento.",
+  m3:  "Atienda las recomendaciones derivadas de la emergencia anterior.",
+  m4:  "Regularice la situación constructiva ante Planeación Municipal.",
+  m5:  "Controle la carga de fuego y las fuentes de ignición del establecimiento.",
+  m6:  "Haga revisar y corregir la instalación eléctrica por personal certificado.",
+  m7:  "Adecue los extintores conforme a la NTC 2885 / NFPA 10.",
+  m8:  "Adecue los medios de evacuación conforme a la NSR-10 Títulos J y K.",
+  m9:  "Fortalezca la preparación del establecimiento ante emergencias.",
+  m10: "Revise la cobertura de seguros del establecimiento."
+};
+
+/* =========================================================================
+   TIPOS DE ESTABLECIMIENTO — lista desplegable del censo de barrido.
+   ========================================================================= */
+window.TIPOS_ESTABLECIMIENTO = [
+  "Tienda / minimercado",
+  "Supermercado / autoservicio",
+  "Restaurante / comidas rápidas",
+  "Panadería / repostería",
+  "Bar / discoteca / estanco",
+  "Hotel / hospedaje / residencia",
+  "Droguería / farmacia",
+  "Papelería / miscelánea",
+  "Almacén de ropa / calzado",
+  "Ferretería / depósito de materiales",
+  "Bodega / almacenamiento",
+  "Taller mecánico / lubricentro",
+  "Estación de servicio / combustibles",
+  "Depósito de gas (GLP)",
+  "Institución educativa",
+  "Centro de salud / consultorio / laboratorio",
+  "Oficina / entidad pública",
+  "Banco / cooperativa / giros",
+  "Iglesia / centro de culto",
+  "Salón de eventos / centro recreativo",
+  "Gimnasio / centro deportivo",
+  "Peluquería / barbería / estética",
+  "Internet / videojuegos / telecomunicaciones",
+  "Carpintería / ebanistería",
+  "Industria / planta de procesamiento",
+  "Vivienda con actividad comercial",
+  "Otro"
+];
+
+/* Estados posibles del certificado al momento del censo. */
+window.ESTADOS_CENSO = [
+  { v:"vigente",   t:"Tiene certificado vigente",      k:"vigente"   },
+  { v:"porvencer", t:"Lo tiene, pero vence pronto",    k:"porvencer" },
+  { v:"vencido",   t:"Lo tuvo, está vencido",          k:"vencido"   },
+  { v:"notiene",   t:"Nunca ha tenido certificado",    k:"sinrev"    },
+  { v:"nomostro",  t:"No lo quiso o no lo pudo mostrar", k:"sinrev"  },
+  { v:"cerrado",   t:"Cerrado / no atendieron",        k:"sinrev"    }
+];

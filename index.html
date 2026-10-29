@@ -1,5 +1,23 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<!-- charset PRIMERO: sin esto el navegador adivina la codificacion y todas
+     las tildes y la N salen rotas al servirse desde GitHub Pages. -->
+<meta charset="utf-8">
+<!-- viewport: sin esto el celular dibuja la pagina a tamano de escritorio. -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>CBVI Revisiones Técnicas</title>
+<meta name="description" content="Revisiones técnicas de seguridad humana y protección contra incendios — Cuerpo de Bomberos Voluntarios de Inírida.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#191d23">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Revisiones">
+<link rel="icon" href="icon192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
   /* ===== Sistema de diseño — "Consola de campo" bomberil =====
@@ -229,6 +247,7 @@
   .opt.sel{background:var(--ink);color:var(--paper);border-color:var(--ink)}
   .opt.sel.good{background:var(--verde);border-color:var(--verde);color:#fff}
   .opt.sel.bad{background:var(--rojo);border-color:var(--rojo);color:#fff}
+  .opt.sel.warn{background:var(--ambar);border-color:var(--ambar);color:#241a00}
   .itools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .mini{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:9px;min-height:38px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
   .mini:hover{border-color:var(--ember);color:var(--ink)}
@@ -303,35 +322,109 @@
   .guidebox .dg svg{width:100%;height:auto}
   .guidebox ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--muted);display:grid;gap:4px;flex:1;min-width:170px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-  @media (max-width:520px){.signrow{grid-template-columns:1fr}}
+
+  /* ===== Mapa real (Leaflet + OpenStreetMap) ===== */
+  .mapreal{height:min(56vh,460px);min-height:300px;border-radius:var(--radius);overflow:hidden;
+    border:1px solid var(--line);background:var(--surface-2);box-shadow:var(--shadow);margin-bottom:10px}
+  .mapreal .leaflet-container{height:100%;width:100%;background:var(--surface-2);font-family:var(--ff)}
+  .mkpin{background:none;border:0}
+  .mkpin .pin{display:block;width:20px;height:20px;border-radius:50%;border:2.5px solid #fff;
+    box-shadow:0 1px 4px rgba(0,0,0,.45)}
+  .leaflet-popup-content-wrapper{border-radius:13px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+  .leaflet-popup-tip{background:var(--surface)}
+  .leaflet-popup-content{margin:13px 15px;min-width:188px}
+  .pop b{font-family:var(--ff-h);font-size:15px;display:block;line-height:1.3}
+  .pop .pt{font-size:12px;color:var(--muted);margin-top:2px}
+  .pop .pd{font-size:12px;color:var(--muted);margin-top:3px}
+  .pop .pe{font-size:13px;font-weight:700;margin-top:6px}
+  .popbtn{margin-top:10px;width:100%;min-height:38px;border-radius:9px;border:1px solid var(--ember);
+    background:var(--ember);color:#fff;font-weight:600;font-size:13px;font-family:inherit}
+  .maplegend.lg2{position:static;display:flex;flex-wrap:wrap;gap:12px;margin:0 0 18px;padding:0;
+    background:none;border:0;box-shadow:none;font-size:12px;color:var(--muted)}
+  .maplegend.lg2 span{display:inline-flex;align-items:center;gap:6px}
+  .maplegend.lg2 i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .pillsel{min-height:38px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--ink);padding:0 12px;font-family:inherit;font-size:12.5px;font-weight:600;max-width:190px}
+
+  /* ===== Censo ===== */
+  .optcol{display:grid;gap:7px}
+  .optcol .opt{width:100%;text-align:left;justify-content:flex-start;padding:0 14px}
+  .censofoto{margin-top:14px}
+  .censofoto .thumbs{margin-top:9px}
+  .gpsrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+
+  /* ===== Hallazgos del certificado ===== */
+  .halls{display:grid;gap:12px;margin:4px 0 6px}
+  .hall{display:flex;gap:12px;border:1px solid var(--line);border-left:3px solid var(--rojo);
+    border-radius:12px;background:var(--surface-2);padding:13px 14px}
+  .hall .hn{flex:0 0 26px;height:26px;border-radius:50%;background:var(--rojo);color:#fff;
+    display:grid;place-items:center;font-family:var(--ff-h);font-weight:700;font-size:13px}
+  .hall .hc{flex:1;min-width:0}
+  .hall .hc > b{font-size:14.5px;font-family:var(--ff-h);display:block;line-height:1.35}
+  .hall .hr{font-size:13px;color:var(--muted);margin-top:4px}
+  .hall .ho{font-size:12.5px;color:var(--muted);font-style:italic;margin-top:4px}
+  .hall .ha{font-size:13px;color:var(--ink);margin-top:8px;background:var(--surface);
+    border:1px dashed var(--line);border-radius:9px;padding:9px 11px;line-height:1.45}
+  .hall .ha span{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--rojo);font-weight:700;margin-bottom:3px}
+  .hall .hf{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .hall .hf img{width:94px;height:76px;object-fit:cover;border-radius:9px;border:1px solid var(--line)}
+
+  /* ===== Avisos ===== */
+  .avisoval{border:1px solid var(--ambar);background:var(--ambar-bg);color:var(--ambar);
+    border-radius:var(--radius);padding:15px 17px;margin-bottom:16px}
+  .avisoval b{font-family:var(--ff-h);font-size:15px}
+  .avisoval p{margin:5px 0 11px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+  .pendbanner{border:1px solid var(--ember);background:color-mix(in srgb,var(--ember) 9%,var(--surface));
+    border-radius:var(--radius);padding:15px 17px;margin-bottom:16px}
+  .pendbanner b{font-family:var(--ff-h);font-size:15px;color:var(--ember)}
+  .pendbanner p{margin:5px 0 11px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+  .solbox{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:13px 15px;margin-bottom:4px}
+  .solbox b{font-family:var(--ff-h);font-size:14px}
+  .solbox p{margin:5px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
+  .pinok{text-align:center}
+  .pingrande{font-size:40px;font-weight:700;letter-spacing:.22em;color:var(--ember);
+    background:var(--surface-2);border:2px dashed var(--ember);border-radius:14px;padding:16px 10px;margin-bottom:14px}
+  .pinok p{font-size:13.5px;line-height:1.55;margin:0 0 8px}
+  .btn-danger{background:var(--rojo-bg);border-color:var(--rojo);color:var(--rojo)}
+
+  /* ===== Estado de subida de las fotos ===== */
+  .thumbs figure{position:relative}
+  .thumbs .upok,.thumbs .uppend{position:absolute;left:4px;bottom:4px;font-size:11px;line-height:1;
+    background:rgba(0,0,0,.62);color:#fff;border-radius:6px;padding:3px 5px}
+  .qrvacio{display:grid;place-items:center;font-size:34px;color:var(--faint);
+    border:2px dashed var(--line);border-radius:12px;width:118px;height:118px}
+
+  @media (max-width:520px){.signrow{grid-template-columns:1fr}.hall{flex-direction:column}.hall .hf img{width:calc(50% - 4px);height:84px}}
 </style>
+</head>
+<body>
 
 <!-- ===================== LOGIN ===================== -->
 <section id="login">
   <div class="login-card">
     <div class="login-top">
-      <div class="logo-chip"><img src="logo.png" alt="Bomberos Voluntarios de Inírida"></div>
+      <div class="logo-chip"><img data-logo alt="Escudo del Cuerpo de Bomberos Voluntarios de Inírida"></div>
       <div><h1>Revisiones Técnicas</h1><p>CUERPO DE BOMBEROS · INÍRIDA</p></div>
     </div>
     <div class="login-body">
       <h2>Inicia sesión para continuar</h2>
-      <div><label class="lbl">Correo (para entrar en línea)</label><input id="loginEmail" type="email" placeholder="correo registrado" autocomplete="username" style="margin-bottom:4px"></div>
-      <div class="userpick" id="userpick">
-        <button data-role="comandante"><span class="ic">★</span><b>Comandante</b><small>Jeferson Rangel</small></button>
-        <button data-role="inspector"><span class="ic">🧭</span><b>Inspector</b><small>Unidad de revisiones</small></button>
-      </div>
+      <div><label class="lbl" for="loginEmail">Correo institucional</label><input id="loginEmail" type="email" placeholder="tu correo" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></div>
       <div>
         <label class="lbl">PIN de acceso</label>
         <div class="pin" id="pin">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 1">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 2">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 3">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 4">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 1" autocomplete="off">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 2" autocomplete="off">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 3" autocomplete="off">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 4" autocomplete="off">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 5 (opcional)" autocomplete="off">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 6 (opcional)" autocomplete="off">
         </div>
       </div>
       <button class="btn btn-p" id="btnLogin" style="width:100%">Entrar</button>
-      <p class="login-hint">Con correo + PIN entras en línea a tu servidor. Sin correo, elige un rol para el modo demo (local).</p>
-      <p class="login-hint" style="margin-top:2px">¿No tienes acceso? <a href="#" id="solicitar" style="color:var(--ember);font-weight:600;text-decoration:none">Solicítalo al administrador</a></p>
+      <button class="btn btn-g" id="btnSolicitar" style="width:100%;margin-top:9px">Solicitar acceso</button>
+      <p class="login-hint">El administrador aprueba tu solicitud y te asigna el PIN. Mientras no te apruebe, no podrás entrar.</p>
+      <p class="login-hint" style="margin-top:8px"><a href="#" id="verDemo" style="color:var(--muted);text-decoration:underline">Ver una demostración sin conexión</a></p>
     </div>
   </div>
 </section>
@@ -339,18 +432,21 @@
 <!-- ===================== APP ===================== -->
 <div id="app" hidden>
   <aside class="rail">
-    <div class="brand"><div class="logo-chip sm"><img src="logo.png" alt="CBVI"></div>
+    <div class="brand"><div class="logo-chip sm"><img data-logo alt="CBVI"></div>
       <div><b>Revisiones</b><span>ABNEGACIÓN Y DISCIPLINA</span></div></div>
     <nav id="nav"></nav>
     <div class="who" id="who"></div>
   </aside>
   <header class="topbar">
+    <button class="icbtn" id="btnBack" title="Volver" aria-label="Volver" hidden>←</button>
+    <button class="icbtn" id="btnHome" title="Inicio" aria-label="Ir al inicio">⌂</button>
     <h2 id="viewTitle">Inicio</h2>
     <span class="sub" id="viewSub"></span>
     <span class="sp"></span>
     <span class="syncbadge off" id="syncBadge" title="Estado de sincronización">Local</span>
     <button class="icbtn" id="btnSync" title="Sincronizar">⟳</button>
     <button class="icbtn" id="btnConfig" title="Configuración">⚙</button>
+    <button class="icbtn" id="btnInstalar" title="Instalar la app" aria-label="Instalar la app" hidden>⤓</button>
     <button class="icbtn" id="btnTheme" title="Tema">◐</button>
   </header>
   <main><div class="maxw" id="view"></div></main>
@@ -363,23 +459,58 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="form-inspeccion.js"></script>
-<script src="guias.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="logos.js?v=1.0"></script>
+<script src="form-inspeccion.js?v=1.0"></script>
+<script src="guias.js?v=1.0"></script>
 <script>
 (function(){
 "use strict";
 var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
 var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]})};
+/* ===== VERSION DE LA APP =====
+   Sube APP_VERSION en cada cambio y agrega su nota. Debe cuadrar con el
+   CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
+   Las notas se le muestran al usuario en el aviso de actualizacion:
+   NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
+var APP_VERSION="1.0";
+var APP_VERSION_NOTAS=[
+  "v1.0: Primera version en servicio de Revisiones Tecnicas.",
+  "v1.0: El inspector solicita acceso con nombre y correo; el administrador aprueba y le asigna el PIN.",
+  "v1.0: Mapa real de la ciudad con el estado de cada establecimiento y el censo del barrido.",
+  "v1.0: Censo de barrido con foto del certificado, ubicacion y responsable como evidencia del recorrido.",
+  "v1.0: Las fotos de los hallazgos se guardan en la nube; sin senal esperan en cola y suben solas.",
+  "v1.0: Certificado en PDF con logos, hallazgos con su foto, recomendaciones, firmas y QR de verificacion.",
+  "v1.0: QR que abre la pagina publica de verificacion con el estado del certificado.",
+  "v1.0: La app se puede instalar en tablet, celular y computador."
+];
+var VERK="cbvi_rt_ver_vista";
 var LS="cbvi_rt_eco_v1", THEME="cbvi_rt_theme", SESK="cbvi_rt_ses_v2";
 var MOD=window.MODULOS||[], META=window.FORM_META||{}, OCUP=window.OCUPACIONES_NSR10||[], INTER=new Set(window.ITEMS_INTERMEDIO||[]), INTERT=new Set(window.TOGGLES_INTERMEDIO||[]);
 var GUIAS=window.GUIAS||{}, DIAGRAMS=window.DIAGRAMS||{}, ITEM_TOPIC=window.ITEM_TOPIC||{}, OCUP_QUICK=window.OCUP_QUICK||[], EJEMPLOS=window.EJEMPLOS||{};
 var GATES=new Set();MOD.forEach(function(m){m.items.forEach(function(it){if(it.dependsOn)GATES.add(it.dependsOn.item)})});
 function applyDeps(root){if(!root)return;Array.prototype.slice.call(root.querySelectorAll('[data-dep-item]')).forEach(function(w){w.hidden=(FORM&&FORM.ans[w.dataset.depItem]!==w.dataset.depVal)})}
-var LOGO_DATA=null;(function(){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);LOGO_DATA=c.toDataURL("image/png")}catch(e){}};im.src="logo.png"})();
-function isAdmin(){return SES&&SES.role==="comandante"}
-var SECRET="CBVI-INIRIDA-2026"; // demo; en producción vive en Script Properties
-var VERIFY="https://cbvi.gov.co/verificar";
+/* Logos: vienen embebidos en logos.js, no dependen de una ruta ni de la red. */
+var LG=window.LOGOS||{};
+var LOGO_DATA=LG.cbviPdf||LG.cbvi||null;   // versión sobre blanco para el PDF
+/* El administrador es quien aprueba inspectores y fija las metas.
+   Se acepta "comandante" por compatibilidad con sesiones ya guardadas. */
+function isAdmin(){return !!(SES&&(SES.role==="admin"||SES.role==="comandante"))}
+function rolLegible(r){return (r==="admin"||r==="comandante")?"Administrador":"Inspector"}
+
+/* Página pública que abre el QR del certificado.
+   Se calcula desde la ubicación de la app, así nunca queda una URL inventada:
+   si la app vive en .../revisiones/index.html, la verificación es
+   .../revisiones/verificar.html  (mismo repositorio de GitHub Pages).
+   OJO: esta dirección queda impresa en cada certificado — no renombres el repo. */
+var VERIFY=(function(){
+  try{
+    var u=location.origin+location.pathname.replace(/[^\/]*$/,"")+"verificar.html";
+    if(location.protocol==="http:"||location.protocol==="https:")return u;
+  }catch(e){}
+  return "";   // sin servidor (file:// o visor): el QR apunta al backend
+})();
 var NOW=new Date();
 var _t;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(_t);_t=setTimeout(function(){t.classList.remove("show")},2300)}
 
@@ -387,8 +518,10 @@ var _t;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show
 function load(){try{return JSON.parse(localStorage.getItem(LS))}catch(e){return null}}
 function persist(){try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}}
 function defcfg(){return {metaRevisiones:12,metaRenovaciones:6,metaBarrido:30,vigenciaMeses:12,cobroActivo:false,tarifas:[{nivel:"Impacto 1",valor:97000},{nivel:"Impacto 2",valor:196000},{nivel:"Impacto 3",valor:327000}]}}
-function emptyDB(){return {establecimientos:[],inspecciones:[],config:defcfg()}}
+function emptyDB(){return {establecimientos:[],inspecciones:[],barridos:[],config:defcfg()}}
 var DB=load()||emptyDB();
+if(!DB.barridos)DB.barridos=[];          // migración de bases guardadas antes del censo
+if(!DB.config)DB.config=defcfg();
 
 /* ---------- backend / sincronización offline-first ---------- */
 var BACKEND_URL="https://script.google.com/macros/s/AKfycbzXkG5Kw1kapPK1dwL55PdhUwCrkZP0Qmdok84rE7PpO-iWl4pIR8-u-yuZrS73T3Kp/exec";
@@ -399,10 +532,19 @@ var QUEUE=loadQ(), _flushing=false;
 function esOnline(){return !!(SES&&SES.pase)}
 function api(accion,payload){var body=JSON.stringify(Object.assign({accion:accion,pase:(SES&&SES.pase)||""},payload||{}));return fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:body}).then(function(r){return r.json()})}
 function setSync(t,c){var b=$("#syncBadge");if(b){b.textContent=t;b.className="syncbadge "+(c||"")}}
-function updateSync(){if(!esOnline()){setSync("Local","off");return}if(navigator.onLine===false){setSync("Sin red","off");return}setSync(QUEUE.length?(QUEUE.length+" pend."):"Sincronizado",QUEUE.length?"pend":"ok")}
+function updateSync(){
+  if(!esOnline()){setSync("Local","off");return}
+  if(navigator.onLine===false){setSync("Sin red","off");return}
+  var n=QUEUE.length+(typeof FOTOQ!=="undefined"?FOTOQ.length:0);
+  setSync(n?(n+" pend."):"Sincronizado", n?"pend":"ok");
+}
 function enqueue(a,p){if(!esOnline())return;QUEUE.push({a:a,p:p});saveQ();updateSync();flush()}
 function flush(){if(_flushing||!esOnline()||navigator.onLine===false||!QUEUE.length){updateSync();return}_flushing=true;var op=QUEUE[0];
   api(op.a,op.p).then(function(res){if(res&&res.ok&&op.a==="guardarInspeccion"&&res.inspeccion){var l=DB.inspecciones.find(function(x){return x.id===op.p.inspeccion.idCliente});if(l){l.codigo=res.inspeccion.codigo;l.sig=res.inspeccion.sig;l._sync=true;persist()}}
+    if(res&&res.ok&&op.a==="guardarInspeccion"&&FORM&&VIEW==="certificado"){
+      var cur=DB.inspecciones.filter(function(x){return x.id===FORM.id})[0];
+      if(cur&&cur.codigo&&cur.codigo!==FORM.codigo){FORM.codigo=cur.codigo;FORM.sig=cur.sig;render()}
+    }
     QUEUE.shift();saveQ();_flushing=false;updateSync();flush()}).catch(function(){_flushing=false;updateSync()})}
 function pullAll(){if(!esOnline())return Promise.resolve();setSync("Sincronizando…","pend");
   return Promise.all([api("listarEstablecimientos").catch(function(){return{}}),api("listarInspecciones").catch(function(){return{}}),api("getConfig").catch(function(){return{}})]).then(function(r){
@@ -413,25 +555,103 @@ function pullAll(){if(!esOnline())return Promise.resolve();setSync("Sincronizand
 function mergeBy(local,server,key){var m={};server.forEach(function(s){m[String(s[key])]=s});local.forEach(function(l){var k=String(l[key]);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
 function mergeInsp(local,server){var m={};server.forEach(function(s){var rj=typeof s.respuestas==="string"?tryj(s.respuestas):(s.respuestas||{});s.ans=rj.ans||{};s.fuentes=rj.fuentes||{};s.fotos=s.fotos||{};s.obs=s.obs||{};s.recs=typeof s.recomendaciones==="string"?tryj(s.recomendaciones):(s.recomendaciones||[]);s.score100=+s.score100||0;s.concepto={favorable:String(s.favorable)==="true",riesgo:s.riesgo||"",texto:""};s.id=String(s.idCliente||s.id);s._sync=true;m[s.id]=s});local.forEach(function(l){var k=String(l.idCliente||l.id);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
 function tryj(s){try{return JSON.parse(s)}catch(e){return (typeof s==="object"&&s)?s:{}}}
-function estFromServer(s){return {id:s.id,codigo:s.codigo,nombre:s.nombre,nit:s.nit,tipo:s.tipo,ocup:s.ocup,act:s.actividad,dir:s.direccion,barrio:s.barrio,x:+s.lat||(.2+Math.random()*.6),y:+s.lng||(.2+Math.random()*.55),rep:s.repLegal,correo:s.correo,tel:s.tel,estado:s.estado,creado:s.creado}}
-function estToServer(e){return {establecimiento:{id:e.id,codigo:e.codigo,nombre:e.nombre,nit:e.nit||"",tipo:e.tipo||"",ocup:e.ocup||"",actividad:e.act||"",direccion:e.dir||"",barrio:e.barrio||"",lat:e.x||"",lng:e.y||"",repLegal:e.rep||"",correo:e.correo||"",tel:e.tel||""}}}
+function estFromServer(s){return {id:s.id,codigo:s.codigo,nombre:s.nombre,nit:s.nit,tipo:s.tipo,ocup:s.ocup,act:s.actividad,dir:s.direccion,barrio:s.barrio,lat:s.lat||"",lng:s.lng||"",razonSocial:s.razonSocial||"",rep:s.repLegal,correo:s.correo,tel:s.tel,estado:s.estado,creado:s.creado}}
+function estToServer(e){return {establecimiento:{id:e.id,codigo:e.codigo,nombre:e.nombre,nit:e.nit||"",tipo:e.tipo||"",ocup:e.ocup||"",actividad:e.act||"",direccion:e.dir||"",barrio:e.barrio||"",lat:e.lat||"",lng:e.lng||"",razonSocial:e.razonSocial||"",repLegal:e.rep||"",correo:e.correo||"",tel:e.tel||""}}}
 function insToServer(f){var r=compute(f);return {inspeccion:{idCliente:f.id,codigo:f.codigo,establecimientoId:f.establecimientoId,radicado:f.radicado||"",tramite:f.tramite||"",nivel:f.nivel||"",inspectorNombre:f.inspector||"",inspectorCodigo:"",fecha:f.fecha,ocupacion:f.ocupacion||"",clasifRiesgo:f.clasifRiesgo||"",X:r.X,Y:r.Y,total:r.raw,score100:f.score100,favorable:!!(f.concepto&&f.concepto.favorable),riesgo:(f.concepto&&f.concepto.riesgo)||"",estado:f.estado,vigenciaHasta:f.vigenciaHasta||"",recomendaciones:JSON.stringify(f.recs||[]),respuestas:JSON.stringify({ans:f.ans,fuentes:f.fuentes}),nCobro:""}}}
 function pushEst(e){enqueue("crearEstablecimiento",estToServer(e))}
+
+/* ===================== FOTOS → GOOGLE DRIVE =====================
+   Las fotos pesan: no caben en la cola normal ni en localStorage por mucho
+   tiempo. Van en su propia cola, se suben de a una y, en cuanto el servidor
+   confirma, se borra la copia pesada del teléfono y queda solo la miniatura
+   (que es la que se imprime en el PDF) más el enlace de Drive.
+   Si no hay señal, esperan ahí hasta que vuelva. */
+var FQK="cbvi_rt_fotoq_v1";
+function loadFQ(){try{return JSON.parse(localStorage.getItem(FQK))||[]}catch(e){return[]}}
+function saveFQ(){try{localStorage.setItem(FQK,JSON.stringify(FOTOQ))}catch(e){avisoEspacio()}}
+var FOTOQ=loadFQ(), _subiendo=false, _avisoEsp=false;
+function avisoEspacio(){ if(_avisoEsp)return; _avisoEsp=true;
+  toast("La tablet se está quedando sin espacio. Sincroniza para liberar fotos."); }
+
+/* Reduce la imagen antes de guardarla: una foto de cámara pesa 3–8 MB y
+   llenaría el almacenamiento del navegador en pocas inspecciones. */
+function comprimir(file,maxPx,calidad,cb){
+  var r=new FileReader();
+  r.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var k=Math.min(1,maxPx/Math.max(img.width,img.height));
+        var cv=document.createElement("canvas");
+        cv.width=Math.max(1,Math.round(img.width*k)); cv.height=Math.max(1,Math.round(img.height*k));
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        cb(cv.toDataURL("image/jpeg",calidad));
+      }catch(e){ cb(null) }
+    };
+    img.onerror=function(){cb(null)};
+    img.src=r.result;
+  };
+  r.onerror=function(){cb(null)};
+  r.readAsDataURL(file);
+}
+function subirFoto(dataUrl,meta){
+  if(!dataUrl)return null;
+  var idc="f"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+  FOTOQ.push({idCliente:idc,base64:dataUrl,itemId:meta.itemId||"",inspeccionId:meta.inspeccionId||"",
+              nombre:meta.nombre||("evid_"+idc),lat:meta.lat||"",lng:meta.lng||""});
+  saveFQ(); updateSync(); flushFotos();
+  return idc;
+}
+function flushFotos(){
+  if(_subiendo||!esOnline()||navigator.onLine===false||!FOTOQ.length){updateSync();return}
+  _subiendo=true;
+  var op=FOTOQ[0];
+  api("subirEvidencia",op).then(function(res){
+    _subiendo=false;
+    if(res&&res.ok){
+      FOTOQ.shift();saveFQ();
+      marcarFotoSubida(op.idCliente,res.evidencia&&res.evidencia.url);
+      updateSync(); if(FOTOQ.length)setTimeout(flushFotos,150);
+    } else {
+      /* Error del servidor (no de red): no reintentar en bucle, se descarta
+         el envío pero la miniatura se conserva en la tablet. */
+      FOTOQ.shift();saveFQ();updateSync();
+      if(FOTOQ.length)setTimeout(flushFotos,400);
+    }
+  }).catch(function(){ _subiendo=false; updateSync(); });   // sin red: queda en cola
+}
+function marcarFotoSubida(idc,url){
+  var tocado=false;
+  DB.inspecciones.forEach(function(ins){
+    if(!ins.fotos)return;
+    Object.keys(ins.fotos).forEach(function(k){
+      (ins.fotos[k]||[]).forEach(function(f){
+        if(f&&f.q===idc){ f.u=url||""; f.f=null; f.q=null; tocado=true; }
+      });
+    });
+  });
+  if(tocado)persist();
+}
 var SES=null, VIEW="dashboard", FORM=null, padI=null, padR=null;
 
 function seed(){
   var mk=function(o){return o};
   var est=[
-    {id:"e1",codigo:"EST-001",nombre:"Supermercado La Economía",tipo:"Comercio",ocup:"C-1",act:"Venta al por menor",barrio:"Centro",dir:"Cra 7 #12-30",nit:"900123-1",rep:"María Peña",tel:"3104567890",x:.42,y:.38},
-    {id:"e2",codigo:"EST-002",nombre:"Ferretería El Tornillo",tipo:"Comercio / bodega",ocup:"A-2",act:"Ferretería",barrio:"La Primavera",dir:"Cl 10 #8-15",nit:"900555-2",rep:"Jorge Díaz",tel:"3115550011",x:.58,y:.3},
-    {id:"e3",codigo:"EST-003",nombre:"Hotel Guainía",tipo:"Hotel",ocup:"R-3",act:"Alojamiento",barrio:"Centro",dir:"Cra 6 #9-02",nit:"900777-3",rep:"Luz Ríos",tel:"3129990022",x:.5,y:.46},
-    {id:"e4",codigo:"EST-004",nombre:"Restaurante El Sabor Llanero",tipo:"Restaurante",ocup:"C-1",act:"Restaurante",barrio:"Las Américas",dir:"Cl 14 #5-40",nit:"900333-4",rep:"Ana Gómez",tel:"3101112233",x:.3,y:.56},
-    {id:"e5",codigo:"EST-005",nombre:"Bar La Terraza",tipo:"Bar",ocup:"L-3",act:"Expendio de bebidas",barrio:"Berlín",dir:"Cl 16 #3-21",nit:"900444-5",rep:"Pedro Ruiz",tel:"3134445566",x:.68,y:.58},
-    {id:"e6",codigo:"EST-006",nombre:"Droguería Salud Total",tipo:"Comercio",ocup:"C-1",act:"Farmacia",barrio:"La Esperanza",dir:"Cra 9 #11-10",nit:"900888-6",rep:"Sara Luna",tel:"3157778899",x:.4,y:.24},
-    {id:"e7",codigo:"EST-007",nombre:"Colegio Custodio García",tipo:"Educativo",ocup:"I-3",act:"Educación",barrio:"El Paujil",dir:"Av Principal #20-00",nit:"800222-7",rep:"Rectoría",tel:"3160001122",x:.24,y:.4},
-    {id:"e8",codigo:"EST-008",nombre:"Depósito de Gas del Río",tipo:"Alta peligrosidad",ocup:"P",act:"Almacenamiento GLP",barrio:"Zona industrial",dir:"Vía al puerto km 1",nit:"901000-8",rep:"Distribuidora GLP",tel:"3170003344",x:.78,y:.7}
+    {id:"e1",codigo:"EST-001",nombre:"Supermercado La Economía",tipo:"Comercio",ocup:"C-1",act:"Venta al por menor",barrio:"Centro",dir:"Cra 7 #12-30",nit:"900123-1",rep:"María Peña",tel:"3104567890",lat:3.866100,lng:-67.924600},
+    {id:"e2",codigo:"EST-002",nombre:"Ferretería El Tornillo",tipo:"Comercio / bodega",ocup:"A-2",act:"Ferretería",barrio:"La Primavera",dir:"Cl 10 #8-15",nit:"900555-2",rep:"Jorge Díaz",tel:"3115550011",lat:3.869200,lng:-67.921800},
+    {id:"e3",codigo:"EST-003",nombre:"Hotel Guainía",tipo:"Hotel",ocup:"R-3",act:"Alojamiento",barrio:"Centro",dir:"Cra 6 #9-02",nit:"900777-3",rep:"Luz Ríos",tel:"3129990022",lat:3.864800,lng:-67.925500},
+    {id:"e4",codigo:"EST-004",nombre:"Restaurante El Sabor Llanero",tipo:"Restaurante",ocup:"C-1",act:"Restaurante",barrio:"Las Américas",dir:"Cl 14 #5-40",nit:"900333-4",rep:"Ana Gómez",tel:"3101112233",lat:3.862500,lng:-67.928100},
+    {id:"e5",codigo:"EST-005",nombre:"Bar La Terraza",tipo:"Bar",ocup:"L-3",act:"Expendio de bebidas",barrio:"Berlín",dir:"Cl 16 #3-21",nit:"900444-5",rep:"Pedro Ruiz",tel:"3134445566",lat:3.870300,lng:-67.919100},
+    {id:"e6",codigo:"EST-006",nombre:"Droguería Salud Total",tipo:"Comercio",ocup:"C-1",act:"Farmacia",barrio:"La Esperanza",dir:"Cra 9 #11-10",nit:"900888-6",rep:"Sara Luna",tel:"3157778899",lat:3.867900,lng:-67.926300},
+    {id:"e7",codigo:"EST-007",nombre:"Colegio Custodio García",tipo:"Educativo",ocup:"I-3",act:"Educación",barrio:"El Paujil",dir:"Av Principal #20-00",nit:"800222-7",rep:"Rectoría",tel:"3160001122",lat:3.860100,lng:-67.930200},
+    {id:"e8",codigo:"EST-008",nombre:"Depósito de Gas del Río",tipo:"Alta peligrosidad",ocup:"P",act:"Almacenamiento GLP",barrio:"Zona industrial",dir:"Vía al puerto km 1",nit:"901000-8",rep:"Distribuidora GLP",tel:"3170003344",lat:3.874000,lng:-67.915000}
   ];
   est.forEach(function(e){e.creado=NOW.toISOString()});
+  var barridos=[
+    {id:"b1",idCliente:"b1",establecimientoId:"e1",nombre:est[0].nombre,tipo:"Supermercado / autoservicio",direccion:est[0].dir,barrio:est[0].barrio,estadoCert:"vigente",lat:est[0].lat,lng:est[0].lng,inspectorNombre:"Inspector CBVI",fecha:new Date(NOW.getTime()-4*86400000).toISOString(),observacion:""},
+    {id:"b2",idCliente:"b2",establecimientoId:"e5",nombre:est[4].nombre,tipo:"Bar / discoteca / estanco",direccion:est[4].dir,barrio:est[4].barrio,estadoCert:"vencido",lat:est[4].lat,lng:est[4].lng,inspectorNombre:"Inspector CBVI",fecha:new Date(NOW.getTime()-2*86400000).toISOString(),observacion:"El dueno dijo que lo renueva esta semana"},
+    {id:"b3",idCliente:"b3",establecimientoId:"e7",nombre:est[6].nombre,tipo:"Institucion educativa",direccion:est[6].dir,barrio:est[6].barrio,estadoCert:"notiene",lat:est[6].lat,lng:est[6].lng,inspectorNombre:"Inspector CBVI",fecha:new Date(NOW.getTime()-86400000).toISOString(),observacion:""}
+  ];
   function iso(days){var d=new Date(NOW);d.setDate(d.getDate()+days);return d.toISOString()}
   var insp=[
     {estId:"e1",dias:360,score:88,fav:true},   // vigente (inspeccionado este mes)
@@ -450,20 +670,56 @@ function seed(){
       inspector:"Inspector de revisiones",fecha:fecha.toISOString(),vigenciaHasta:vig.toISOString(),
       ocupacion:est.find(function(e){return e.id===s.estId}).ocup,clasifRiesgo:s.fav?"Bajo":"Alto",
       ans:{},fuentes:{},fotos:{},obs:{},score100:s.score,X:0,Y:0,
-      concepto:{favorable:s.fav,riesgo:s.score>=81?"BAJO":(s.score>=51?"MEDIO":"ALTO")},sig:sign(cod)};
+      concepto:{favorable:s.fav,riesgo:s.score>=81?"BAJO":(s.score>=51?"MEDIO":"ALTO")},sig:demoSig(cod)};
   });
-  return {establecimientos:est,inspecciones:inspecciones,
+  return {establecimientos:est,inspecciones:inspecciones,barridos:barridos,
     config:{metaRevisiones:12,metaBarrido:30,metaRenovaciones:6,vigenciaMeses:12,cobroActivo:false,
             tarifas:[{nivel:"Impacto 1",valor:97000},{nivel:"Impacto 2",valor:196000},{nivel:"Impacto 3",valor:327000}]},
     _ejemplo:true};
 }
-function sign(cod){var s=0,str=cod+SECRET;for(var i=0;i<str.length;i++){s=(s*31+str.charCodeAt(i))>>>0}return s.toString(36).toUpperCase().slice(0,6)}
+/* El distintivo del certificado lo firma el SERVIDOR con el secreto
+   (PASE_SECRET). El navegador no puede calcularlo — por eso no se puede
+   falsificar un certificado desde el front. Mientras no haya sincronizado,
+   el concepto queda marcado como "pendiente de validación". */
+/* Las inspecciones de DEMOSTRACION (visor, sin backend) llevan un distintivo
+   calculado aqui solo para poder probar la pantalla de verificacion. No vale
+   como certificado real: los de verdad los firma el servidor con PASE_SECRET. */
+function demoSig(cod){
+  var h=2166136261, t=String(cod)+"|demo";
+  for(var i=0;i<t.length;i++){h^=t.charCodeAt(i);h=(h*16777619)>>>0}
+  var A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789", o="";
+  for(var k=0;k<6;k++){o+=A.charAt(h%32);h=((h>>>5)^(h*2654435761))>>>0}
+  return o;
+}
+var TRAMITES={primera:"Primera vez",renovacion:"Renovaci\u00f3n",cambio:"Cambio de raz\u00f3n social o propietario"};
+function tramiteLegible(t){return TRAMITES[t]||t||"\u2014"}
+function estaValidado(f){return !!(f&&f.sig&&f.codigo&&String(f.codigo).indexOf("LOCAL")<0)}
+function urlVerificacion(f){
+  var c=encodeURIComponent(f.codigo||""), d=encodeURIComponent(f.sig||"");
+  if(VERIFY)return VERIFY+"?c="+c+"&d="+d;
+  return BACKEND_URL+"?c="+c+"&d="+d;
+}
 
 /* ---------- estado / vigencia ---------- */
 function ultimaInsp(estId){return DB.inspecciones.filter(function(x){return x.establecimientoId===estId&&x.estado==="finalizada"})
   .sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)})[0]}
+function ultimoBarrido(estId){return (DB.barridos||[]).filter(function(x){return x.establecimientoId===estId})
+  .sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)})[0]}
 function estadoEst(e){
-  var u=ultimaInsp(e.id); if(!u)return{k:"sinrev",t:"Sin revisión",u:null};
+  var u=ultimaInsp(e.id);
+  if(!u){
+    /* Sin revisión nuestra: vale lo que el inspector vio en el censo.
+       Muchos establecimientos tienen certificados viejos en papel que aún
+       no están en la base; el barrido es la única evidencia de su estado. */
+    var b=ultimoBarrido(e.id);
+    if(b&&b.estadoCert){
+      if(b.estadoCert==="vigente")  return{k:"vigente",  t:"Vigente (censado)",  u:null,censo:b};
+      if(b.estadoCert==="porvencer")return{k:"porvencer",t:"Por vencer (censado)",u:null,censo:b};
+      if(b.estadoCert==="vencido")  return{k:"vencido",  t:"Vencido (censado)",  u:null,censo:b};
+      return{k:"sinrev",t:"Censado · sin certificado",u:null,censo:b};
+    }
+    return{k:"sinrev",t:"Sin revisión",u:null};
+  }
   if(u.concepto&&u.concepto.favorable===false)return{k:"nofav",t:"No favorable",u:u};
   var dias=Math.round((new Date(u.vigenciaHasta)-NOW)/86400000);
   if(dias<0)return{k:"vencido",t:"Vencido",u:u,dias:dias};
@@ -480,6 +736,18 @@ function inInter(it){return INTER.has(it.id)}
 function scoreVal(f,it){ if(it.tipo==="fuentes"){var pr=(f.fuentes[it.id]||[]).length;return Math.max(0,(it.maxPuntos||it.fuentes.length)-pr*(it.puntosPorAusencia||1))}
   var v=f.ans[it.id];if(v==null)return null;var o=(it.opts||[]).find(function(o){return o.v===v});return o?o.p:null}
 function depOk(f,it){ if(!it.dependsOn)return true; return f.ans[it.dependsOn.item]===it.dependsOn.value }
+/* Un hallazgo = lo que NO cumple + lo que hay que hacer + la foto que lo
+   prueba. Solo los hallazgos llevan foto al PDF: si algo cumple, la foto
+   queda como evidencia interna pero no se imprime. */
+function mkHallazgo(f,m,it,resp,etiqueta){
+  var ACC=window.ACCIONES||{}, ACM=window.ACCION_MODULO||{};
+  var mod=String(it.id).split("_")[0];
+  return { id:it.id, q:etiqueta||it.label, r:resp,
+           modulo:(m&&m.titulo)||(m&&m.id)||mod,
+           accion: ACC[it.id] || ACM[mod] || "Corrija lo observado.",
+           obs:(f.obs&&f.obs[it.id])||"",
+           fotos:((f.fotos&&f.fotos[it.id])||[]).map(fotoSrc).filter(Boolean) };
+}
 function compute(f){
   var intermedia=f.modo==="intermedia";
   var X=0,Y=0,got=0,tot=0,recs=[],sumMax=0,sumVal=0;
@@ -498,8 +766,8 @@ function compute(f){
       var p=scoreVal(f,it);
       var ans=(it.tipo==="fuentes")?(f.fuentes[it.id]!==undefined):(f.ans[it.id]!=null);
       if(ans){got++; modVal+=(p||0);
-        if(it.tipo!=="fuentes"&&p!=null&&p<mx)recs.push({q:it.label,r:f.ans[it.id]});
-        if(it.tipo==="fuentes"){var pr=f.fuentes[it.id]||[];if(pr.length)recs.push({q:"Fuentes de ignición observadas",r:pr.join(", ")})}
+        if(it.tipo!=="fuentes"&&p!=null&&p<mx)recs.push(mkHallazgo(f,m,it,f.ans[it.id]));
+        if(it.tipo==="fuentes"){var pr=f.fuentes[it.id]||[];if(pr.length)recs.push(mkHallazgo(f,m,it,pr.join(", "),"Fuentes de ignición observadas"))}
       }
     });}
     if(m.clase==="agravante")X+=modVal; else if(m.clase==="reductor")Y+=modVal;
@@ -512,35 +780,47 @@ function compute(f){
 
 /* ======================================================= NAV */
 var NAVITEMS=[
-  {id:"dashboard",t:"Inicio",ic:"◉",roles:["comandante","inspector"]},
-  {id:"barrido",t:"Barrido",ic:"🗺",roles:["comandante","inspector"]},
-  {id:"establecimientos",t:"Establecimientos",ic:"▦",roles:["comandante","inspector"]},
-  {id:"metas",t:"Metas",ic:"◎",roles:["comandante","inspector"]},
-  {id:"vencimientos",t:"Vencimientos",ic:"timer",roles:["comandante","inspector"]},
-  {id:"verificar",t:"Verificar",ic:"❖",roles:["comandante","inspector"]},
-  {id:"config",t:"Configuración",ic:"⚙",roles:["comandante"]},
-  {id:"usuarios",t:"Usuarios",ic:"👥",roles:["comandante"]}
+  {id:"dashboard",t:"Inicio",ic:"◉",admin:false},
+  {id:"barrido",t:"Barrido",ic:"🗺",admin:false},
+  {id:"establecimientos",t:"Establecimientos",ic:"▦",admin:false},
+  {id:"conceptos",t:"Conceptos",ic:"📄",admin:false},
+  {id:"metas",t:"Metas",ic:"◎",admin:false},
+  {id:"vencimientos",t:"Vencimientos",ic:"timer",admin:false},
+  {id:"verificar",t:"Verificar",ic:"❖",admin:false},
+  {id:"config",t:"Configuración",ic:"⚙",admin:true},
+  {id:"usuarios",t:"Usuarios",ic:"👥",admin:true}
 ];
-var ICMAP={dashboard:"◉",barrido:"🗺",establecimientos:"▦",metas:"◎",vencimientos:"⏳",verificar:"❖",config:"⚙",usuarios:"👥"};
-function navTo(v){VIEW=v;FORM=null;render();window.scrollTo(0,0)}
+var ICMAP={dashboard:"◉",barrido:"🗺",establecimientos:"▦",conceptos:"📄",metas:"◎",vencimientos:"⏳",verificar:"❖",config:"⚙",usuarios:"👥"};
+/* Historial de navegación para el botón Volver */
+var NAVHIST=[];
+function navTo(v,sinHistorial){
+  if(!sinHistorial&&VIEW&&VIEW!==v)NAVHIST.push({v:VIEW,ficha:fichaId,form:FORM});
+  if(NAVHIST.length>12)NAVHIST.shift();
+  VIEW=v;FORM=null;render();window.scrollTo(0,0);
+}
+function navAtras(){
+  var p=NAVHIST.pop();
+  if(!p){VIEW="dashboard";FORM=null;render();window.scrollTo(0,0);return}
+  VIEW=p.v;fichaId=p.ficha;FORM=p.form||null;render();window.scrollTo(0,0);
+}
 function renderNav(){
   var nav=$("#nav");nav.innerHTML="";var tabs=$("#tabs");tabs.innerHTML="";
   var venc=DB.establecimientos.filter(function(e){var s=estadoEst(e).k;return s==="vencido"||s==="porvencer"}).length;
   NAVITEMS.forEach(function(n){
-    if(SES&&n.roles.indexOf(SES.role)<0)return;
+    if(n.admin&&!isAdmin())return;
     var b=el("button","");if(n.id===VIEW)b.className="on";
     b.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+n.t+(n.id==="vencimientos"&&venc?'<span class="badge">'+venc+'</span>':'');
     b.addEventListener("click",function(){navTo(n.id)});
     nav.appendChild(b);
     // bottom tabs (primeros 5)
-    if(["dashboard","barrido","establecimientos","vencimientos","verificar"].indexOf(n.id)>=0){
+    if(["dashboard","barrido","establecimientos","conceptos","vencimientos"].indexOf(n.id)>=0){
       var t=el("button","");if(n.id===VIEW)t.className="on";
       t.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+n.t;
       t.addEventListener("click",function(){navTo(n.id)});tabs.appendChild(t);
     }
   });
   var who=$("#who");
-  who.innerHTML='<div class="av">'+(SES?esc(SES.name[0]):"?")+'</div><div class="nm"><b>'+esc(SES?SES.name:"")+'</b><small>'+esc(SES?SES.role:"")+'</small></div>';
+  who.innerHTML='<div class="av">'+(SES&&SES.name?esc(SES.name.charAt(0).toUpperCase()):"?")+'</div><div class="nm"><b>'+esc(SES?SES.name:"")+'</b><small>'+esc(SES?rolLegible(SES.role):"")+'</small></div>';
   var lo=el("button","","⎋");lo.title="Salir";lo.addEventListener("click",logout);who.appendChild(lo);
 }
 
@@ -549,21 +829,25 @@ function render(){
   renderNav();
   var v=$("#view");v.innerHTML="";
   var old=$(".scorebar");if(old)old.remove();
-  var T={dashboard:["Inicio",""],barrido:["Barrido de la ciudad","Censo y estado de los establecimientos"],
-    establecimientos:["Establecimientos",""],metas:["Metas","Rendimiento del inspector"],
-    vencimientos:["Vencimientos","Lo que vence pronto y lo vencido"],verificar:["Verificar concepto",""],config:["Configuración","Importar, exportar y mantenimiento"],usuarios:["Usuarios","Aprueba inspectores y asigna sus PIN"],
-    inspeccion:["Inspección técnica",""],certificado:["Concepto técnico",""],ficha:["Ficha del establecimiento",""]};
+  var T={dashboard:["Inicio",""],barrido:["Barrido de la ciudad","Mapa, censo y evidencia del recorrido"],
+    establecimientos:["Establecimientos",""],conceptos:["Conceptos emitidos","Todas las revisiones finalizadas"],
+    metas:["Metas","Rendimiento del inspector"],
+    vencimientos:["Vencimientos","Lo que vence pronto y lo vencido"],verificar:["Verificar certificado",""],config:["Configuración","Importar, exportar y mantenimiento"],usuarios:["Usuarios","Aprueba inspectores y asigna sus PIN"],
+    inspeccion:["Inspección técnica",""],certificado:["Certificado técnico",""],ficha:["Ficha del establecimiento",""]};
   $("#viewTitle").textContent=(T[VIEW]||["",""])[0]; $("#viewSub").textContent=(T[VIEW]||["",""])[1];
-  ({dashboard:vDashboard,barrido:vBarrido,establecimientos:vEstablecimientos,ficha:vFicha,
+  var bb=$("#btnBack"); if(bb)bb.hidden=(VIEW==="dashboard"&&!NAVHIST.length);
+  ({dashboard:vDashboard,barrido:vBarrido,establecimientos:vEstablecimientos,ficha:vFicha,conceptos:vConceptos,
     metas:vMetas,vencimientos:vVencimientos,verificar:vVerificar,config:vConfig,usuarios:vUsuarios,inspeccion:vInspeccion,certificado:vCertificado}[VIEW]||vDashboard)(v);
 }
 
 /* -------- Dashboard -------- */
 function counts(){var c={vigente:0,porvencer:0,vencido:0,sinrev:0,nofav:0};DB.establecimientos.forEach(function(e){c[estadoEst(e).k]++});return c}
+function censoMes(){return (DB.barridos||[]).filter(function(b){var d=new Date(b.fecha);
+  return d.getMonth()===NOW.getMonth()&&d.getFullYear()===NOW.getFullYear()}).length}
 function mesInsp(){return DB.inspecciones.filter(function(x){var d=new Date(x.fecha);return x.estado==="finalizada"&&d.getMonth()===NOW.getMonth()&&d.getFullYear()===NOW.getFullYear()})}
 function vDashboard(v){
   var c=counts(), cfg=DB.config;
-  var mes=mesInsp().length, barr=DB.establecimientos.length;
+  var mes=mesInsp().length, barr=censoMes();
   var metaTotal=cfg.metaRevisiones+cfg.metaRenovaciones, pct=Math.min(100,Math.round(mes/Math.max(1,metaTotal)*100));
   if(DB._ejemplo)v.insertAdjacentHTML("beforeend",'<div style="margin-bottom:14px"><span class="seedtag">● Datos de ejemplo — bórralos cuando cargues los reales</span></div>');
   // Meta hero
@@ -572,7 +856,7 @@ function vDashboard(v){
     '<button class="act" id="goMetas">Configurar</button></div>'+
     '<div class="metacard"><div class="ring" style="--p:'+pct+'"><div class="in"><b>'+pct+'%</b><small>'+mes+' de '+metaTotal+'</small></div></div>'+
     '<div class="metalist">'+metaRow("Revisiones y renovaciones",mes,metaTotal)+
-      metaRow("Establecimientos en base",barr,cfg.metaBarrido)+'</div></div>';
+      metaRow("Establecimientos censados este mes",barr,cfg.metaBarrido)+'</div></div>';
   v.appendChild(hero);
   $("#goMetas",hero).addEventListener("click",function(){navTo("metas")});
   // estado ciudad
@@ -587,12 +871,27 @@ function vDashboard(v){
   v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Acciones rápidas</h3><div class="ln"></div></div>');
   var acc=el("div");acc.style.cssText="display:flex;gap:10px;flex-wrap:wrap";
   acc.innerHTML='<button class="btn btn-p" id="aNueva">+ Nueva inspección</button>'+
-    '<button class="btn btn-g" id="aBarrido">Ir al barrido</button>'+
-    '<button class="btn btn-g" id="aVerif">Verificar un concepto</button>';
+    '<button class="btn btn-g" id="aCensar">📍 Censar establecimiento</button>'+
+    '<button class="btn btn-g" id="aBarrido">Ver el mapa</button>'+
+    '<button class="btn btn-g" id="aVerif">Verificar un certificado</button>';
   v.appendChild(acc);
   $("#aNueva",acc).addEventListener("click",function(){nuevaInspeccion()});
+  $("#aCensar",acc).addEventListener("click",function(){modalCenso()});
   $("#aBarrido",acc).addEventListener("click",function(){navTo("barrido")});
   $("#aVerif",acc).addEventListener("click",function(){navTo("verificar")});
+  // solicitudes de acceso esperando aprobación
+  if(isAdmin()&&esOnline()){
+    var zona=el("div");v.insertAdjacentHTML("beforeend","");v.appendChild(zona);
+    api("listarInspectores").then(function(res){
+      if(!res||!res.ok)return;
+      var p=(res.inspectores||[]).filter(function(u){return !u.aprobado});
+      if(!p.length)return;
+      zona.innerHTML='<div class="pendbanner clickable"><b>🔔 '+p.length+(p.length===1?' persona quiere acceso':' personas quieren acceso')+'</b>'+
+        '<p>'+esc(p.slice(0,3).map(function(u){return u.nombre||u.email}).join(", "))+(p.length>3?" y otros":"")+
+        '. Apruébalos y asígnales su PIN.</p><button class="btn btn-p btn-sm" id="verSol">Ver solicitudes</button></div>';
+      var bs=$("#verSol",zona);if(bs)bs.addEventListener("click",function(){navTo("usuarios")});
+    }).catch(function(){});
+  }
   // próximos a vencer
   var prox=DB.establecimientos.map(function(e){return{e:e,s:estadoEst(e)}}).filter(function(o){return o.s.k==="porvencer"||o.s.k==="vencido"})
     .sort(function(a,b){return (a.s.dias||0)-(b.s.dias||0)}).slice(0,4);
@@ -603,37 +902,222 @@ function vDashboard(v){
 function tile(v,k,col){var t=el("div","tile");t.innerHTML='<div class="v" style="color:'+col+'">'+v+'</div><div class="k">'+esc(k)+'</div>';return t}
 function metaRow(lbl,v,m){var p=Math.min(100,Math.round(v/Math.max(1,m)*100));return '<div class="metarow"><div class="t"><span>'+esc(lbl)+'</span><b>'+v+'/'+m+'</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}
 
-/* -------- Barrido (mapa dibujado) -------- */
+/* ===================== BARRIDO · mapa real (Leaflet + OpenStreetMap) =====
+   Mismo motor de mapa que la app de Reportes. Muestra TODO el panorama:
+   revisiones vigentes, por vencer, vencidas y lo censado sin certificado.
+   Sin señal el fondo del mapa puede no cargar (los mosaicos vienen de la red),
+   pero los puntos y el censo siguen guardándose en la tablet. */
+var INIRIDA=[3.8653,-67.9239];           // centro de Inírida, Guainía
+var MAPA=null, CAPA=null, mapFiltro="todos", mapBarrio="todos";
+
+/* Coordenada estable para los que aún no tienen GPS: se deriva del id, así
+   el punto no salta de lugar cada vez que se abre el mapa. */
+function hashNum(s){var h=0;s=String(s||"");for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0}return h}
+function coordDe(e){
+  if(e.lat&&e.lng&&!isNaN(+e.lat)&&!isNaN(+e.lng))return[+e.lat,+e.lng];
+  var h=hashNum(e.id||e.codigo||e.nombre);
+  return [INIRIDA[0]+(((h%1000)/1000)-0.5)*0.028, INIRIDA[1]+((((h>>10)%1000)/1000)-0.5)*0.034];
+}
+function barriosUnicos(){
+  var m={};DB.establecimientos.forEach(function(e){var b=(e.barrio||"").trim();if(b&&b!=="—")m[b]=1});
+  return Object.keys(m).sort();
+}
 function vBarrido(v){
-  var W=680,H=440;
-  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Mapa de barrido">';
-  // "río" y calles estilizadas
-  svg+='<defs><linearGradient id="riv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82b5" stop-opacity=".25"/><stop offset="1" stop-color="#3b82b5" stop-opacity=".1"/></linearGradient></defs>';
-  svg+='<path d="M0,370 C160,340 240,410 400,380 C520,358 600,400 680,386 L680,440 L0,440 Z" fill="url(#riv)"/>';
-  for(var gx=1;gx<8;gx++)svg+='<line x1="'+(gx*W/8)+'" y1="0" x2="'+(gx*W/8)+'" y2="'+H+'" stroke="var(--line)" stroke-width="1" opacity=".5"/>';
-  for(var gy=1;gy<6;gy++)svg+='<line x1="0" y1="'+(gy*H/6)+'" x2="'+W+'" y2="'+(gy*H/6)+'" stroke="var(--line)" stroke-width="1" opacity=".5"/>';
-  svg+='<rect x="'+(.46*W)+'" y="'+(.4*H)+'" width="46" height="34" rx="4" fill="var(--ember)" opacity=".9"/><text x="'+(.46*W+23)+'" y="'+(.4*H+22)+'" fill="#fff" font-size="11" text-anchor="middle" font-family="sans-serif">🚒</text>';
-  DB.establecimientos.forEach(function(e){
-    var s=estadoEst(e),col=STCOL[s.k],cx=e.x*W,cy=e.y*H;
-    svg+='<g class="mk" data-id="'+e.id+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="'+col+'"/></g>';
+  var cfg=DB.config, cens=(DB.barridos||[]).length;
+  var mesC=(DB.barridos||[]).filter(function(b){var d=new Date(b.fecha);return d.getMonth()===NOW.getMonth()&&d.getFullYear()===NOW.getFullYear()}).length;
+
+  /* --- barra de acciones --- */
+  v.insertAdjacentHTML("beforeend",
+    '<div class="toolbar"><button class="btn btn-p btn-sm" id="censar">+ Censar establecimiento</button>'+
+    '<button class="btn btn-g btn-sm" id="miUbic">◎ Mi ubicación</button>'+
+    '<span class="note">'+mesC+' censados este mes · '+cens+' en total · meta '+(cfg.metaBarrido||30)+'</span></div>');
+
+  /* --- filtros --- */
+  var bs=barriosUnicos();
+  v.insertAdjacentHTML("beforeend",
+    '<div class="filterpills" id="mpills">'+["todos","vigente","porvencer","vencido","sinrev"].map(function(k){
+      var lbl={todos:"Todo",vigente:"Vigentes",porvencer:"Por vencer",vencido:"Vencidos",sinrev:"Sin certificado"}[k];
+      return '<button data-k="'+k+'" class="'+(mapFiltro===k?"on":"")+'">'+lbl+'</button>'}).join("")+
+    (bs.length?('<select id="mbarrio" class="pillsel"><option value="todos">Todos los barrios</option>'+
+      bs.map(function(b){return '<option value="'+esc(b)+'"'+(mapBarrio===b?" selected":"")+'>'+esc(b)+'</option>'}).join("")+'</select>'):'')+
+    '</div>');
+
+  /* --- mapa --- */
+  var mw=el("div","mapreal");mw.id="mapa";v.appendChild(mw);
+  v.insertAdjacentHTML("beforeend",'<div class="maplegend lg2">'+
+    '<span><i style="background:var(--verde)"></i>Vigente</span>'+
+    '<span><i style="background:var(--ambar)"></i>Por vencer</span>'+
+    '<span><i style="background:var(--rojo)"></i>Vencido / no favorable</span>'+
+    '<span><i style="background:var(--gris)"></i>Censado sin certificado</span></div>');
+
+  setTimeout(pintarMapa,40);
+
+  $("#censar").addEventListener("click",function(){modalCenso()});
+  $("#miUbic").addEventListener("click",function(){
+    if(!navigator.geolocation){toast("Este dispositivo no da ubicación");return}
+    toast("Buscando tu ubicación…");
+    navigator.geolocation.getCurrentPosition(function(p){
+      if(MAPA)MAPA.setView([p.coords.latitude,p.coords.longitude],17);
+    },function(){toast("No se pudo obtener la ubicación. Activa el GPS.")},{enableHighAccuracy:true,timeout:12000});
   });
-  svg+='</svg>';
-  v.insertAdjacentHTML("beforeend",'<div class="toolbar"><button class="btn btn-p btn-sm" id="altaExpr">+ Censar establecimiento</button>'+
-    '<span class="note">Toca un punto para ver o inspeccionar. '+DB.establecimientos.length+' establecimientos.</span></div>');
-  var mw=el("div","mapwrap");mw.innerHTML=svg+'<div class="maplegend">'+
-    '<span><i style="background:var(--verde)"></i>Vigente</span><span><i style="background:var(--ambar)"></i>Por vencer</span>'+
-    '<span><i style="background:var(--rojo)"></i>Vencido / no favorable</span><span><i style="background:var(--gris)"></i>Sin revisión</span></div>';
-  v.appendChild(mw);
-  $$(".mk",mw).forEach(function(g){g.addEventListener("click",function(){openFicha(g.dataset.id)})});
-  $("#altaExpr").addEventListener("click",altaExpres);
-  // lista corta bajo el mapa
-  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Sin revisión o por vencer</h3><div class="ln"></div></div>');
+  $$("#mpills button").forEach(function(b){b.addEventListener("click",function(){
+    mapFiltro=b.dataset.k;$$("#mpills button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");pintarMarcadores();})});
+  var sb=$("#mbarrio"); if(sb)sb.addEventListener("change",function(){mapBarrio=sb.value;pintarMarcadores()});
+
+  /* --- lista de lo pendiente debajo del mapa --- */
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Pendientes de atender</h3><div class="ln"></div></div>');
   var lg=el("div","listgrid");
-  DB.establecimientos.map(function(e){return{e:e,s:estadoEst(e)}}).filter(function(o){return o.s.k==="sinrev"||o.s.k==="porvencer"||o.s.k==="vencido"})
-    .forEach(function(o){lg.appendChild(estRow(o.e))});
+  DB.establecimientos.map(function(e){return{e:e,s:estadoEst(e)}})
+    .filter(function(o){return o.s.k==="sinrev"||o.s.k==="porvencer"||o.s.k==="vencido"})
+    .sort(function(a,b){return (a.s.dias||0)-(b.s.dias||0)})
+    .slice(0,40).forEach(function(o){lg.appendChild(estRow(o.e))});
   if(!lg.children.length)lg.innerHTML='<div class="empty">Todo al día ✔</div>';
   v.appendChild(lg);
+
+  /* --- últimos censos: la evidencia del recorrido --- */
+  var ult=(DB.barridos||[]).slice().sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)}).slice(0,10);
+  if(ult.length){
+    v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Últimos censos registrados</h3><div class="ln"></div><span class="count">'+(DB.barridos||[]).length+'</span></div>');
+    var lb=el("div","listgrid");
+    ult.forEach(function(b){
+      var et=(window.ESTADOS_CENSO||[]).filter(function(x){return x.v===b.estadoCert})[0]||{t:b.estadoCert,k:"sinrev"};
+      var r=el("button","row-item");
+      r.innerHTML='<div class="ava">'+(b.fotoThumb?'<img src="'+esc(b.fotoThumb)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">':'🏪')+'</div>'+
+        '<div class="meta"><b>'+esc(b.nombre)+'</b><small>'+esc(b.barrio||"—")+' · '+fmt(b.fecha)+' · '+esc(b.inspectorNombre||"")+(b.lat?" · 📍":"")+'</small></div>'+
+        chip(et.k,et.t);
+      r.addEventListener("click",function(){if(b.establecimientoId)openFicha(b.establecimientoId)});
+      lb.appendChild(r);
+    });
+    v.appendChild(lb);
+  }
 }
+function pintarMapa(){
+  var cont=document.getElementById("mapa"); if(!cont)return;
+  if(!window.L){cont.innerHTML='<div class="empty">No se pudo cargar el mapa. Necesita conexión la primera vez.</div>';return}
+  try{
+    if(MAPA){try{MAPA.remove()}catch(e){}MAPA=null}
+    MAPA=L.map(cont,{zoomControl:true,attributionControl:true}).setView(INIRIDA,14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+      maxZoom:19, attribution:'&copy; OpenStreetMap'
+    }).addTo(MAPA);
+    CAPA=L.layerGroup().addTo(MAPA);
+    pintarMarcadores();
+  }catch(e){ cont.innerHTML='<div class="empty">No se pudo cargar el mapa.</div>'; }
+}
+function pintarMarcadores(){
+  if(!MAPA||!CAPA||!window.L)return;
+  CAPA.clearLayers();
+  var pts=[];
+  DB.establecimientos.forEach(function(e){
+    var st=estadoEst(e);
+    if(mapFiltro!=="todos"&&st.k!==mapFiltro&&!(mapFiltro==="vencido"&&st.k==="nofav"))return;
+    if(mapBarrio!=="todos"&&(e.barrio||"").trim()!==mapBarrio)return;
+    var c=coordDe(e), col=STCOL[st.k]||"var(--gris)";
+    var ic=L.divIcon({className:"mkpin",iconSize:[22,22],iconAnchor:[11,11],
+      html:'<span class="pin" style="background:'+col+'"></span>'});
+    var m=L.marker(c,{icon:ic,title:e.nombre}).addTo(CAPA);
+    var ub=ultimoBarrido(e.id);
+    m.bindPopup(
+      '<div class="pop"><b>'+esc(e.nombre)+'</b>'+
+      '<div class="pt">'+esc(e.tipo||"Establecimiento")+'</div>'+
+      '<div class="pd">'+esc((e.dir||"")+(e.barrio?", "+e.barrio:""))+'</div>'+
+      '<div class="pe" style="color:'+col+'">'+esc(st.t)+'</div>'+
+      (st.u?'<div class="pd">Vence: '+fmt(st.u.vigenciaHasta)+' · '+st.u.score100+'/100</div>':'')+
+      (ub?'<div class="pd">Censado '+fmt(ub.fecha)+' por '+esc(ub.inspectorNombre||"—")+'</div>':'')+
+      '<button class="popbtn" data-ficha="'+esc(e.id)+'">Abrir ficha</button></div>');
+    pts.push(c);
+  });
+  MAPA.off("popupopen");
+  MAPA.on("popupopen",function(ev){
+    var b=ev.popup.getElement()&&ev.popup.getElement().querySelector("[data-ficha]");
+    if(b)b.addEventListener("click",function(){openFicha(b.getAttribute("data-ficha"))});
+  });
+  if(pts.length>1){try{MAPA.fitBounds(L.latLngBounds(pts).pad(0.18))}catch(e){}}
+  else if(pts.length===1){MAPA.setView(pts[0],16)}
+}
+
+/* ===================== CENSO ·  evidencia de que el barrido se hizo =====
+   Nombre, tipo, dirección, barrio, estado del certificado, foto de prueba,
+   GPS, fecha y quién lo hizo. Idempotente: reintentar no duplica. */
+function modalCenso(est){
+  var tipos=window.TIPOS_ESTABLECIMIENTO||["Otro"];
+  var estados=window.ESTADOS_CENSO||[];
+  var geo={lat:"",lng:""}, foto=null, thumb=null;
+  var body=
+    '<div class="ff"><div class="wide"><label class="lbl" for="cNom">Nombre del establecimiento *</label>'+
+      '<input id="cNom" type="text" placeholder="Ej. Panadería La Espiga" value="'+esc(est?est.nombre:"")+'"></div>'+
+    '<div class="wide"><label class="lbl" for="cTipo">Tipo de establecimiento *</label><select id="cTipo">'+
+      tipos.map(function(t){return '<option'+((est&&est.tipo===t)?" selected":"")+'>'+esc(t)+'</option>'}).join("")+'</select></div>'+
+    '<div class="wide"><label class="lbl" for="cDir">Dirección</label><input id="cDir" type="text" placeholder="Calle 12 # 8-30" value="'+esc(est?est.dir:"")+'"></div>'+
+    '<div class="wide"><label class="lbl" for="cBar">Barrio</label><input id="cBar" type="text" list="barriosDL" placeholder="Ej. Centro" value="'+esc(est?est.barrio:"")+'">'+
+      '<datalist id="barriosDL">'+barriosUnicos().map(function(b){return '<option value="'+esc(b)+'">'}).join("")+'</datalist></div>'+
+    '<div class="wide"><label class="lbl">¿Tiene el certificado de revisión? *</label><div class="optcol" id="cEst">'+
+      estados.map(function(e){return '<button type="button" class="opt" data-v="'+esc(e.v)+'">'+esc(e.t)+'</button>'}).join("")+'</div></div>'+
+    '<div class="wide" id="cCertBox" hidden><label class="lbl" for="cVence">¿Hasta cuándo está vigente?</label><input id="cVence" type="date"></div>'+
+    '<div class="wide"><label class="lbl" for="cObs">Observación</label><textarea id="cObs" rows="2" placeholder="Lo que haya que dejar anotado…"></textarea></div>'+
+    '</div>'+
+    '<div class="censofoto"><label class="btn btn-g btn-sm" style="width:100%">📷 Foto de prueba (certificado o fachada)'+
+      '<input id="cFoto" type="file" accept="image/*" capture="environment" hidden></label>'+
+      '<div id="cPrev" class="thumbs"></div></div>'+
+    '<div class="gpsrow"><button type="button" class="mini" id="cGps">📍 Tomar ubicación GPS</button><span class="note" id="cGpsTxt">Sin ubicación</span></div>'+
+    '<p class="note">Queda registrado con tu nombre, la fecha y la hora. Es la evidencia de que el barrido se hizo.</p>';
+
+  modal("Censar establecimiento", body, "Guardar censo", function(){
+    var nom=($("#cNom").value||"").trim(); if(!nom){toast("Escribe el nombre");return false}
+    var sel=$("#cEst .opt.sel"); if(!sel){toast("Indica si tiene certificado");return false}
+    var estadoCert=sel.dataset.v;
+    var idc="b"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
+    var eid=est?est.id:("e"+Date.now());
+    var b={ id:idc, idCliente:idc, establecimientoId:eid, nombre:nom,
+      tipo:$("#cTipo").value, direccion:($("#cDir").value||"").trim(), barrio:($("#cBar").value||"").trim(),
+      estadoCert:estadoCert, certVence:($("#cVence")&&$("#cVence").value)||"", certCodigo:"",
+      observacion:($("#cObs").value||"").trim(), lat:geo.lat, lng:geo.lng,
+      inspectorNombre:(SES&&SES.name)||"", fecha:NOW_ISO(), fotoThumb:thumb||"" };
+    DB.barridos.push(b);
+
+    /* el censo alimenta el directorio de establecimientos */
+    var e=DB.establecimientos.filter(function(x){return x.id===eid})[0];
+    if(!e){
+      e={ id:eid, codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"), nombre:nom,
+          tipo:b.tipo, dir:b.direccion, barrio:b.barrio, lat:geo.lat, lng:geo.lng,
+          ocup:"",act:"",nit:"",rep:"",tel:"", creado:NOW_ISO() };
+      DB.establecimientos.push(e);
+    } else {
+      e.nombre=nom; e.tipo=b.tipo;
+      if(b.direccion)e.dir=b.direccion; if(b.barrio)e.barrio=b.barrio;
+      if(geo.lat){e.lat=geo.lat;e.lng=geo.lng}
+    }
+    persist();
+    if(esOnline()){ pushEst(e); enqueue("censar",{barrido:b}); if(foto)subirFoto(foto,{itemId:"censo_"+idc,inspeccionId:idc}); }
+    toast("Censo guardado"+(esOnline()?"":" (se enviará al haber señal)"));
+    render(); return true;
+  });
+
+  /* interacción dentro del modal */
+  $$("#cEst .opt").forEach(function(b){b.addEventListener("click",function(){
+    $$("#cEst .opt").forEach(function(x){x.classList.remove("sel","good","bad","warn")});
+    b.classList.add("sel");
+    var tono={vigente:"good",porvencer:"warn",vencido:"bad",notiene:"bad"}[b.dataset.v];
+    if(tono)b.classList.add(tono);        // nunca add("") : lanza excepcion y corta la funcion
+    var cb=$("#cCertBox"); if(cb)cb.hidden=(b.dataset.v!=="vigente"&&b.dataset.v!=="porvencer");
+  })});
+  $("#cFoto").addEventListener("change",function(){
+    var f=this.files&&this.files[0]; if(!f)return;
+    comprimir(f,1100,.55,function(full){ foto=full;
+      comprimir(f,260,.5,function(th){ thumb=th;
+        $("#cPrev").innerHTML='<figure><img src="'+th+'" alt="Foto del censo"></figure>'; });
+    });
+  });
+  $("#cGps").addEventListener("click",function(){
+    if(!navigator.geolocation){toast("Este dispositivo no da ubicación");return}
+    $("#cGpsTxt").textContent="Buscando…";
+    navigator.geolocation.getCurrentPosition(function(p){
+      geo.lat=p.coords.latitude.toFixed(6);geo.lng=p.coords.longitude.toFixed(6);
+      $("#cGpsTxt").textContent="📍 "+geo.lat+", "+geo.lng;
+    },function(){$("#cGpsTxt").textContent="No se pudo obtener (activa el GPS)"},{enableHighAccuracy:true,timeout:12000});
+  });
+}
+function NOW_ISO(){return new Date().toISOString()}
 
 /* -------- Establecimientos -------- */
 var estFilter="todos", estQuery="";
@@ -705,8 +1189,9 @@ function vFicha(v){
 }
 function kv(k,val){return '<div><div class="k">'+esc(k)+'</div><div class="v">'+esc(val||"—")+'</div></div>'}
 
-/* -------- alta exprés -------- */
-function altaExpres(){
+/* -------- alta exprés (ahora es el censo) -------- */
+function altaExpres(){ modalCenso(); }
+function altaExpresViejo(){
   modal("Censar establecimiento",
     '<div class="ff"><div class="wide"><label class="lbl">Nombre del establecimiento</label><input id="aeNom" type="text" placeholder="Ej. Panadería La Espiga"></div>'+
     '<div><label class="lbl">Tipo</label><input id="aeTipo" type="text" placeholder="Comercio, hotel…"></div>'+
@@ -718,14 +1203,17 @@ function altaExpres(){
       var n=DB.establecimientos.length+1;
       var ne={id:"e"+Date.now(),codigo:"EST-"+String(n).padStart(3,"0"),nombre:nom,
         tipo:$("#aeTipo").value||"Comercio",barrio:$("#aeBar").value||"—",dir:$("#aeDir").value||"—",
-        ocup:"",act:"",nit:"",rep:"",tel:"",x:.2+Math.random()*.6,y:.2+Math.random()*.55,creado:NOW.toISOString()};
+        ocup:"",act:"",nit:"",rep:"",tel:"",lat:"",lng:"",creado:NOW.toISOString()};
       DB.establecimientos.push(ne);persist();if(esOnline())pushEst(ne);toast("Establecimiento censado");render();return true;
     });
 }
 
 /* -------- Inspección -------- */
 function nuevaInspeccion(estId){
-  FORM={id:"i"+Date.now(),codigo:"RT-2026-"+String(DB.inspecciones.length+1).padStart(4,"0"),
+  /* El número definitivo (RT-AAAA-0001) lo asigna el SERVIDOR al sincronizar,
+     así nunca hay dos conceptos con el mismo número aunque dos inspectores
+     trabajen sin señal al mismo tiempo. Hasta entonces va uno provisional. */
+  FORM={id:"i"+Date.now(),codigo:"LOCAL-"+String(Date.now()).slice(-6),
     establecimientoId:estId||null,modo:"completa",_step:0,estado:"borrador",inspector:SES?SES.name:"",
     fecha:NOW.toISOString(),ocupacion:"",clasifRiesgo:"",ans:{},fuentes:{},fotos:{},obs:{}};
   VIEW="inspeccion";render();window.scrollTo(0,0);
@@ -895,20 +1383,51 @@ function renderItem(m,it){
   var th=el("div","thumbs");th.dataset.th=it.id;wrap.appendChild(th);renderThumbs(it.id,th);
   return wrap;
 }
+/* Cada foto se guarda como {t:miniatura, f:copia pesada, u:enlace Drive, q:idCola}.
+   La miniatura es la que se ve y la que se imprime; la copia pesada se borra
+   apenas Drive confirma. */
 function addFotos(id,files,wrap){
-  var arr=[].slice.call(files),done=0;
-  arr.forEach(function(file){var r=new FileReader();r.onload=function(){var img=new Image();img.onload=function(){
-    var mx=1200,s=Math.min(1,mx/Math.max(img.width,img.height));var cv=document.createElement("canvas");cv.width=img.width*s;cv.height=img.height*s;
-    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);(FORM.fotos[id]=FORM.fotos[id]||[]).push(cv.toDataURL("image/jpeg",.6));
-    done++;scheduleSave();renderThumbs(id,wrap.querySelector('[data-th="'+id+'"]'));
-    if(done===arr.length)toast(arr.length>1?(arr.length+" fotos agregadas"):"Evidencia agregada")};img.src=r.result};r.readAsDataURL(file)});
+  var arr=[].slice.call(files), done=0, n=arr.length;
+  if(!n)return;
+  toast(n>1?("Preparando "+n+" fotos…"):"Preparando la foto…");
+  arr.forEach(function(file){
+    comprimir(file,1100,.6,function(full){
+      comprimir(file,460,.6,function(th){
+        done++;
+        if(th){
+          var reg={t:th,f:full||null,u:null,q:null};
+          (FORM.fotos[id]=FORM.fotos[id]||[]).push(reg);
+          if(full&&esOnline()){
+            reg.q=subirFoto(full,{itemId:id,inspeccionId:FORM.id,nombre:(FORM.codigo||"insp")+"_"+id});
+            reg.f=null;   // ya está en la cola de subida: no duplicar en memoria
+          }
+          scheduleSave();
+          renderThumbs(id,wrap.querySelector('[data-th="'+id+'"]'));
+        }
+        if(done===n)toast(n>1?(n+" fotos agregadas"):"Evidencia agregada");
+      });
+    });
+  });
 }
-function renderThumbs(id,c){if(!c)return;c.innerHTML="";(FORM.fotos[id]||[]).forEach(function(d,i){var f=el("figure");var im=el("img");im.src=d;var x=el("button","","×");x.addEventListener("click",function(){FORM.fotos[id].splice(i,1);scheduleSave();renderThumbs(id,c)});f.appendChild(im);f.appendChild(x);c.appendChild(f)})}
+function fotoSrc(f){ return (f&&f.t)?f.t:(typeof f==="string"?f:"") }   // compatibilidad con fotos viejas
+function fotosDe(f,id){ return (f&&f.fotos&&f.fotos[id])||[] }
+function renderThumbs(id,c){
+  if(!c)return;c.innerHTML="";
+  (FORM.fotos[id]||[]).forEach(function(d,i){
+    var f=el("figure");var im=el("img");im.src=fotoSrc(d);im.alt="Evidencia fotográfica";
+    var x=el("button","","×");x.title="Quitar foto";
+    x.addEventListener("click",function(){FORM.fotos[id].splice(i,1);scheduleSave();renderThumbs(id,c)});
+    f.appendChild(im);f.appendChild(x);
+    if(d&&d.u)f.insertAdjacentHTML("beforeend",'<span class="upok" title="Guardada en Drive">☁</span>');
+    else if(d&&d.q)f.insertAdjacentHTML("beforeend",'<span class="uppend" title="Pendiente de subir">⏳</span>');
+    c.appendChild(f);
+  });
+}
 var _sv;function scheduleSave(){clearTimeout(_sv);_sv=setTimeout(saveInsp,400)}
 function saveInsp(){if(!FORM)return;if(FORM._nom!==undefined||FORM._dir!==undefined||FORM._rep!==undefined)syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
 function syncEst(){ // crea/actualiza el establecimiento desde el encabezado
   var e=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});
-  if(!e&&FORM._nom){e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),x:.2+Math.random()*.6,y:.2+Math.random()*.55,creado:NOW.toISOString()};DB.establecimientos.push(e);FORM.establecimientoId=e.id}
+  if(!e&&FORM._nom){e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),lat:"",lng:"",creado:NOW.toISOString()};DB.establecimientos.push(e);FORM.establecimientoId=e.id}
   if(e){if(FORM._nom!==undefined)e.nombre=FORM._nom;if(FORM._rep!==undefined)e.rep=FORM._rep;if(FORM.ocupacion)e.ocup=FORM.ocupacion;
     if(FORM._dir!==undefined){var p=FORM._dir.split(",");e.dir=p[0]||e.dir;e.barrio=(p[1]||e.barrio||"").trim()}}
 }
@@ -923,90 +1442,374 @@ function finalizar(){
   saveInsp();var r=compute(FORM);
   FORM.estado="finalizada";FORM.score100=r.s100;FORM.X=r.X;FORM.Y=r.Y;
   FORM.concepto={favorable:r.band.favorable,riesgo:r.band.riesgo,texto:r.band.texto};
-  FORM.recs=r.recs;var vig=new Date(NOW);vig.setMonth(vig.getMonth()+(DB.config.vigenciaMeses||12));FORM.vigenciaHasta=vig.toISOString();
-  FORM.sig=sign(FORM.codigo);FORM.fecha=NOW.toISOString();
+  FORM.recs=r.recs;
+  var vig=new Date();vig.setMonth(vig.getMonth()+(DB.config.vigenciaMeses||12));FORM.vigenciaHasta=vig.toISOString();
+  FORM.fecha=new Date().toISOString();
   saveInsp();
-  if(esOnline()){var e=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});if(e)pushEst(e);enqueue("guardarInspeccion",insToServer(FORM));}
   VIEW="certificado";render();window.scrollTo(0,0);
+  if(esOnline()){
+    var e=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0];
+    if(e)pushEst(e);
+    emitirConcepto(FORM);
+  }
+}
+/* Pide al servidor el número oficial y el distintivo firmado. Sin ellos el
+   QR no sirve: por eso el certificado queda "pendiente de validación" hasta
+   que haya señal. Reintenta con el MISMO idCliente, así no se duplica. */
+function emitirConcepto(f){
+  if(!esOnline()||!f)return Promise.resolve(false);
+  var destino=f;
+  return api("guardarInspeccion",insToServer(f)).then(function(res){
+    if(res&&res.ok&&(res.codigo||res.inspeccion)){
+      var c=res.codigo||(res.inspeccion&&res.inspeccion.codigo);
+      var g=res.sig||(res.inspeccion&&res.inspeccion.sig);
+      var l=DB.inspecciones.filter(function(x){return x.id===destino.id})[0]||destino;
+      if(c)l.codigo=c; if(g)l.sig=g; l._sync=true;
+      if(FORM&&FORM.id===destino.id){FORM.codigo=l.codigo;FORM.sig=l.sig;FORM._sync=true}
+      persist();
+      if(VIEW==="certificado")render();
+      return true;
+    }
+    toast((res&&res.error)||"El servidor no emitió el número");
+    return false;
+  }).catch(function(){
+    enqueue("guardarInspeccion",insToServer(destino));   // sin red: a la cola
+    return false;
+  });
 }
 
-/* -------- Certificado -------- */
+/* ===================== CERTIFICADO ===================== */
 function vCertificado(v){
   if(!FORM){navTo("dashboard");return}
   var r=FORM.concepto?{s100:FORM.score100,band:{favorable:FORM.concepto.favorable,riesgo:FORM.concepto.riesgo,texto:FORM.concepto.texto||""},X:FORM.X,Y:FORM.Y,recs:FORM.recs||[]}:compute(FORM);
-  var est=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId})||{};
-  var fav=r.band.favorable;
+  var est=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0]||{};
+  var fav=r.band.favorable, validado=estaValidado(FORM);
+  var hall=(r.recs||[]);
+
+  /* Aviso cuando el concepto aún no tiene número oficial */
+  if(!validado){
+    v.insertAdjacentHTML("beforeend",
+      '<div class="avisoval"><b>⏳ Pendiente de validación</b>'+
+      '<p>Este concepto todavía no tiene número oficial ni código QR porque no se ha enviado al servidor. '+
+      (esOnline()?'Se está emitiendo…':'Conéctate a internet y pulsa <b>Sincronizar</b> (⟳) para emitirlo.')+'</p>'+
+      '<button class="btn btn-p btn-sm" id="emitir">Emitir ahora</button></div>');
+  }
+
   var card=el("div","cert");
-  card.innerHTML='<div class="top"><div class="logo-chip"><img src="logo.png" alt="CBVI"></div><div><small>CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA</small><h3>Concepto técnico de seguridad humana y PCI</h3></div></div>'+
-    '<div class="bd"><div class="verdict '+(fav?"fav":"no")+'"><div class="big">'+r.s100+'<span style="font-size:14px">/100</span></div>'+
-    '<div><b style="font-family:var(--ff-h);font-size:17px">'+(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE")+'</b> · Riesgo '+esc(r.band.riesgo)+
-    '<p>'+esc(r.band.texto||"")+'</p></div></div>'+
-    '<div class="kv">'+kv("Establecimiento",est.nombre)+kv("Código",'<span class="mono">'+esc(FORM.codigo)+'</span>')+kv("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""))+
-      kv("Ocupación NSR-10",FORM.ocupacion)+kv("Modo",FORM.modo==="intermedia"?"Intermedia (Inírida)":"Completa (DNBC)")+
-      kv("Inspector",FORM.inspector)+kv("Fecha",fmt(FORM.fecha))+kv("Vigencia",fmt(FORM.vigenciaHasta))+'</div>'+
-    '<div class="sech"><h3>Recomendaciones y hallazgos</h3><div class="ln"></div></div>'+
-    (r.recs&&r.recs.length?('<ul class="reclist">'+r.recs.slice(0,30).map(function(x){return '<li><span class="ex">!</span><span>'+esc(x.q)+' — <b>'+esc(x.r)+'</b></span></li>'}).join("")+'</ul>'):'<p class="note">Sin hallazgos: todo cumple.</p>')+
+  card.innerHTML=
+    '<div class="top"><div class="logo-chip"><img data-logo alt="CBVI"></div><div>'+
+      '<small>CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA</small>'+
+      '<h3>Concepto técnico de seguridad humana y protección contra incendios</h3></div></div>'+
+    '<div class="bd">'+
+    '<div class="verdict '+(fav?"fav":"no")+'"><div class="big">'+r.s100+'<span style="font-size:14px">/100</span></div>'+
+      '<div><b style="font-family:var(--ff-h);font-size:17px">'+(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE")+'</b> · Riesgo '+esc(r.band.riesgo)+
+      '<p>'+esc(r.band.texto||"")+'</p></div></div>'+
+    '<div class="kv">'+
+      kv("Establecimiento",est.nombre)+
+      kv("Número del concepto",'<span class="mono">'+esc(validado?FORM.codigo:"por asignar")+'</span>')+
+      kv("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""))+
+      kv("Propietario / encargado",est.rep)+
+      kv("Tipo de trámite",tramiteLegible(FORM.tramite))+
+      kv("Ocupación NSR-10",FORM.ocupacion)+
+      kv("Inspector",FORM.inspector)+
+      kv("Fecha",fmt(FORM.fecha))+
+      kv("Vigente hasta",fmt(FORM.vigenciaHasta))+'</div>'+
+
+    '<div class="sech"><h3>Hallazgos y recomendaciones</h3><div class="ln"></div>'+
+      (hall.length?'<span class="count">'+hall.length+'</span>':'')+'</div>'+
+    (hall.length
+      ? '<div class="halls">'+hall.map(function(h,i){return hallHTML(h,i)}).join("")+'</div>'
+      : '<p class="note">Sin hallazgos: el establecimiento cumple en todos los puntos evaluados.</p>')+
+
     '<div class="sech"><h3>Firmas</h3><div class="ln"></div></div>'+
     '<div class="signrow"><div><label class="lbl">Inspector</label><canvas class="pad-c" id="padI"></canvas></div>'+
-    '<div><label class="lbl">Quien recibe</label><canvas class="pad-c" id="padR"></canvas></div></div>'+
-    '<div style="display:flex;gap:8px;margin-top:8px"><button class="mini" id="clrI">Limpiar</button><button class="mini" id="clrR">Limpiar</button></div>'+
-    '<div class="qrbox"><div class="qr" id="qr"></div><div><b style="font-family:var(--ff-h)">Verificación anti-falsificación</b>'+
-    '<p class="note">Escanea para validar vigencia y autenticidad.<br>Código: <span class="mono">'+esc(FORM.codigo)+'</span> · Distintivo: <span class="mono">'+esc(FORM.sig||sign(FORM.codigo))+'</span></p></div></div></div>';
+      '<div><label class="lbl">Quien recibe</label><canvas class="pad-c" id="padR"></canvas></div></div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><button class="mini" id="clrI">Limpiar firma</button><button class="mini" id="clrR">Limpiar firma</button></div>'+
+
+    '<div class="qrbox">'+(validado
+      ? '<div class="qr" id="qr"></div><div><b style="font-family:var(--ff-h)">Verificación anti-falsificación</b>'+
+        '<p class="note">Quien escanee este código ve en su celular si el certificado está vigente.<br>'+
+        'Número: <span class="mono">'+esc(FORM.codigo)+'</span> · Distintivo: <span class="mono">'+esc(FORM.sig)+'</span></p></div>'
+      : '<div class="qr qrvacio">⏳</div><div><b style="font-family:var(--ff-h)">QR pendiente</b>'+
+        '<p class="note">El código QR se genera cuando el servidor emite el número oficial. Sincroniza para obtenerlo.</p></div>')+
+    '</div></div>';
   v.appendChild(card);
+  if(window.pintarLogos)window.pintarLogos();
+
   var act=el("div");act.style.cssText="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px";
-  act.innerHTML='<button class="btn btn-p" id="pdf">Descargar certificado (PDF)</button>'+
-    '<button class="btn btn-g" id="edit">← Editar</button>'+
+  act.innerHTML='<button class="btn btn-p" id="pdf">⤓ Descargar certificado (PDF)</button>'+
+    '<button class="btn btn-g" id="edit">← Editar la inspección</button>'+
     '<button class="btn btn-g btn-sm" id="done" style="margin-left:auto">Listo</button>';
   v.appendChild(act);
-  v.insertAdjacentHTML("beforeend",'<p class="note" style="margin-top:10px">El PDF se descarga en la app desplegada; dentro del visor de Claude la descarga puede estar bloqueada por seguridad.</p>');
+
   setTimeout(function(){
-    if(window.SignaturePad){padI=mkPad("padI",FORM.firmaInsp,function(d){FORM.firmaInsp=d;saveInsp()});padR=mkPad("padR",FORM.firmaRecibe,function(d){FORM.firmaRecibe=d;saveInsp()});
-      $("#clrI").addEventListener("click",function(){padI.clear();FORM.firmaInsp=null;saveInsp()});$("#clrR").addEventListener("click",function(){padR.clear();FORM.firmaRecibe=null;saveInsp()})}
-    try{if(window.QRCode){$("#qr").innerHTML="";new QRCode($("#qr"),{text:VERIFY+"?c="+FORM.codigo+"&d="+(FORM.sig||sign(FORM.codigo)),width:110,height:110,correctLevel:QRCode.CorrectLevel.M})}}catch(e){}
+    if(window.SignaturePad&&$("#padI")){
+      padI=mkPad("padI",FORM.firmaInsp,function(d){FORM.firmaInsp=d;saveInsp()});
+      padR=mkPad("padR",FORM.firmaRecibe,function(d){FORM.firmaRecibe=d;saveInsp()});
+      $("#clrI").addEventListener("click",function(){padI.clear();FORM.firmaInsp=null;saveInsp()});
+      $("#clrR").addEventListener("click",function(){padR.clear();FORM.firmaRecibe=null;saveInsp()});
+    }
+    if(validado)pintarQR();
   },30);
+
+  var be=$("#emitir");
+  if(be)be.addEventListener("click",function(){
+    if(!esOnline()){toast("Entra en línea con tu correo y PIN para emitir el concepto");return}
+    be.disabled=true;be.textContent="Emitiendo…";
+    emitirConcepto(FORM).then(function(ok){ if(!ok){be.disabled=false;be.textContent="Emitir ahora"} });
+  });
   $("#pdf",act).addEventListener("click",function(){makePDF(r,est)});
   $("#edit",act).addEventListener("click",function(){VIEW="inspeccion";render()});
-  $("#done",act).addEventListener("click",function(){navTo("establecimientos")});
+  $("#done",act).addEventListener("click",function(){navTo("conceptos")});
+}
+function hallHTML(h,i){
+  var fotos=(h.fotos||[]).slice(0,3);
+  return '<div class="hall">'+
+    '<div class="hn">'+(i+1)+'</div>'+
+    '<div class="hc">'+
+      '<b>'+esc(h.q)+'</b>'+
+      '<div class="hr">Se observó: <b>'+esc(h.r)+'</b></div>'+
+      (h.obs?'<div class="ho">'+esc(h.obs)+'</div>':'')+
+      '<div class="ha"><span>Qué hacer</span>'+esc(h.accion||"")+'</div>'+
+      (fotos.length?'<div class="hf">'+fotos.map(function(f){return '<img src="'+esc(f)+'" alt="Evidencia del hallazgo">'}).join("")+'</div>':'')+
+    '</div></div>';
+}
+function pintarQR(){
+  try{
+    var q=$("#qr"); if(!q||!window.QRCode)return;
+    q.innerHTML="";
+    new QRCode(q,{text:urlVerificacion(FORM),width:118,height:118,correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){}
 }
 function mkPad(id,data,onEnd){var cv=$("#"+id);var ratio=Math.max(window.devicePixelRatio||1,1);cv.width=cv.offsetWidth*ratio;cv.height=cv.offsetHeight*ratio;cv.getContext("2d").scale(ratio,ratio);
   var sp=new SignaturePad(cv,{penColor:getComputedStyle(document.body).getPropertyValue("--ink"),backgroundColor:"rgba(0,0,0,0)"});
   sp.addEventListener("endStroke",function(){onEnd(sp.toDataURL())});if(data){try{sp.fromDataURL(data)}catch(e){}}return sp}
-function qrDataURL(){var q=$("#qr");if(!q)return null;var c=q.querySelector("canvas");if(c)return c.toDataURL("image/png");var im=q.querySelector("img");if(im&&im.src)return im.src;return null}
+function qrDataURL(){var q=$("#qr");if(!q)return null;var c=q.querySelector("canvas");if(c){try{return c.toDataURL("image/png")}catch(e){return null}}var im=q.querySelector("img");if(im&&im.src)return im.src;return null}
+
+/* ===================== PDF del certificado =====================
+   Es el documento que se le entrega al propietario: logos institucionales,
+   datos, puntaje, concepto, SOLO los hallazgos (cada uno con su foto y qué
+   debe hacer), firmas y QR de verificación. Al final se guarda en Drive
+   para que el QR lo pueda abrir desde cualquier celular. */
 function makePDF(r,est){
-  if(!(window.jspdf&&window.jspdf.jsPDF)){toast("PDF no disponible");return}
-  var d=new window.jspdf.jsPDF({unit:"pt",format:"letter"}),W=d.internal.pageSize.getWidth(),m=42,y=0,fav=r.band.favorable;
-  d.setFillColor(25,29,35);d.rect(0,0,W,56,"F");if(LOGO_DATA){d.setFillColor(255,255,255);d.roundedRect(m,9,40,40,5,5,"F");try{d.addImage(LOGO_DATA,"PNG",m+3,12,34,34)}catch(e){}}
-  d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(12.5);d.text("CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA",m+52,26);
-  d.setFont("helvetica","normal");d.setFontSize(9);d.text("Concepto técnico de seguridad humana y protección contra incendios",m+52,40);
-  y=74;d.setFillColor(fav?228:247,fav?241:228,fav?232:226);d.roundedRect(m,y,W-2*m,50,6,6,"F");
-  d.setTextColor(fav?23:192,fav?134:39,fav?75:31);d.setFont("helvetica","bold");d.setFontSize(20);d.text(r.s100+"/100",m+14,y+32);
-  d.setFontSize(12);d.text(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE",m+96,y+22);
-  d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(40);d.text(d.splitTextToSize("Riesgo "+r.band.riesgo+". "+(r.band.texto||""),W-2*m-104),m+96,y+34);
-  y+=66;function row(k,val){d.setFont("helvetica","bold");d.setFontSize(8.5);d.setTextColor(90);d.text(k.toUpperCase(),m,y);d.setFont("helvetica","normal");d.setTextColor(20);d.setFontSize(10);d.text(d.splitTextToSize(String(val||"—"),W-2*m-150),m+150,y);y+=17}
-  row("Establecimiento",est.nombre);row("Código / distintivo",FORM.codigo+"  ·  "+(FORM.sig||sign(FORM.codigo)));
-  row("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""));row("Ocupación NSR-10",FORM.ocupacion);
-  row("Modo",FORM.modo==="intermedia"?"Intermedia (Inírida)":"Completa (DNBC)");row("Inspector",FORM.inspector);
-  row("Fecha / vigencia",fmt(FORM.fecha)+"  ·  "+fmt(FORM.vigenciaHasta));
-  y+=6;d.setFont("helvetica","bold");d.setFontSize(11);d.setTextColor(20);d.text("Recomendaciones y hallazgos",m,y);y+=15;d.setFont("helvetica","normal");d.setFontSize(9.5);
-  if(r.recs&&r.recs.length)r.recs.slice(0,22).forEach(function(x){var ln=d.splitTextToSize("• "+x.q+" — "+x.r,W-2*m);if(y>690){d.addPage();y=54}d.text(ln,m,y);y+=ln.length*12+2});
-  else {d.text("Sin hallazgos: todo cumple.",m,y);y+=14}
-  if(y>560){d.addPage();y=54}y+=18;
-  try{if(FORM.firmaInsp)d.addImage(FORM.firmaInsp,"PNG",m,y,150,52)}catch(e){}
-  try{if(FORM.firmaRecibe)d.addImage(FORM.firmaRecibe,"PNG",W-m-150,y,150,52)}catch(e){}
-  y+=56;d.setDrawColor(150);d.line(m,y,m+150,y);d.line(W-m-150,y,W-m,y);d.setFontSize(8);d.setTextColor(90);
-  d.text("Firma del inspector — "+(FORM.inspector||""),m,y+12);d.text("Firma de quien recibe",W-m-150,y+12);
-  var qr=qrDataURL();if(qr){try{d.addImage(qr,"PNG",W-m-96,74,96,96)}catch(e){}}
-  d.setFontSize(7);d.setTextColor(120);d.text("Verifica en "+VERIFY+"?c="+FORM.codigo+"  ·  distintivo "+(FORM.sig||sign(FORM.codigo)),m,752);
-  try{d.save("Concepto_"+FORM.codigo+".pdf");toast("PDF generado")}catch(e){toast("Descarga bloqueada en la vista previa")}
+  if(!(window.jspdf&&window.jspdf.jsPDF)){toast("El generador de PDF no cargó. Revisa tu conexión y recarga.");return}
+  var validado=estaValidado(FORM);
+  var d=new window.jspdf.jsPDF({unit:"pt",format:"letter",compress:true});
+  var W=d.internal.pageSize.getWidth(), H=d.internal.pageSize.getHeight();
+  var m=42, y=0, fav=r.band.favorable, PIE=56;
+
+  function nueva(){ d.addPage(); encabezadoCorto(); y=96; }
+  function espacio(alto){ if(y+alto>H-PIE){ nueva(); } }
+
+  function encabezado(){
+    d.setFillColor(25,29,35);d.rect(0,0,W,72,"F");
+    if(LOGO_DATA){ d.setFillColor(255,255,255);d.roundedRect(m,12,48,48,6,6,"F");
+      try{ d.addImage(LOGO_DATA,"JPEG",m+3,15,42,42) }catch(e){} }
+    d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(12.5);
+    d.text("CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA",m+60,28);
+    d.setFont("helvetica","normal");d.setFontSize(8.6);d.setTextColor(205,211,219);
+    d.text("Concepto técnico de seguridad humana y protección contra incendios",m+60,43);
+    d.text("Inírida, Guainía — Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m+60,56);
+  }
+  function encabezadoCorto(){
+    d.setFillColor(25,29,35);d.rect(0,0,W,46,"F");
+    if(LOGO_DATA){ d.setFillColor(255,255,255);d.roundedRect(m,8,30,30,4,4,"F");
+      try{ d.addImage(LOGO_DATA,"JPEG",m+2,10,26,26) }catch(e){} }
+    d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(9.5);
+    d.text("CBVI — Concepto técnico "+(validado?FORM.codigo:"(provisional)"),m+40,27);
+  }
+
+  encabezado();
+
+  /* --- Veredicto --- */
+  y=92;
+  d.setFillColor(fav?228:247, fav?241:228, fav?232:226);
+  d.roundedRect(m,y,W-2*m-120,56,7,7,"F");
+  d.setTextColor(fav?23:192, fav?134:39, fav?75:31);
+  d.setFont("helvetica","bold");d.setFontSize(22);d.text(String(r.s100)+"/100",m+16,y+36);
+  d.setFontSize(12);d.text(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE",m+112,y+25);
+  d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(60);
+  d.text(d.splitTextToSize("Nivel de riesgo "+r.band.riesgo+". "+(r.band.texto||""),W-2*m-240),m+112,y+38);
+
+  /* --- QR al lado del veredicto --- */
+  var qr=validado?qrDataURL():null;
+  if(qr){ try{
+    d.addImage(qr,"PNG",W-m-104,y-4,104,104);
+    d.setFontSize(6.4);d.setTextColor(120);
+    d.text("Escanea para verificar",W-m-104,y+112);
+  }catch(e){} }
+  else {
+    d.setDrawColor(200);d.setLineWidth(.8);d.roundedRect(W-m-104,y-4,104,104,6,6,"S");
+    d.setFontSize(7.5);d.setTextColor(150);
+    d.text(d.splitTextToSize("Certificado sin validar. Sincronice la app para emitir el QR.",92),W-m-99,y+40);
+  }
+
+  /* --- Datos --- */
+  y+=124;
+  function fila(k,val){
+    espacio(20);
+    d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(110);d.text(String(k).toUpperCase(),m,y);
+    d.setFont("helvetica","normal");d.setTextColor(25);d.setFontSize(10);
+    var ln=d.splitTextToSize(String(val==null||val===""?"—":val),W-2*m-160);
+    d.text(ln,m+160,y); y+=Math.max(16,ln.length*12+4);
+  }
+  fila("Establecimiento",est.nombre);
+  fila("Razón social",est.razonSocial||est.nombre);
+  fila("Propietario / encargado",est.rep);
+  fila("NIT",est.nit);
+  fila("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""));
+  fila("Actividad",est.act||est.tipo);
+  fila("Número del concepto",(validado?FORM.codigo:"POR ASIGNAR")+(validado?("   ·   distintivo "+FORM.sig):""));
+  fila("Tipo de trámite",tramiteLegible(FORM.tramite));
+  fila("Ocupación NSR-10",FORM.ocupacion);
+  fila("Clasificación del riesgo",FORM.clasifRiesgo);
+  fila("Fecha de la revisión",fmt(FORM.fecha));
+  fila("Vigente hasta",fmt(FORM.vigenciaHasta));
+  fila("Inspector",FORM.inspector);
+
+  /* --- Hallazgos con su foto y su recomendación --- */
+  var hall=(r.recs||[]);
+  y+=12; espacio(40);
+  d.setDrawColor(215);d.setLineWidth(.8);d.line(m,y,W-m,y); y+=18;
+  d.setFont("helvetica","bold");d.setFontSize(12);d.setTextColor(25);
+  d.text(hall.length?("Hallazgos y recomendaciones ("+hall.length+")"):"Hallazgos y recomendaciones",m,y);
+  y+=8;
+  d.setFont("helvetica","normal");d.setFontSize(8.2);d.setTextColor(120);
+  d.text("Solo se relaciona lo que NO cumple. Lo demás fue verificado y cumple.",m,y+10);
+  y+=24;
+
+  if(!hall.length){
+    d.setFontSize(10);d.setTextColor(23,134,75);
+    d.text("Sin hallazgos: el establecimiento cumple en todos los puntos evaluados.",m,y); y+=18;
+  } else {
+    hall.forEach(function(h,i){
+      var foto=(h.fotos&&h.fotos[0])||null;
+      var anchoTxt=foto?(W-2*m-128):(W-2*m-26);
+      var lTit=d.splitTextToSize(String(h.q||""),anchoTxt);
+      var lObs=d.splitTextToSize("Se observó: "+String(h.r||""),anchoTxt);
+      var lNota=h.obs?d.splitTextToSize("Observación del inspector: "+h.obs,anchoTxt):[];
+      var lAcc=d.splitTextToSize("Qué hacer: "+String(h.accion||""),anchoTxt);
+      var altoTxt=lTit.length*12+lObs.length*11+lNota.length*11+lAcc.length*11+26;
+      var alto=Math.max(altoTxt, foto?96:0)+14;
+      espacio(alto);
+
+      /* franja roja a la izquierda */
+      d.setFillColor(192,39,31);d.rect(m,y-9,3,alto-8,"F");
+      d.setFont("helvetica","bold");d.setFontSize(9.6);d.setTextColor(25);
+      d.text(String(i+1)+".  "+lTit[0],m+12,y);
+      for(var k=1;k<lTit.length;k++){ d.text(lTit[k],m+24,y+k*12); }
+      var yy=y+lTit.length*12+2;
+      d.setFont("helvetica","normal");d.setFontSize(8.8);d.setTextColor(90);
+      d.text(lObs,m+24,yy); yy+=lObs.length*11+2;
+      if(lNota.length){ d.setTextColor(120);d.text(lNota,m+24,yy); yy+=lNota.length*11+2; }
+      d.setTextColor(192,39,31);d.setFont("helvetica","bold");d.setFontSize(8.8);
+      d.text(lAcc,m+24,yy+2);
+      if(foto){ try{ d.addImage(foto,"JPEG",W-m-112,y-9,104,88) }catch(e){} }
+      y+=alto;
+    });
+  }
+
+  /* --- Firmas --- */
+  espacio(110); y+=16;
+  try{ if(FORM.firmaInsp)d.addImage(FORM.firmaInsp,"PNG",m,y,150,50) }catch(e){}
+  try{ if(FORM.firmaRecibe)d.addImage(FORM.firmaRecibe,"PNG",W-m-150,y,150,50) }catch(e){}
+  y+=54;d.setDrawColor(150);d.setLineWidth(.6);d.line(m,y,m+170,y);d.line(W-m-170,y,W-m,y);
+  d.setFont("helvetica","normal");d.setFontSize(8);d.setTextColor(90);
+  d.text("Inspector — "+(FORM.inspector||""),m,y+12);
+  d.text("Quien recibe — "+(est.rep||""),W-m-170,y+12);
+  d.setFontSize(7.2);d.setTextColor(130);
+  d.text("Vigencia: "+fmt(FORM.vigenciaHasta)+". Este concepto pierde validez si cambian las condiciones evaluadas.",m,y+28);
+
+  /* --- Pie de todas las páginas --- */
+  var tot=d.internal.getNumberOfPages();
+  for(var p=1;p<=tot;p++){
+    d.setPage(p);
+    d.setDrawColor(225);d.setLineWidth(.6);d.line(m,H-44,W-m,H-44);
+    d.setFont("helvetica","normal");d.setFontSize(6.8);d.setTextColor(130);
+    d.text("Cuerpo de Bomberos Voluntarios de Inírida — Guainía, Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m,H-32);
+    if(validado)d.text("Verifique este certificado en: "+urlVerificacion(FORM),m,H-22);
+    else d.text("DOCUMENTO PROVISIONAL — sin número oficial ni código de verificación.",m,H-22);
+    d.text("Página "+p+" de "+tot,W-m-54,H-22);
+  }
+
+  var nombre="Certificado_"+(validado?FORM.codigo:"PROVISIONAL")+".pdf";
+  try{ d.save(nombre); toast("Certificado descargado"); }
+  catch(e){ toast("La descarga está bloqueada en esta vista previa"); }
+
+  /* Guardar en Drive para que el QR pueda abrirlo */
+  if(validado&&esOnline()){
+    try{
+      var b64=d.output("datauristring");
+      api("guardarCertificado",{codigo:FORM.codigo,base64:b64}).then(function(res){
+        if(res&&res.ok){ FORM.pdfUrl=res.url; saveInsp(); }
+      }).catch(function(){});
+    }catch(e){}
+  }
+}
+
+/* ===================== CONCEPTOS EMITIDOS =====================
+   Faltaba esta pantalla: las inspecciones ya hechas no se podían volver a
+   abrir ni a reimprimir. */
+var conQuery="", conFiltro="todos";
+function vConceptos(v){
+  v.insertAdjacentHTML("beforeend",
+    '<div class="toolbar"><div class="search"><input id="qCon" type="text" placeholder="Buscar por número, establecimiento o inspector…" value="'+esc(conQuery)+'"></div>'+
+    '<button class="btn btn-p btn-sm" id="conNueva">+ Nueva inspección</button></div>'+
+    '<div class="filterpills" id="cpills">'+["todos","favorable","nofav","borrador","pendiente"].map(function(k){
+      var lbl={todos:"Todos",favorable:"Favorables",nofav:"No favorables",borrador:"Borradores",pendiente:"Sin emitir"}[k];
+      return '<button data-k="'+k+'" class="'+(conFiltro===k?"on":"")+'">'+lbl+'</button>'}).join("")+'</div>');
+
+  var cont=el("div");v.appendChild(cont);
+  function rebuild(){
+    cont.innerHTML="";
+    var q=conQuery.toLowerCase().trim();
+    var lista=DB.inspecciones.slice().sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)})
+      .filter(function(x){
+        if(conFiltro==="borrador"&&x.estado!=="borrador")return false;
+        if(conFiltro==="favorable"&&!(x.estado==="finalizada"&&x.concepto&&x.concepto.favorable))return false;
+        if(conFiltro==="nofav"&&!(x.estado==="finalizada"&&x.concepto&&!x.concepto.favorable))return false;
+        if(conFiltro==="pendiente"&&(x.estado!=="finalizada"||estaValidado(x)))return false;
+        if(conFiltro==="todos"&&x.estado!=="finalizada"&&x.estado!=="borrador")return false;
+        if(!q)return true;
+        var e=DB.establecimientos.filter(function(y){return y.id===x.establecimientoId})[0]||{};
+        return (String(x.codigo)+" "+(e.nombre||"")+" "+(x.inspector||"")+" "+(e.barrio||"")).toLowerCase().indexOf(q)>=0;
+      });
+    if(!lista.length){cont.innerHTML='<div class="empty">No hay conceptos que coincidan.</div>';return}
+    var lg=el("div","listgrid");
+    lista.forEach(function(x){
+      var e=DB.establecimientos.filter(function(y){return y.id===x.establecimientoId})[0]||{};
+      var fin=x.estado==="finalizada", fav=fin&&x.concepto&&x.concepto.favorable, val=estaValidado(x);
+      var b=el("button","row-item");
+      b.innerHTML='<div class="ava">'+(fin?(fav?"✔":"✖"):"✎")+'</div>'+
+        '<div class="meta"><b>'+esc(e.nombre||"(sin establecimiento)")+'</b>'+
+        '<small><span class="mono">'+esc(val?x.codigo:(fin?"por asignar":"borrador"))+'</span> · '+fmt(x.fecha)+
+        (fin?(' · '+x.score100+'/100'):'')+' · '+esc(x.inspector||"")+'</small></div>'+
+        (fin?('<span class="chip '+(fav?"st-vigente":"st-nofav")+'"><span class="dotc"></span>'+(fav?"Favorable":"No favorable")+'</span>'+
+             (val?"":'<span class="chip st-porvencer" title="Falta emitirlo en el servidor"><span class="dotc"></span>Sin emitir</span>'))
+            :'<span class="chip st-sinrev"><span class="dotc"></span>Borrador</span>');
+      b.addEventListener("click",function(){
+        NAVHIST.push({v:"conceptos",ficha:fichaId,form:null});
+        FORM=x; VIEW=(x.estado==="finalizada")?"certificado":"inspeccion"; render(); window.scrollTo(0,0);
+      });
+      lg.appendChild(b);
+    });
+    cont.appendChild(lg);
+  }
+  rebuild();
+  var qi=$("#qCon");
+  qi.addEventListener("input",function(){conQuery=qi.value;rebuild()});   // solo se rearma la lista: no pierde el foco
+  $$("#cpills button").forEach(function(b){b.addEventListener("click",function(){
+    conFiltro=b.dataset.k;$$("#cpills button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");rebuild()})});
+  $("#conNueva").addEventListener("click",function(){nuevaInspeccion()});
 }
 
 /* -------- Metas -------- */
 function vMetas(v){
-  var cfg=DB.config, mes=mesInsp().length, barr=DB.establecimientos.length;
+  var cfg=DB.config, mes=mesInsp().length, barr=censoMes();
   var card=el("div","card pad");card.style.marginBottom="16px";
   var metaTotal=cfg.metaRevisiones+cfg.metaRenovaciones, pct=Math.min(100,Math.round(mes/Math.max(1,metaTotal)*100));
   card.innerHTML='<div class="metacard"><div class="ring" style="--p:'+pct+'"><div class="in"><b>'+pct+'%</b><small>del mes</small></div></div>'+
-    '<div class="metalist">'+metaRow("Revisiones + renovaciones",mes,metaTotal)+metaRow("Establecimientos censados",barr,cfg.metaBarrido)+
+    '<div class="metalist">'+metaRow("Revisiones + renovaciones",mes,metaTotal)+metaRow("Establecimientos censados este mes",barr,cfg.metaBarrido)+
     '<p class="note">Objetivo por defecto; ajústalo abajo. En producción se mide contra lo que registre el inspector cada mes.</p></div></div>';
   v.appendChild(card);
   if(isAdmin()){
@@ -1020,13 +1823,30 @@ function vMetas(v){
     v.appendChild(f);
     $("#saveMeta").addEventListener("click",function(){cfg.metaRevisiones=+$("#mR").value||0;cfg.metaRenovaciones=+$("#mN").value||0;cfg.metaBarrido=+$("#mB").value||0;cfg.vigenciaMeses=+$("#mV").value||12;persist();if(esOnline())enqueue("setConfig",{config:{metaRevisiones:cfg.metaRevisiones,metaRenovaciones:cfg.metaRenovaciones,metaBarrido:cfg.metaBarrido,vigenciaMeses:cfg.vigenciaMeses}});toast("Metas actualizadas");render()});
   } else {
-    v.insertAdjacentHTML("beforeend",'<div class="card pad"><p class="note">🔒 Solo el administrador (comandante) puede cambiar las metas. Así nadie las baja a su conveniencia.</p></div>');
+    v.insertAdjacentHTML("beforeend",'<div class="card pad"><p class="note">🔒 Solo el administrador puede cambiar las metas. Así nadie las baja a su conveniencia.</p></div>');
   }
-  if(SES&&SES.role==="comandante"){
-    v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Tablero del comandante</h3><div class="ln"></div></div>');
+  if(isAdmin()){
+    v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Tablero de control</h3><div class="ln"></div></div>');
     var c=counts();
-    var t=el("div","tiles");t.appendChild(tile(mes,"Revisiones este mes","var(--ink)"));t.appendChild(tile(c.vigente,"Al día","var(--verde)"));t.appendChild(tile(c.vencido+c.porvencer,"Requieren gestión","var(--ambar)"));t.appendChild(tile(c.sinrev,"Por censar","var(--gris)"));
+    var t=el("div","tiles");
+    t.appendChild(tile(mes,"Revisiones este mes","var(--ink)"));
+    t.appendChild(tile(censoMes(),"Censados este mes","var(--azul)"));
+    t.appendChild(tile(c.vigente,"Al día","var(--verde)"));
+    t.appendChild(tile(c.vencido+c.porvencer+c.nofav,"Requieren gestión","var(--ambar)"));
     v.appendChild(t);
+    /* quién hizo cada cosa: el barrido deja autor y fecha */
+    var porIns={};
+    (DB.barridos||[]).forEach(function(b){var d=new Date(b.fecha);
+      if(d.getMonth()===NOW.getMonth()&&d.getFullYear()===NOW.getFullYear()){
+        var k=b.inspectorNombre||"(sin nombre)";porIns[k]=(porIns[k]||0)+1}});
+    var ks=Object.keys(porIns);
+    if(ks.length){
+      v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Censos del mes por inspector</h3><div class="ln"></div></div>');
+      var cd=el("div","card pad");
+      cd.innerHTML=ks.sort(function(a,b){return porIns[b]-porIns[a]})
+        .map(function(k){return metaRow(k,porIns[k],DB.config.metaBarrido||30)}).join("");
+      v.appendChild(cd);
+    }
   }
 }
 
@@ -1056,7 +1876,7 @@ function vVerificar(v){
     var c=($("#vC").value||"").trim().toUpperCase(), dd=($("#vD").value||"").trim().toUpperCase();
     var insp=DB.inspecciones.find(function(x){return x.codigo===c&&x.estado==="finalizada"});
     var box=$("#vRes");
-    if(!insp||sign(insp.codigo)!==dd){box.innerHTML='<div class="verdict no"><div class="big">✖</div><div><b style="font-family:var(--ff-h)">No verificado</b><p>El código o el distintivo no coinciden. Posible falsificación.</p></div></div>';return}
+    if(!insp||!insp.sig||String(insp.sig).toUpperCase()!==dd){box.innerHTML='<div class="verdict no"><div class="big">✖</div><div><b style="font-family:var(--ff-h)">No verificado</b><p>El código o el distintivo no coinciden. Posible falsificación.</p></div></div>';return}
     var est=DB.establecimientos.find(function(x){return x.id===insp.establecimientoId})||{};
     var dias=Math.round((new Date(insp.vigenciaHasta)-NOW)/86400000), vig=dias>=0&&insp.concepto.favorable;
     box.innerHTML='<div class="verdict '+(vig?"fav":"no")+'"><div class="big">'+(vig?"✔":"!")+'</div><div><b style="font-family:var(--ff-h)">'+(vig?"Concepto vigente y auténtico":(insp.concepto.favorable?"Concepto vencido":"Concepto no favorable"))+'</b>'+
@@ -1098,7 +1918,25 @@ function vConfig(v){
   v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Mantenimiento</h3><div class="ln"></div></div>');
   var mt=el("div","card pad");mt.innerHTML='<p class="note">Borra los datos de ejemplo y empieza limpio en este dispositivo.</p><button class="btn btn-g btn-sm" id="wipe" style="margin-top:10px;color:var(--rojo)">Borrar todos los datos</button>';
   v.appendChild(mt);
-  $("#wipe",mt).addEventListener("click",function(){modal("Borrar todos los datos","<p class=\"note\">Elimina establecimientos e inspecciones de este dispositivo. No se puede deshacer.</p>","Borrar",function(){DB={establecimientos:[],inspecciones:[],config:DB.config};persist();toast("Datos borrados");navTo("dashboard");return true})});
+  $("#wipe",mt).addEventListener("click",function(){modal("Borrar todos los datos","<p class=\"note\">Elimina establecimientos e inspecciones de este dispositivo. No se puede deshacer.</p>","Borrar",function(){DB={establecimientos:[],inspecciones:[],barridos:[],config:DB.config};persist();toast("Datos borrados");navTo("dashboard");return true})});
+
+  /* --- Version de la app --- */
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Versi\u00f3n y novedades</h3><div class="ln"></div></div>');
+  var vv=el("div","card pad");
+  vv.innerHTML='<p>Versi\u00f3n instalada: <b class="mono">'+esc(APP_VERSION)+'</b></p>'+
+    '<p class="note" style="margin-top:6px">Si un inspector dice que ve algo distinto, comp\u00e1renlo: debe ser el mismo n\u00famero en las dos tablets.</p>'+
+    '<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">'+
+      '<button class="btn btn-g btn-sm" id="verNotas">Ver novedades</button>'+
+      '<button class="btn btn-g btn-sm" id="btnInstalar2">Instalar la app</button>'+
+    '</div>';
+  v.appendChild(vv);
+  $("#verNotas",vv).addEventListener("click",function(){
+    modal("Novedades de la versi\u00f3n "+APP_VERSION,
+      '<ul style="margin:4px 0 0 18px;line-height:1.65;font-size:14px">'+
+      notasDe(APP_VERSION).map(function(t){return "<li>"+esc(t)+"</li>"}).join("")+'</ul>',
+      "Cerrar", function(){return true});
+  });
+  $("#btnInstalar2",vv).addEventListener("click",pedirInstalacion);
 }
 function importCsv(txt){
   var lines=(txt||"").split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
@@ -1109,12 +1947,12 @@ function importCsv(txt){
     var p=l.split(",");if(p.length<4)return;
     var nombre=p[0].trim();if(!nombre)return;
     var barrio=(p[1]||"").trim(),fecha=(p[2]||"").trim(),vig=(p[3]||"").trim(),fav=/^(s|1|t|f)/i.test((p[4]||"si").trim());
-    var e={id:"e"+Date.now()+"_"+n,codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),nombre:nombre,tipo:"Comercio",barrio:barrio||"—",dir:"—",ocup:"",act:"",nit:"",rep:"",tel:"",x:.2+Math.random()*.6,y:.2+Math.random()*.55,creado:NOW.toISOString()};
+    var e={id:"e"+Date.now()+"_"+n,codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),nombre:nombre,tipo:"Comercio",barrio:barrio||"—",dir:"—",ocup:"",act:"",nit:"",rep:"",tel:"",lat:"",lng:"",creado:NOW.toISOString()};
     DB.establecimientos.push(e);
     var cod="RT-IMP-"+String(DB.inspecciones.length+1).padStart(4,"0");
     var imp={id:"i"+Date.now()+"_"+n,codigo:cod,establecimientoId:e.id,modo:"completa",estado:"finalizada",inspector:"Importado",
       fecha:toIso(fecha),vigenciaHasta:toIso(vig),ocupacion:"",clasifRiesgo:"",ans:{},fuentes:{},fotos:{},obs:{},score100:fav?90:40,X:0,Y:0,
-      concepto:{favorable:fav,riesgo:fav?"BAJO":"ALTO"},sig:sign(cod),importado:true};
+      concepto:{favorable:fav,riesgo:fav?"BAJO":"ALTO"},sig:"",importado:true};   // historico de papel: sin distintivo propio
     DB.inspecciones.push(imp);
     if(esOnline()){pushEst(e);enqueue("guardarInspeccion",{inspeccion:{idCliente:imp.id,codigo:imp.codigo,establecimientoId:e.id,fecha:imp.fecha,vigenciaHasta:imp.vigenciaHasta,score100:imp.score100,favorable:fav,riesgo:imp.concepto.riesgo,estado:"finalizada",respuestas:"{}",recomendaciones:"[]"}})}
     n++;
@@ -1122,22 +1960,29 @@ function importCsv(txt){
   DB._ejemplo=false;persist();var msg=$("#impMsg");if(msg)msg.textContent=n+" inspecciones importadas.";toast(n+" importadas");setTimeout(function(){navTo("establecimientos")},700);
 }
 
-/* -------- Usuarios (admin): aprobar inspectores y asignar PIN -------- */
+/* ===================== USUARIOS (solo administrador) =====================
+   El inspector solicita acceso con su nombre y correo, SIN PIN.
+   Aquí llega la solicitud; el administrador la aprueba y le asigna el PIN. */
 function vUsuarios(v){
-  if(!isAdmin()){v.innerHTML='<div class="empty">🔒 Solo el administrador.</div>';return}
-  if(!esOnline()){v.innerHTML='<div class="empty">Conéctate en línea (correo + PIN) para administrar usuarios e inspectores.</div>';return}
-  v.insertAdjacentHTML("beforeend",'<div class="toolbar"><button class="btn btn-p btn-sm" id="addU">+ Agregar inspector</button><span class="note">Aprueba quién puede usar la app y asígnale un PIN.</span></div>');
+  if(!isAdmin()){v.innerHTML='<div class="empty">🔒 Esta sección es solo del administrador.</div>';return}
+  if(!esOnline()){v.innerHTML='<div class="empty">Entra en línea (correo + PIN) para administrar los inspectores.<br><span class="note">Los usuarios viven en el servidor, no en la tablet.</span></div>';return}
+  v.insertAdjacentHTML("beforeend",'<div class="toolbar"><button class="btn btn-p btn-sm" id="addU">+ Agregar inspector a mano</button>'+
+    '<button class="btn btn-g btn-sm" id="recU">⟳ Actualizar</button>'+
+    '<span class="note">Aquí decides quién puede usar la app.</span></div>');
   var cont=el("div");cont.innerHTML='<div class="empty">Cargando usuarios…</div>';v.appendChild(cont);
   function cargar(){
     api("listarInspectores").then(function(res){
       cont.innerHTML="";
-      var list=(res&&res.ok&&res.inspectores)||[];
+      if(!res||!res.ok){cont.innerHTML='<div class="empty">'+esc((res&&res.error)||"No se pudo cargar")+'</div>';return}
+      var list=res.inspectores||[];
       var pend=list.filter(function(u){return !u.aprobado}), act=list.filter(function(u){return u.aprobado});
       if(pend.length){
-        cont.insertAdjacentHTML("beforeend",'<div class="sech" style="margin-top:0"><h3>Solicitudes por aprobar</h3><div class="ln"></div><span class="count">'+pend.length+'</span></div>');
+        cont.insertAdjacentHTML("beforeend",'<div class="pendbanner"><b>🔔 '+pend.length+(pend.length===1?' solicitud de acceso':' solicitudes de acceso')+'</b>'+
+          '<p>Alguien quiere usar la app. Revisa quién es, apruébalo y asígnale un PIN.</p></div>');
+        cont.insertAdjacentHTML("beforeend",'<div class="sech" style="margin-top:4px"><h3>Por aprobar</h3><div class="ln"></div><span class="count">'+pend.length+'</span></div>');
         var lgp=el("div","listgrid");pend.forEach(function(u){lgp.appendChild(filaUsuario(u,true,cargar))});cont.appendChild(lgp);
       }
-      cont.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Inspectores</h3><div class="ln"></div></div>');
+      cont.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Con acceso</h3><div class="ln"></div><span class="count">'+act.length+'</span></div>');
       var lga=el("div","listgrid");
       if(!act.length)lga.innerHTML='<div class="empty">Aún no hay inspectores aprobados.</div>';
       act.forEach(function(u){lga.appendChild(filaUsuario(u,false,cargar))});cont.appendChild(lga);
@@ -1145,84 +1990,297 @@ function vUsuarios(v){
   }
   cargar();
   $("#addU").addEventListener("click",function(){modalUsuario(null,cargar)});
+  $("#recU").addEventListener("click",function(){cont.innerHTML='<div class="empty">Cargando…</div>';cargar()});
 }
 function filaUsuario(u,pendiente,done){
   var b=el("button","row-item");
-  b.innerHTML='<div class="ava">'+(u.rol==="comandante"?"★":"🧭")+'</div><div class="meta"><b>'+esc(u.nombre||u.email)+'</b><small>'+esc(u.email)+' · '+esc(u.rol||"inspector")+'</small></div>'+
-    (pendiente?'<span class="chip st-porvencer"><span class="dotc"></span>Por aprobar</span>':'<span class="chip '+(u.activo?"st-vigente":"st-sinrev")+'"><span class="dotc"></span>'+(u.activo?"Activo":"Inactivo")+'</span>');
+  b.innerHTML='<div class="ava">'+(u.rol==="admin"?"★":"🧭")+'</div>'+
+    '<div class="meta"><b>'+esc(u.nombre||u.email)+'</b>'+
+    '<small>'+esc(u.email)+' · '+esc(rolLegible(u.rol))+(u.solicitado?(' · solicitó '+fmt(u.solicitado)):'')+'</small></div>'+
+    (pendiente
+      ? '<span class="chip st-porvencer"><span class="dotc"></span>Por aprobar</span>'
+      : '<span class="chip '+(u.activo?"st-vigente":"st-sinrev")+'"><span class="dotc"></span>'+(u.activo?"Activo":"Desactivado")+'</span>');
   b.addEventListener("click",function(){modalUsuario(u,done)});
   return b;
 }
 function modalUsuario(u,done){
   var nuevo=!u, aprobar=(u&&!u.aprobado);
-  var body='<div class="ff"><div class="wide"><label class="lbl">Correo</label><input id="uEmail" type="email" value="'+esc(u?u.email:"")+'"'+(u?" readonly":"")+'></div>'+
-    '<div class="wide"><label class="lbl">Nombre</label><input id="uNom" type="text" value="'+esc(u?(u.nombre||""):"")+'"></div>'+
-    '<div><label class="lbl">PIN '+((u&&u.aprobado)?"(vacío = no cambiar)":"(4 a 6 dígitos)")+'</label><input id="uPin" type="text" inputmode="numeric" maxlength="6" placeholder="••••"></div>'+
-    '<div><label class="lbl">Rol</label><select id="uRol"><option value="inspector"'+((u&&u.rol==="inspector")?" selected":"")+'>Inspector</option><option value="comandante"'+((u&&u.rol==="comandante")?" selected":"")+'>Comandante (admin)</option></select></div></div>'+
-    (u&&u.aprobado?'<label class="fchk" style="margin-top:10px;max-width:240px"><input type="checkbox" id="uAct"'+(u.activo?" checked":"")+'><span>Activo (puede entrar)</span></label>':'<p class="note" style="margin-top:8px">Al aprobar, dile al inspector su PIN para que inicie sesión con su correo.</p>');
-  modal(nuevo?"Agregar inspector":(aprobar?"Aprobar acceso":"Editar inspector"), body, nuevo?"Crear":(aprobar?"Aprobar":"Guardar"),
+  var titulo=nuevo?"Agregar inspector":(aprobar?"Aprobar acceso":"Editar inspector");
+  var body=
+    (aprobar?'<div class="solbox"><b>Solicitud de acceso</b><p>'+esc(u.nombre||"")+' pidió entrar con el correo <b>'+esc(u.email)+'</b>'+(u.solicitado?(' el '+fmt(u.solicitado)):'')+'. Si lo apruebas, asígnale un PIN y díselo para que pueda entrar.</p></div>':'')+
+    '<div class="ff">'+
+    '<div class="wide"><label class="lbl" for="uEmail">Correo</label><input id="uEmail" type="email" value="'+esc(u?u.email:"")+'"'+(u?" readonly":"")+' inputmode="email" autocapitalize="off" spellcheck="false"></div>'+
+    '<div class="wide"><label class="lbl" for="uNom">Nombre completo</label><input id="uNom" type="text" value="'+esc(u?(u.nombre||""):"")+'"></div>'+
+    '<div><label class="lbl" for="uPin">PIN '+((u&&u.aprobado)?"(vacío = no cambiarlo)":"(4 a 6 dígitos)")+'</label>'+
+      '<input id="uPin" type="text" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off"></div>'+
+    '<div><label class="lbl" for="uRol">Perfil</label><select id="uRol">'+
+      '<option value="inspector"'+((!u||u.rol==="inspector")?" selected":"")+'>Inspector</option>'+
+      '<option value="admin"'+((u&&u.rol==="admin")?" selected":"")+'>Administrador</option></select></div></div>'+
+    (nuevo||aprobar?'<button type="button" class="mini" id="genPin" style="margin-top:8px">🎲 Generar un PIN</button>':'')+
+    (u&&u.aprobado?'<label class="fchk" style="margin-top:12px;max-width:260px"><input type="checkbox" id="uAct"'+(u.activo?" checked":"")+'><span>Activo (puede entrar a la app)</span></label>':'')+
+    '<p class="note" style="margin-top:10px">El inspector entra con su correo y este PIN. El administrador puede cambiárselo o desactivarlo cuando quiera.</p>';
+
+  modal(titulo, body, nuevo?"Crear":(aprobar?"Aprobar y asignar PIN":"Guardar"),
     function(){
       var email=($("#uEmail").value||"").trim().toLowerCase(); if(!email){toast("Falta el correo");return false}
       var pin=($("#uPin").value||"").trim();
-      if((nuevo||aprobar)&&pin.length<4){toast("Asigna un PIN de 4 a 6 dígitos");return false}
+      if((nuevo||aprobar)&&!/^\d{4,6}$/.test(pin)){toast("El PIN debe tener de 4 a 6 dígitos");return false}
+      if(pin&&!/^\d{4,6}$/.test(pin)){toast("El PIN debe tener de 4 a 6 dígitos");return false}
       var ins={email:email,nombre:($("#uNom").value||"").trim(),rol:$("#uRol").value};
       if(pin)ins.pin=pin;
       ins.activo=(u&&u.aprobado)?$("#uAct").checked:true;
-      api("guardarInspector",{inspector:ins}).then(function(res){ if(res&&res.ok){toast("Guardado");if(done)done();} else toast((res&&res.error)||"Error al guardar"); }).catch(function(){toast("Sin conexión")});
+      api("guardarInspector",{inspector:ins}).then(function(res){
+        if(res&&res.ok){
+          if(pin)modalPinListo(ins.nombre||email,email,pin);
+          else toast("Guardado");
+          if(done)done();
+        } else toast((res&&res.error)||"Error al guardar");
+      }).catch(function(){toast("Sin conexión al servidor")});
       return true;
-    });
+    },
+    aprobar?{texto:"Rechazar",clase:"btn-danger",accion:function(){
+      api("rechazarInspector",{email:u.email}).then(function(res){
+        toast(res&&res.ok?"Solicitud rechazada":((res&&res.error)||"No se pudo"));
+        if(done)done();
+      }).catch(function(){toast("Sin conexión")});
+      return true;
+    }}:null);
+
+  var gp=$("#genPin");
+  if(gp)gp.addEventListener("click",function(){ $("#uPin").value=String(Math.floor(1000+Math.random()*9000)); });
+}
+/* Se muestra el PIN UNA vez, para que el admin se lo pase al inspector.
+   Después solo queda guardado cifrado en el servidor. */
+function modalPinListo(nombre,email,pin){
+  modal("Acceso aprobado",
+    '<div class="pinok"><div class="pingrande mono">'+esc(pin)+'</div>'+
+    '<p><b>'+esc(nombre)+'</b> ya puede entrar con:<br>correo <b>'+esc(email)+'</b> y este PIN.</p>'+
+    '<p class="note">Anótalo o dícelo ahora: por seguridad no se vuelve a mostrar. Si se pierde, entra aquí y asígnale uno nuevo.</p></div>',
+    "Entendido", function(){return true});
 }
 
 /* -------- modal / theme / auth -------- */
-function modal(title,body,okTxt,onOk){
+/* I4: modales propios. Nada de confirm()/alert()/prompt() nativos — en el
+   APK/WebView fallan en silencio. "extra" es un tercer botón opcional. */
+function modal(title,body,okTxt,onOk,extra){
   var root=$("#modalRoot");
-  root.innerHTML='<div class="modal"><div class="box"><header>'+esc(title)+'</header><div class="c">'+body+'</div>'+
-    '<footer><button class="btn btn-g btn-sm" id="mCancel">Cancelar</button><button class="btn btn-p btn-sm" id="mOk">'+esc(okTxt)+'</button></footer></div></div>';
+  root.innerHTML='<div class="modal"><div class="box" role="dialog" aria-modal="true"><header>'+esc(title)+'</header>'+
+    '<div class="c">'+body+'</div>'+
+    '<footer>'+(extra?'<button class="btn btn-sm '+esc(extra.clase||"btn-g")+'" id="mExtra" style="margin-right:auto">'+esc(extra.texto)+'</button>':'')+
+    '<button class="btn btn-g btn-sm" id="mCancel">Cancelar</button>'+
+    '<button class="btn btn-p btn-sm" id="mOk">'+esc(okTxt)+'</button></footer></div></div>';
   var close=function(){root.innerHTML=""};
   $("#mCancel").addEventListener("click",close);
   $("#mOk").addEventListener("click",function(){if(onOk()!==false)close()});
+  if(extra)$("#mExtra").addEventListener("click",function(){if(extra.accion()!==false)close()});
   root.querySelector(".modal").addEventListener("click",function(e){if(e.target===this)close()});
+  var f=root.querySelector("input,select,textarea,button");if(f&&!("ontouchstart" in window))try{f.focus()}catch(e){}
+}
+/* ===================== AVISO DE ACTUALIZACION =====================
+   Cada vez que sube APP_VERSION, la primera vez que se abre esa version se le
+   muestra al usuario que cambio. Asi el inspector sabe que la app se actualizo
+   y no cree que "se movio algo solo". Las notas salen de APP_VERSION_NOTAS. */
+function notasDe(v){
+  var pre="v"+v+":";
+  return APP_VERSION_NOTAS.filter(function(n){return String(n).indexOf(pre)===0})
+    .map(function(n){return String(n).slice(pre.length).trim()});
+}
+function avisoVersion(){
+  var vista=null; try{vista=localStorage.getItem(VERK)}catch(e){}
+  if(vista===APP_VERSION)return;                       // ya la vio
+  /* Si hay otro aviso abierto, esperar: modal() reemplaza el contenido y el
+     usuario se perderia uno de los dos mensajes. */
+  var r=$("#modalRoot");
+  if(r&&r.innerHTML){setTimeout(avisoVersion,1200);return}
+  var items=notasDe(APP_VERSION), estrena=!vista;
+  modal(estrena?("Bienvenido \u00b7 versi\u00f3n "+APP_VERSION):("La app se actualiz\u00f3 \u00b7 versi\u00f3n "+APP_VERSION),
+    '<p>'+(estrena?'Esto es lo que trae esta versi\u00f3n:':'Esto es lo que cambi\u00f3:')+'</p>'+
+    '<ul style="margin:10px 0 0 18px;line-height:1.65;font-size:14px">'+
+      items.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+
+    '</ul>'+
+    '<p class="note" style="margin-top:12px">Versi\u00f3n '+esc(APP_VERSION)+'</p>',
+    "Entendido", function(){ try{localStorage.setItem(VERK,APP_VERSION)}catch(e){} return true; });
+}
+/* Version nueva publicada mientras la app estaba abierta: el Service Worker la
+   descarga pero no manda. Se le avisa y el usuario decide cuando recargar. */
+function avisarRecarga(reg){
+  var t=$("#toast");
+  if(!t)return;
+  t.innerHTML='Hay una versi\u00f3n nueva disponible. <u style="cursor:pointer">Recargar</u>';
+  t.classList.add("show");
+  t.querySelector("u").addEventListener("click",function(){
+    try{ if(reg&&reg.waiting)reg.waiting.postMessage("skipWaiting") }catch(e){}
+    setTimeout(function(){location.reload()},150);
+  });
 }
 function initTheme(){try{var t=localStorage.getItem(THEME);if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}}
 $("#btnConfig").addEventListener("click",function(){if(!SES)return;if(isAdmin())navTo("config");else toast("Solo el administrador puede entrar a Configuración")});
-$("#btnSync").addEventListener("click",function(){if(esOnline()){toast("Sincronizando…");pullAll().then(flush)}else toast("Entra en línea (correo + PIN) para sincronizar con el servidor")});
+$("#btnSync").addEventListener("click",function(){
+  if(!esOnline()){toast("Entra con tu correo y PIN para sincronizar con el servidor");return}
+  toast("Sincronizando…");
+  pullAll().then(function(){ flush(); flushFotos();
+    /* reintenta emitir los conceptos que quedaron sin número oficial */
+    DB.inspecciones.filter(function(x){return x.estado==="finalizada"&&!estaValidado(x)})
+      .slice(0,5).forEach(function(x){emitirConcepto(x)});
+  });
+});
+$("#btnInstalar").addEventListener("click",pedirInstalacion);
 $("#btnTheme").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");var n=c==="dark"?"light":(c==="light"?"dark":(matchMedia("(prefers-color-scheme: dark)").matches?"light":"dark"));document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(THEME,n)}catch(e){}});
 
-// login
-var pickRole=null;
-$$("#userpick button").forEach(function(b){b.addEventListener("click",function(){pickRole=b.dataset.role;$$("#userpick button").forEach(function(x){x.classList.remove("sel")});b.classList.add("sel")})});
-$$("#pin input").forEach(function(inp,i,arr){inp.addEventListener("input",function(){this.value=this.value.replace(/\D/g,"");if(this.value&&arr[i+1])arr[i+1].focus()});inp.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&arr[i-1])arr[i-1].focus()})});
-function afterLogin(){try{sessionStorage.setItem(SESK,JSON.stringify(SES))}catch(e){}$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync()}
-function demoLogin(){var role=pickRole||"inspector";SES={role:role,name:role==="comandante"?"Jeferson Rangel":"Inspector CBVI"};if(!DB.establecimientos.length){DB=seed();persist()}afterLogin()}
-$("#btnLogin").addEventListener("click",function(){
-  var pin=$$("#pin input").map(function(x){return x.value}).join("");
-  if(pin.length<4){toast("Escribe el PIN de 4 dígitos");return}
-  var email=($("#loginEmail").value||"").trim().toLowerCase();
-  if(email){
-    var btn=$("#btnLogin");btn.disabled=true;toast("Conectando…");
-    api("login",{email:email,pin:pin}).then(function(res){btn.disabled=false;
-      if(res&&res.ok){SES={role:res.usuario.rol,name:res.usuario.nombre||email,email:email,pase:res.pase};afterLogin();pullAll().then(flush)}
-      else toast((res&&res.error)||"No se pudo entrar");
-    }).catch(function(){btn.disabled=false;toast("Sin conexión al servidor: modo demo");demoLogin()});
-    return;
-  }
-  if(!pickRole){toast("Escribe tu correo y PIN, o elige un rol para el demo");return}
-  demoLogin();
+/* ===================== INICIO DE SESIÓN =====================
+   El inspector NO se crea su propio acceso: pide acceso con nombre y correo,
+   y el administrador lo aprueba y le asigna el PIN. */
+$$("#pin input").forEach(function(inp,i,arr){
+  inp.addEventListener("input",function(){
+    this.value=this.value.replace(/\D/g,"");
+    if(this.value&&arr[i+1])arr[i+1].focus();
+  });
+  inp.addEventListener("keydown",function(e){
+    if(e.key==="Backspace"&&!this.value&&arr[i-1])arr[i-1].focus();
+    if(e.key==="Enter")$("#btnLogin").click();
+  });
+  inp.addEventListener("paste",function(e){
+    var t=(e.clipboardData||window.clipboardData).getData("text").replace(/\D/g,"");
+    if(!t)return; e.preventDefault();
+    for(var k=0;k<arr.length;k++)arr[k].value=t.charAt(i+k)||"";
+    var ult=Math.min(arr.length-1,i+t.length);arr[ult].focus();
+  });
 });
-$("#solicitar").addEventListener("click",function(ev){ev.preventDefault();
+function leerPin(){return $$("#pin input").map(function(x){return x.value}).join("")}
+function limpiarPin(){$$("#pin input").forEach(function(x){x.value=""})}
+
+function afterLogin(){
+  try{sessionStorage.setItem(SESK,JSON.stringify(SES))}catch(e){}
+  try{localStorage.setItem("cbvi_rt_ultimo_correo",(SES&&SES.email)||"")}catch(e){}
+  $("#login").hidden=true;$("#app").hidden=false;
+  VIEW="dashboard";NAVHIST=[];render();updateSync();
+  setTimeout(avisoVersion,450);          // aviso de actualizacion (regla: siempre avisar el cambio)
+}
+function demoLogin(){
+  SES={role:"admin",name:"Modo demostración",email:"",demo:true};
+  if(!DB.establecimientos.length){DB=seed();if(!DB.barridos)DB.barridos=[];persist()}
+  afterLogin();
+  toast("Modo demostración: los datos son de ejemplo y quedan solo en este dispositivo");
+}
+
+$("#btnLogin").addEventListener("click",function(){
+  var email=($("#loginEmail").value||"").trim().toLowerCase();
+  var pin=leerPin();
+  if(!email){toast("Escribe tu correo");$("#loginEmail").focus();return}
+  if(pin.length<4){toast("Escribe tu PIN (mínimo 4 dígitos)");return}
+  var btn=$("#btnLogin");btn.disabled=true;btn.textContent="Entrando…";
+  api("login",{email:email,pin:pin}).then(function(res){
+    btn.disabled=false;btn.textContent="Entrar";
+    if(res&&res.ok){
+      SES={role:res.usuario.rol,name:res.usuario.nombre||email,email:email,pase:res.pase};
+      limpiarPin();afterLogin();pullAll().then(function(){flush();flushFotos()});
+    } else { toast((res&&res.error)||"No se pudo entrar"); limpiarPin(); }
+  }).catch(function(){
+    btn.disabled=false;btn.textContent="Entrar";
+    toast("No hay conexión con el servidor. Revisa tu red e inténtalo otra vez.");
+  });
+});
+$("#loginEmail").addEventListener("keydown",function(e){if(e.key==="Enter")$$("#pin input")[0].focus()});
+try{var ue=localStorage.getItem("cbvi_rt_ultimo_correo");if(ue)$("#loginEmail").value=ue}catch(e){}
+
+$("#btnSolicitar").addEventListener("click",function(){
   modal("Solicitar acceso",
-    '<div class="ff"><div class="wide"><label class="lbl">Correo</label><input id="sEmail" type="email" placeholder="tu correo"></div><div class="wide"><label class="lbl">Tu nombre</label><input id="sNom" type="text"></div></div><p class="note">El administrador debe aprobarte y darte un PIN antes de que puedas entrar.</p>',
+    '<div class="ff"><div class="wide"><label class="lbl" for="sNom">Tu nombre completo</label>'+
+      '<input id="sNom" type="text" placeholder="Nombre y apellidos"></div>'+
+    '<div class="wide"><label class="lbl" for="sEmail">Tu correo</label>'+
+      '<input id="sEmail" type="email" placeholder="correo@ejemplo.com" value="'+esc(($("#loginEmail").value||"").trim())+'" inputmode="email" autocapitalize="off" spellcheck="false"></div></div>'+
+    '<p class="note">No escribas ningún PIN: el administrador revisa tu solicitud, la aprueba y te asigna uno. Él te lo entregará para que puedas entrar.</p>',
     "Enviar solicitud",
-    function(){ var em=($("#sEmail").value||"").trim().toLowerCase(); if(!em){toast("Escribe tu correo");return false}
-      api("solicitarAcceso",{email:em,nombre:($("#sNom").value||"").trim()}).then(function(res){ toast(res&&res.ok?"Solicitud enviada. Espera la aprobación del administrador.":((res&&res.error)||"No se pudo enviar")); }).catch(function(){toast("Sin conexión al servidor")});
+    function(){
+      var nom=($("#sNom").value||"").trim();
+      var em=($("#sEmail").value||"").trim().toLowerCase();
+      if(!nom){toast("Escribe tu nombre");return false}
+      if(!em||em.indexOf("@")<0){toast("Escribe un correo válido");return false}
+      api("solicitarAcceso",{email:em,nombre:nom}).then(function(res){
+        if(res&&res.ok){
+          $("#loginEmail").value=em;
+          try{localStorage.setItem("cbvi_rt_ultimo_correo",em)}catch(e){}
+          modal("Solicitud enviada",
+            '<p>'+(res.yaExiste
+              ? 'Tu correo <b>'+esc(em)+'</b> ya tiene acceso. Si no recuerdas el PIN, pídeselo al administrador.'
+              : 'Listo. El administrador recibirá tu solicitud y te asignará un PIN.<br><br>Cuando te lo entregue, entra con tu correo <b>'+esc(em)+'</b> y ese PIN.')+'</p>',
+            "Entendido",function(){return true});
+        } else toast((res&&res.error)||"No se pudo enviar la solicitud");
+      }).catch(function(){toast("No hay conexión con el servidor")});
       return true;
     });
 });
-function logout(){SES=null;try{sessionStorage.removeItem(SESK)}catch(e){}$("#app").hidden=true;$("#login").hidden=false;$$("#pin input").forEach(function(x){x.value=""});pickRole=null;$$("#userpick button").forEach(function(x){x.classList.remove("sel")});updateSync()}
+$("#verDemo").addEventListener("click",function(ev){
+  ev.preventDefault();
+  modal("Modo demostración",
+    '<p>Verás la app con datos inventados para conocerla. Nada se envía al servidor y nada de lo que hagas aquí es real.</p>'+
+    '<p class="note">Para trabajar de verdad entra con tu correo y tu PIN.</p>',
+    "Ver la demostración", function(){ demoLogin(); return true });
+});
+
+function logout(){
+  SES=null;try{sessionStorage.removeItem(SESK)}catch(e){}
+  $("#app").hidden=true;$("#login").hidden=false;limpiarPin();NAVHIST=[];updateSync();
+}
+
+/* ===================== Botones de navegación ===================== */
+$("#btnBack").addEventListener("click",navAtras);
+$("#btnHome").addEventListener("click",function(){NAVHIST=[];navTo("dashboard",true)});
+window.addEventListener("popstate",function(){ if(SES&&NAVHIST.length)navAtras(); });
+
+/* ===================== Instalar la app ===================== */
+var _instalar=null;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();_instalar=e;
+  var b=$("#btnInstalar");if(b)b.hidden=false;
+});
+function pedirInstalacion(){
+  if(!_instalar){
+    modal("Instalar la app",
+      '<p>Para tenerla como aplicación en la tablet o el celular:</p>'+
+      '<p><b>Android (Chrome):</b> menú ⋮ → <b>Instalar aplicación</b> o <b>Agregar a pantalla de inicio</b>.</p>'+
+      '<p><b>iPhone / iPad (Safari):</b> botón Compartir → <b>Agregar a pantalla de inicio</b>.</p>'+
+      '<p class="note">Queda con el escudo del CBVI y abre a pantalla completa, igual que la app de Reportes.</p>',
+      "Entendido",function(){return true});
+    return;
+  }
+  _instalar.prompt();
+  _instalar.userChoice.then(function(){ _instalar=null; var b=$("#btnInstalar"); if(b)b.hidden=true; });
+}
+
+/* ===================== Service Worker (funcionar sin señal) ===================== */
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      if(!reg)return;
+      reg.addEventListener("updatefound",function(){
+        var sw=reg.installing;
+        if(!sw)return;
+        sw.addEventListener("statechange",function(){
+          if(sw.state==="installed"&&navigator.serviceWorker.controller)avisarRecarga(reg);
+        });
+      });
+    }).catch(function(){});
+  });
+}
 
 initTheme();
-try{var s=JSON.parse(sessionStorage.getItem(SESK));if(s&&s.role){SES=s;$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync();if(esOnline()){pullAll().then(flush)}}}catch(e){}
-window.addEventListener("online",function(){updateSync();flush()});
+try{
+  var ses=JSON.parse(sessionStorage.getItem(SESK));
+  if(ses&&ses.role){
+    SES=ses;$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync();
+    setTimeout(avisoVersion,450);
+    if(esOnline()){pullAll().then(function(){flush();flushFotos()})}
+  }
+}catch(e){}
+window.addEventListener("online",function(){updateSync();flush();flushFotos()});
 window.addEventListener("offline",function(){updateSync()});
+/* accesos directos del ícono instalado */
+try{
+  var go=new URLSearchParams(location.search).get("go");
+  if(go&&SES){ if(go==="nueva")nuevaInspeccion(); else if(go==="censar"){navTo("barrido");setTimeout(function(){modalCenso()},300)} }
+}catch(e){}
 })();
 </script>
+</body>
+</html>

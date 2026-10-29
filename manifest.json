@@ -1,0 +1,25 @@
+{
+  "name": "CBVI Revisiones Técnicas",
+  "short_name": "Revisiones",
+  "description": "Revisiones técnicas de seguridad humana y protección contra incendios — Cuerpo de Bomberos Voluntarios de Inírida",
+  "lang": "es-CO",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eceef1",
+  "theme_color": "#191d23",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icon192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "iconmaskable192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "iconmaskable512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nueva inspección", "short_name": "Inspección", "url": "./index.html?go=nueva", "icons": [{ "src": "icon192.png", "sizes": "192x192" }] },
+    { "name": "Censar establecimiento", "short_name": "Censar", "url": "./index.html?go=censar", "icons": [{ "src": "icon192.png", "sizes": "192x192" }] },
+    { "name": "Verificar certificado", "short_name": "Verificar", "url": "./verificar.html", "icons": [{ "src": "icon192.png", "sizes": "192x192" }] }
+  ]
+}

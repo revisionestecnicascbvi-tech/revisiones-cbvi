@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Verificación de certificado — CBVI</title>
+<meta name="theme-color" content="#191d23">
+<meta name="robots" content="noindex">
+<meta name="description" content="Verificación pública de conceptos técnicos de seguridad humana y protección contra incendios del Cuerpo de Bomberos Voluntarios de Inírida.">
+<link rel="icon" href="icon192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --ink:#14181d; --paper:#eceef1; --surface:#fff; --surface-2:#f6f7f9;
+    --muted:#626b76; --faint:#8b94a0; --line:#d9dde3; --line-2:#e8ebef;
+    --rail:#191d23; --ember:#dc3b2c;
+    --verde:#17864b; --verde-bg:#e4f1e8; --ambar:#c9790c; --ambar-bg:#f8eed8;
+    --rojo:#c0271f; --rojo-bg:#f7e4e2; --gris:#737c87; --gris-bg:#e9ecef;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(16,20,26,.05),0 12px 30px -14px rgba(16,20,26,.22);
+    --ff-h:"Saira",system-ui,sans-serif; --ff:"Public Sans",system-ui,-apple-system,sans-serif;
+    --ff-m:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ink:#eef1f4; --paper:#0f1216; --surface:#171b20; --surface-2:#1d2229;
+    --muted:#9aa3ae; --faint:#6b747f; --line:#2b313a; --line-2:#232931;
+    --verde:#49b97d; --verde-bg:#15271d; --ambar:#e0a23f; --ambar-bg:#2a2214;
+    --rojo:#ef5a50; --rojo-bg:#2b1715; --gris:#8a93a0; --gris-bg:#20262e;
+    --ember:#f05545;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 34px -16px rgba(0,0,0,.65);
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --ink:#eef1f4; --paper:#0f1216; --surface:#171b20; --surface-2:#1d2229;
+    --muted:#9aa3ae; --faint:#6b747f; --line:#2b313a; --line-2:#232931;
+    --verde:#49b97d; --verde-bg:#15271d; --ambar:#e0a23f; --ambar-bg:#2a2214;
+    --rojo:#ef5a50; --rojo-bg:#2b1715; --gris:#8a93a0; --gris-bg:#20262e;
+    --ember:#f05545; color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff);line-height:1.5;
+    -webkit-text-size-adjust:100%;min-height:100vh}
+  h1,h2,h3{font-family:var(--ff-h);margin:0;letter-spacing:.2px}
+  .mono{font-family:var(--ff-m);font-variant-numeric:tabular-nums}
+  [hidden]{display:none!important}
+
+  .masthead{background:var(--rail);color:#cdd3db;padding:18px max(16px,env(safe-area-inset-left)) 18px max(16px,env(safe-area-inset-right))}
+  .mh{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:14px}
+  .mh .chip{width:56px;height:56px;flex:0 0 auto;border-radius:14px;background:#fff;display:grid;place-items:center;padding:5px;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+  .mh .chip img{width:100%;height:100%;object-fit:contain}
+  .mh small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#79818c;font-weight:600}
+  .mh h1{font-size:18px;color:#fff;line-height:1.25;margin-top:2px}
+
+  .wrap{max-width:720px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-left)) 44px max(16px,env(safe-area-inset-right))}
+
+  .state{border-radius:var(--radius);padding:20px;display:flex;gap:16px;align-items:center;margin-bottom:18px;border:1px solid transparent}
+  .state .ic{width:60px;height:60px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:30px;background:rgba(255,255,255,.55)}
+  .state h2{font-size:23px;letter-spacing:.4px}
+  .state p{margin:3px 0 0;font-size:13.5px;opacity:.9}
+  .s-vigente{background:var(--verde-bg);border-color:var(--verde);color:var(--verde)}
+  .s-porvencer{background:var(--ambar-bg);border-color:var(--ambar);color:var(--ambar)}
+  .s-vencido,.s-nofav,.s-invalido{background:var(--rojo-bg);border-color:var(--rojo);color:var(--rojo)}
+  .s-cargando{background:var(--surface-2);border-color:var(--line);color:var(--muted)}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .state .ic{background:rgba(0,0,0,.3)}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+  .card > h3{padding:13px 18px;border-bottom:1px solid var(--line-2);font-size:13px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+  .kv{padding:6px 18px 16px}
+  .kv .r{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line-2);align-items:baseline;flex-wrap:wrap}
+  .kv .r:last-child{border-bottom:0}
+  .kv .k{flex:0 0 150px;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .kv .v{flex:1 1 200px;font-size:15px;font-weight:500;overflow-wrap:anywhere}
+
+  .scorerow{display:flex;gap:14px;padding:16px 18px;align-items:center;flex-wrap:wrap}
+  .score{font-family:var(--ff-h);font-size:40px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .score small{font-size:15px;color:var(--muted);font-weight:500}
+  .concepto{font-family:var(--ff-h);font-size:16px;font-weight:600}
+  .riesgo{font-size:13px;color:var(--muted)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;
+    border-radius:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;width:100%}
+  .btn-p{background:var(--ember);border-color:var(--ember);color:#fff}
+  .btn + .btn{margin-top:10px}
+
+  .foot{font-size:12px;color:var(--faint);text-align:center;margin-top:26px;line-height:1.6}
+  .foot b{color:var(--muted)}
+  .spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--ember);border-radius:50%;animation:sp .8s linear infinite;display:inline-block;vertical-align:-5px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+  .manual{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  .manual label{display:block;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:5px}
+  .manual input{width:100%;min-height:50px;padding:0 14px;border-radius:11px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--ink);font-family:var(--ff-m);font-size:15px;margin-bottom:12px}
+  .manual input:focus{outline:2px solid var(--ember);outline-offset:1px}
+  .ff2{display:grid;grid-template-columns:1fr 150px;gap:12px}
+  @media (max-width:430px){.ff2{grid-template-columns:1fr}.kv .k{flex-basis:100%}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mh">
+    <div class="chip"><img data-logo alt="Escudo del Cuerpo de Bomberos Voluntarios de Inírida"></div>
+    <div>
+      <small>Cuerpo de Bomberos Voluntarios de Inírida</small>
+      <h1>Verificación de certificado</h1>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="estado" class="state s-cargando">
+    <div class="ic"><span class="spin"></span></div>
+    <div><h2>Consultando…</h2><p>Validando el certificado con el servidor del CBVI.</p></div>
+  </div>
+
+  <div id="contenido"></div>
+
+  <form id="manual" class="manual" hidden>
+    <label for="mc">Código del certificado</label>
+    <div class="ff2">
+      <input id="mc" type="text" placeholder="RT-2026-0001" autocomplete="off" spellcheck="false">
+      <input id="md" type="text" placeholder="Distintivo" autocomplete="off" spellcheck="false" maxlength="8">
+    </div>
+    <button class="btn btn-p" type="submit">Verificar</button>
+  </form>
+
+  <p class="foot">
+    Verificación en línea del <b>Cuerpo de Bomberos Voluntarios de Inírida</b> · Guainía, Colombia<br>
+    ABNEGACIÓN Y DISCIPLINA<br>
+    <span id="selloHora"></span>
+  </p>
+</main>
+
+<script src="logos.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ====== Backend (I1: esta URL NO cambia) ====== */
+var BACKEND_URL = "https://script.google.com/macros/s/AKfycbzXkG5Kw1kapPK1dwL55PdhUwCrkZP0Qmdok84rE7PpO-iWl4pIR8-u-yuZrS73T3Kp/exec";
+
+var $ = function(s){ return document.querySelector(s); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(m){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]; }); }
+
+function fecha(v){
+  if(!v) return "—";
+  var d = new Date(v);
+  if(isNaN(d)){ return String(v); }
+  return d.toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
+}
+/* El backend guarda la clave interna ("primera"); aqui se muestra en palabras. */
+var TRAMITES={primera:"Primera vez",renovacion:"Renovaci\u00f3n",cambio:"Cambio de raz\u00f3n social o propietario"};
+function tramiteLegible(t){ return TRAMITES[t]||t||"\u2014";
+}
+
+var EST = {
+  vigente:  {cls:"s-vigente",  ic:"✓", t:"CERTIFICADO VIGENTE",  p:"Este establecimiento cuenta con concepto técnico favorable y vigente."},
+  porvencer:{cls:"s-porvencer",ic:"!", t:"PRÓXIMO A VENCER",     p:"El concepto sigue siendo válido, pero vence pronto. Debe renovarse."},
+  vencido:  {cls:"s-vencido",  ic:"✕", t:"CERTIFICADO VENCIDO",  p:"La vigencia de este concepto ya terminó. Debe solicitarse una nueva revisión."},
+  nofav:    {cls:"s-nofav",    ic:"✕", t:"CONCEPTO NO FAVORABLE",p:"La revisión no resultó favorable. El establecimiento debe subsanar los hallazgos."},
+  invalido: {cls:"s-invalido", ic:"✕", t:"CERTIFICADO NO VÁLIDO",p:"Este código no existe en los registros del CBVI o fue alterado. No lo acepte como documento auténtico."}
+};
+
+function pintarEstado(k, extra){
+  var e = EST[k] || EST.invalido;
+  $("#estado").className = "state " + e.cls;
+  $("#estado").innerHTML =
+    '<div class="ic">'+e.ic+'</div><div><h2>'+esc(e.t)+'</h2><p>'+esc(extra||e.p)+'</p></div>';
+}
+
+function fila(k, v, mono){
+  if(v==null || v==="" ) return "";
+  return '<div class="r"><div class="k">'+esc(k)+'</div><div class="v'+(mono?" mono":"")+'">'+esc(v)+'</div></div>';
+}
+
+function pintarCert(d){
+  var html = "";
+
+  /* --- Puntaje y concepto --- */
+  var favColor = d.favorable ? "var(--verde)" : "var(--rojo)";
+  html += '<div class="card"><h3>Resultado de la revisión</h3>'+
+    '<div class="scorerow">'+
+      '<div class="score" style="color:'+favColor+'">'+esc(d.score100)+'<small>/100</small></div>'+
+      '<div><div class="concepto" style="color:'+favColor+'">'+
+        (d.favorable?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE")+'</div>'+
+        '<div class="riesgo">Nivel de riesgo: <b>'+esc(d.riesgo||"—")+'</b></div></div>'+
+    '</div></div>';
+
+  /* --- Establecimiento --- */
+  html += '<div class="card"><h3>Establecimiento</h3><div class="kv">'+
+    fila("Nombre", d.establecimiento)+
+    fila("Razón social", d.razonSocial)+
+    fila("Propietario / encargado", d.propietario)+
+    fila("NIT", d.nit, true)+
+    fila("Dirección", d.direccion)+
+    fila("Barrio", d.barrio)+
+    fila("Actividad", d.actividad)+
+  '</div></div>';
+
+  /* --- Revisión --- */
+  html += '<div class="card"><h3>Datos del concepto</h3><div class="kv">'+
+    fila("Número", d.codigo, true)+
+    fila("Tipo de trámite", tramiteLegible(d.tramite))+
+    fila("Fecha de revisión", fecha(d.fecha))+
+    fila("Vigente hasta", fecha(d.vigenciaHasta))+
+    fila("Inspector", d.inspector)+
+    fila("Expedido por", "Cuerpo de Bomberos Voluntarios de Inírida")+
+  '</div></div>';
+
+  /* --- Certificado PDF --- */
+  if(d.pdfUrl){
+    html += '<a class="btn btn-p" href="'+esc(d.pdfUrl)+'" target="_blank" rel="noopener">Ver / descargar el certificado (PDF)</a>';
+  }
+
+  $("#contenido").innerHTML = html;
+  $("#selloHora").textContent = "Consultado el " +
+    new Date().toLocaleString("es-CO",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+
+function consultar(c, d){
+  pintarEstado("vigente"); // placeholder reemplazado al responder
+  $("#estado").className = "state s-cargando";
+  $("#estado").innerHTML = '<div class="ic"><span class="spin"></span></div>'+
+    '<div><h2>Consultando…</h2><p>Validando el certificado con el servidor del CBVI.</p></div>';
+  $("#contenido").innerHTML = "";
+
+  var url = BACKEND_URL + "?api=1&c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
+  fetch(url, { method:"GET" })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(!res || !res.ok || !res.cert){
+        pintarEstado("invalido", (res && res.error) || null);
+        $("#manual").hidden = false;
+        return;
+      }
+      pintarEstado(res.cert.estado);
+      pintarCert(res.cert);
+      $("#manual").hidden = true;
+    })
+    .catch(function(){
+      $("#estado").className = "state s-cargando";
+      $("#estado").innerHTML = '<div class="ic">⚠</div><div><h2>Sin conexión</h2>'+
+        '<p>No se pudo consultar el servidor. Revisa tus datos o tu red e inténtalo de nuevo.</p></div>';
+      $("#manual").hidden = false;
+    });
+}
+
+/* ====== Arranque ====== */
+var p = new URLSearchParams(location.search);
+var c = (p.get("c")||"").trim(), d = (p.get("d")||"").trim();
+
+if(c){
+  consultar(c, d);
+} else {
+  $("#estado").className = "state s-cargando";
+  $("#estado").innerHTML = '<div class="ic">❖</div><div><h2>Verificar un certificado</h2>'+
+    '<p>Escribe el número y el distintivo que aparecen en el documento, o escanea su código QR.</p></div>';
+  $("#manual").hidden = false;
+}
+
+$("#manual").addEventListener("submit", function(ev){
+  ev.preventDefault();
+  var mc = ($("#mc").value||"").trim().toUpperCase();
+  if(!mc) return;
+  consultar(mc, ($("#md").value||"").trim().toUpperCase());
+});
+})();
+</script>
+</body>
+</html>
