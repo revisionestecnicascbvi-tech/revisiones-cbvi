@@ -296,6 +296,16 @@
   .mini{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:9px;min-height:38px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
   .mini:hover{border-color:var(--ember);color:var(--ink)}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  /* visor del lector de QR */
+  .qrbox{position:relative;width:100%;max-width:340px;margin:10px auto 0;aspect-ratio:1/1;
+    background:#000;border-radius:14px;overflow:hidden;isolation:isolate}
+  .qrbox video{width:100%;height:100%;object-fit:cover;display:block}
+  .qrmira{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.9);border-radius:12px;
+    box-shadow:0 0 0 2000px rgba(0,0,0,.28);pointer-events:none}
+  .buscaest{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .buscaest input{flex:1;min-width:0}
+  .hallazgoest{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:var(--surface-2)}
+  .hallazgoest b{display:block;font-size:14.5px}
   .thumbs figure{position:relative;margin:0;width:62px;height:62px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
   .thumbs img{width:100%;height:100%;object-fit:cover}
   .thumbs button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:12px}
@@ -532,9 +542,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.7"></script>
-<script src="form-inspeccion.js?v=1.7"></script>
-<script src="guias.js?v=1.7"></script>
+<script src="logos.js?v=1.8"></script>
+<script src="form-inspeccion.js?v=1.8"></script>
+<script src="guias.js?v=1.8"></script>
 <script>
 (function(){
 "use strict";
@@ -546,8 +556,12 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.7";
+var APP_VERSION="1.8";
 var APP_VERSION_NOTAS=[
+  "v1.8: Lector de QR en Verificar: apunta la camara al certificado y se llena solo.",
+  "v1.8: En Censar ya se puede escanear el QR o buscar por nombre o documento: trae los datos y el estado del certificado.",
+  "v1.8: Cada item de la inspeccion tiene boton de Tomar foto, aparte del de Galeria.",
+  "v1.8: Corregido el QR que llevaba a una pantalla de error de Google en vez de a la verificacion.",
   "v1.7: Boton Emitir todos: los conceptos importados reciben su numero oficial en grupos, en vez de uno por uno.",
   "v1.7: La importacion acepta documento, direccion, telefono, propietario y actividad, y ya no duplica un establecimiento que ya existe.",
   "v1.7: Si el nombre viene escrito distinto (tildes, mayusculas), igual se reconoce como el mismo establecimiento.",
@@ -629,7 +643,7 @@ function esOnline(){return !!(SES&&SES.pase)}
    del backend es más vieja que esta app (guardar el código en Apps Script NO
    lo publica). En vez de un mensaje críptico, se explica qué hacer. */
 var SERVIDOR_VIEJO=false;
-var BACKEND_MIN="1.4";
+var BACKEND_MIN="1.5";
 function mensajeServidor(err){
   var e=String(err||"");
   if(/Acci[oó]n desconocida/i.test(e)){
@@ -1313,7 +1327,17 @@ function modalCenso(est){
   var tipos=window.TIPOS_ESTABLECIMIENTO||["Otro"];
   var estados=window.ESTADOS_CENSO||[];
   var geo={lat:"",lng:""}, foto=null, thumb=null;
+  var estHallado=est||null;   // el que se reconoció por QR o por búsqueda
+  function chipClase(k){return ST[k]||ST.sinrev||""}
   var body=
+    /* Atajo de terreno: si el establecimiento ya está en la base (o el dueño
+       muestra su certificado), no hay que volver a escribir nada. */
+    '<div class="buscaest">'+
+      '<button type="button" class="btn btn-p btn-sm" id="cScan">📷 Escanear QR</button>'+
+      '<input id="cBuscaTxt" type="text" placeholder="…o busca por nombre, documento o código">'+
+      '<button type="button" class="btn btn-g btn-sm" id="cBuscar">Buscar</button>'+
+    '</div>'+
+    '<div id="cHallado"></div>'+
     '<div class="ff"><div class="wide"><label class="lbl" for="cNom">Nombre del establecimiento *</label>'+
       '<input id="cNom" type="text" placeholder="Ej. Panadería La Espiga" value="'+esc(est?est.nombre:"")+'"></div>'+
     '<div class="wide"><label class="lbl" for="cTipo">Tipo de establecimiento *</label><select id="cTipo">'+
@@ -1337,7 +1361,11 @@ function modalCenso(est){
     var sel=$("#cEst .opt.sel"); if(!sel){toast("Indica si tiene certificado");return false}
     var estadoCert=sel.dataset.v;
     var idc="b"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
-    var eid=est?est.id:("e"+Date.now());
+    /* si se reconoció por QR o por búsqueda, el censo se cuelga de ESA ficha;
+       si no, se buscá por nombre/documento antes de crear una nueva, para no
+       terminar con el mismo negocio repetido */
+    var yaEsta = estHallado || buscarEstablecimiento(nom, "");
+    var eid = yaEsta ? yaEsta.id : ("e"+Date.now());
     var b={ id:idc, idCliente:idc, establecimientoId:eid, nombre:nom,
       tipo:$("#cTipo").value, direccion:($("#cDir").value||"").trim(), barrio:($("#cBar").value||"").trim(),
       estadoCert:estadoCert, certVence:($("#cVence")&&$("#cVence").value)||"", certCodigo:"",
@@ -1364,6 +1392,73 @@ function modalCenso(est){
   });
 
   /* interacción dentro del modal */
+  function marcarEstado(v){
+    var b=$('#cEst .opt[data-v="'+v+'"]'); if(!b)return;
+    b.click();
+  }
+  /* Trae a la ficha lo que ya se sabe del establecimiento: así el inspector
+     solo confirma y toma la foto, en vez de teclear todo otra vez. */
+  function aplicarHallado(e){
+    estHallado=e;
+    $("#cNom").value=e.nombre||"";
+    if(e.tipo){ var sel=$("#cTipo"); for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===e.tipo||sel.options[i].text===e.tipo){sel.selectedIndex=i;break} } }
+    if(e.dir&&e.dir!=="—") $("#cDir").value=e.dir;
+    if(e.barrio&&e.barrio!=="—") $("#cBar").value=e.barrio;
+    var s=estadoEst(e), u=s.u;
+    if(s.k==="vigente"||s.k==="porvencer"||s.k==="vencido") marcarEstado(s.k);
+    if(u&&u.vigenciaHasta){
+      var cv=$("#cVence");
+      if(cv){ try{ cv.value=new Date(u.vigenciaHasta).toISOString().slice(0,10) }catch(err){} }
+    }
+    var extra=[];
+    if(e.nit) extra.push("Documento "+esc(e.nit));
+    if(e.rep) extra.push(esc(e.rep));
+    if(e.tel) extra.push(esc(e.tel));
+    $("#cHallado").innerHTML='<div class="hallazgoest"><b>'+esc(e.nombre||"")+'</b>'+
+      '<span class="chip '+chipClase(s.k)+'" style="margin-top:6px"><span class="dotc"></span>'+esc(s.t)+'</span>'+
+      (u&&u.vigenciaHasta?('<p class="note" style="margin-top:6px">Vence '+fmt(u.vigenciaHasta)+(u.codigo?(' · concepto '+esc(u.codigo)):'')+'</p>'):'')+
+      (extra.length?('<p class="note">'+extra.join(" · ")+'</p>'):'')+
+      '<p class="note">Ya estaba en la base: confirma lo que veas y toma la foto.</p></div>';
+  }
+  function buscarYMostrar(txt){
+    txt=String(txt||"").trim();
+    var cont=$("#cHallado");
+    if(!txt){ cont.innerHTML=""; return }
+    var n=normNombre(txt), d=normDoc(txt);
+    var res=DB.establecimientos.filter(function(e){
+      if(d&&normDoc(e.nit)&&normDoc(e.nit)===d) return true;
+      if(normNombre(e.codigo||"")===n) return true;
+      return normNombre(e.nombre).indexOf(n)>=0;
+    }).slice(0,8);
+    if(!res.length){ cont.innerHTML='<p class="note">No está en la base todavía. Llena los datos y queda censado como nuevo.</p>'; return }
+    if(res.length===1){ aplicarHallado(res[0]); return }
+    cont.innerHTML='<p class="note">Varios coinciden; elige cuál:</p>';
+    var lg=el("div","listgrid");
+    res.forEach(function(e){
+      var s=estadoEst(e);
+      var b=el("button","row-item");
+      b.innerHTML='<div class="meta"><b>'+esc(e.nombre)+'</b><small>'+esc(e.barrio||"")+(e.nit?(' · '+esc(e.nit)):'')+'</small></div>'+
+        '<span class="chip '+chipClase(s.k)+'"><span class="dotc"></span>'+esc(s.t)+'</span>';
+      b.addEventListener("click",function(){ aplicarHallado(e) });
+      lg.appendChild(b);
+    });
+    cont.appendChild(lg);
+  }
+  $("#cBuscar").addEventListener("click",function(){ buscarYMostrar($("#cBuscaTxt").value) });
+  $("#cBuscaTxt").addEventListener("keydown",function(ev){ if(ev.key==="Enter"){ev.preventDefault();buscarYMostrar(this.value)} });
+  $("#cScan").addEventListener("click",function(){
+    escanearQR(function(r){
+      /* del QR sale el concepto; del concepto, el establecimiento */
+      var ins=DB.inspecciones.filter(function(x){return String(x.codigo||"").toUpperCase()===r.c})[0];
+      if(ins){
+        var e=DB.establecimientos.filter(function(x){return x.id===ins.establecimientoId})[0];
+        if(e){ aplicarHallado(e); toast("Certificado reconocido"); return }
+      }
+      $("#cBuscaTxt").value=r.c;
+      $("#cHallado").innerHTML='<p class="note">Leí el concepto <b class="mono">'+esc(r.c)+'</b>, pero no está en esta tablet. '+
+        'Puede ser de otra estación o faltar sincronizar. Llena los datos a mano y queda censado igual.</p>';
+    });
+  });
   $$("#cEst .opt").forEach(function(b){b.addEventListener("click",function(){
     $$("#cEst .opt").forEach(function(x){x.classList.remove("sel","good","bad","warn")});
     b.classList.add("sel");
@@ -1371,6 +1466,8 @@ function modalCenso(est){
     if(tono)b.classList.add(tono);        // nunca add("") : lanza excepcion y corta la funcion
     var cb=$("#cCertBox"); if(cb)cb.hidden=(b.dataset.v!=="vigente"&&b.dataset.v!=="porvencer");
   })});
+  /* va DESPUÉS de los listeners de arriba: marcar el estado los necesita */
+  if(est) aplicarHallado(est);
   $("#cFoto").addEventListener("change",function(){
     var f=this.files&&this.files[0]; if(!f)return;
     comprimir(f,1100,.55,function(full){ foto=full;
@@ -1648,10 +1745,16 @@ function renderItem(m,it){
     wrap.appendChild(opts);
   }
   var tools=el("div","itools");
-  var fl=el("label","mini");fl.innerHTML="📷 Fotos";var fi=el("input");fi.type="file";fi.accept="image/*";fi.multiple=true;fi.hidden=true;
+  /* Dos botones distintos a propósito: en terreno lo normal es tomar la foto
+     en el momento (capture abre la cámara directo); "Galería" queda para las
+     que el inspector ya tomó antes y quiere adjuntar varias de una vez. */
+  var cl=el("label","mini");cl.innerHTML="📷 Tomar foto";
+  var ci=el("input");ci.type="file";ci.accept="image/*";ci.setAttribute("capture","environment");ci.hidden=true;
+  ci.addEventListener("change",function(){if(ci.files&&ci.files.length)addFotos(it.id,ci.files,wrap);ci.value=""});cl.appendChild(ci);
+  var fl=el("label","mini");fl.innerHTML="🖼️ Galería";var fi=el("input");fi.type="file";fi.accept="image/*";fi.multiple=true;fi.hidden=true;
   fi.addEventListener("change",function(){if(fi.files&&fi.files.length)addFotos(it.id,fi.files,wrap);fi.value=""});fl.appendChild(fi);
   var ob=el("button","mini","✎ Nota");
-  tools.appendChild(fl);tools.appendChild(ob);wrap.appendChild(tools);
+  tools.appendChild(cl);tools.appendChild(fl);tools.appendChild(ob);wrap.appendChild(tools);
   var tx=el("textarea");tx.placeholder="Observación / hallazgo…";tx.value=FORM.obs[it.id]||"";tx.hidden=!FORM.obs[it.id];tx.style.marginTop="8px";
   tx.addEventListener("input",function(){FORM.obs[it.id]=tx.value;scheduleSave()});
   ob.addEventListener("click",function(){tx.hidden=!tx.hidden;if(!tx.hidden)tx.focus()});
@@ -2085,6 +2188,142 @@ function makePDF(r,est){
   }
 }
 
+/* ===================== LECTOR DE QR =====================
+   En terreno, escribir el código y el distintivo a mano es lento y se presta
+   para errores. Esto lee el QR del certificado.
+   Se intenta en este orden, para que funcione sin depender de nada:
+     1. Cámara en vivo con el lector del propio sistema (BarcodeDetector).
+     2. Cámara en vivo con jsQR (se descarga una vez y queda en caché).
+     3. Si la cámara no se puede abrir (el APK no tiene ese permiso), se toma
+        una FOTO del QR con la cámara normal y se lee de la foto.
+   Siempre queda la opción de escribirlo a mano. */
+var JSQR_URL="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js";
+var _jsqrCargando=null;
+function cargarJsQR(){
+  if(window.jsQR) return Promise.resolve(window.jsQR);
+  if(_jsqrCargando) return _jsqrCargando;
+  _jsqrCargando=new Promise(function(ok,fail){
+    var s=document.createElement("script");
+    s.src=JSQR_URL; s.async=true;
+    s.onload=function(){ window.jsQR?ok(window.jsQR):fail(new Error("jsQR no cargó")) };
+    s.onerror=function(){ fail(new Error("sin red para el lector")) };
+    document.head.appendChild(s);
+  });
+  return _jsqrCargando;
+}
+var _detectorNativo=null;
+function detectorNativo(){
+  if(_detectorNativo!==null) return _detectorNativo;
+  try{
+    _detectorNativo = (typeof BarcodeDetector!=="undefined")
+      ? new BarcodeDetector({formats:["qr_code"]}) : false;
+  }catch(e){ _detectorNativo=false }
+  return _detectorNativo;
+}
+function leerCanvas(cv){
+  var det=detectorNativo();
+  if(det){
+    return det.detect(cv).then(function(r){ return (r&&r[0]&&r[0].rawValue)||null })
+      .catch(function(){ return leerConJsQR(cv) });
+  }
+  return leerConJsQR(cv);
+}
+function leerConJsQR(cv){
+  return cargarJsQR().then(function(jsQR){
+    var ctx=cv.getContext("2d"), d=ctx.getImageData(0,0,cv.width,cv.height);
+    var r=jsQR(d.data,d.width,d.height,{inversionAttempts:"attemptBoth"});
+    return (r&&r.data)||null;
+  }).catch(function(){ return null });
+}
+/* Del QR sale la dirección de verificación; de ahí se sacan código y
+   distintivo. También se acepta que el QR traiga solo el código. */
+function datosDeQR(txt){
+  txt=String(txt||"").trim(); if(!txt) return null;
+  var c="",d="";
+  try{
+    if(/^https?:\/\//i.test(txt)){
+      var u=new URL(txt);
+      c=u.searchParams.get("c")||""; d=u.searchParams.get("d")||"";
+    }
+  }catch(e){}
+  if(!c){
+    var m=txt.match(/\bRT-[A-Z0-9]+-\d+\b/i);
+    if(m)c=m[0];
+    var md=txt.match(/[?&]d=([A-Z0-9]+)/i);
+    if(md)d=md[1];
+  }
+  if(!c) return null;
+  return {c:c.toUpperCase(), d:(d||"").toUpperCase()};
+}
+/* Abre el lector y llama onLeido({c,d}) cuando reconoce un código. */
+function escanearQR(onLeido){
+  var stream=null, vivo=true, video=null, cv=document.createElement("canvas");
+  function cerrar(){
+    vivo=false;
+    if(stream){ try{ stream.getTracks().forEach(function(t){t.stop()}) }catch(e){} stream=null }
+  }
+  function entregar(txt){
+    var d=datosDeQR(txt);
+    if(!d){ var m=$("#qrMsg"); if(m)m.textContent="Ese código no es de un certificado del CBVI."; return false }
+    cerrar(); $("#modalRoot").innerHTML=""; onLeido(d); return true;
+  }
+  /* Plan B: foto del QR. Funciona siempre, incluso sin permiso de cámara
+     en vivo, porque usa la cámara normal del teléfono. */
+  function modoFoto(motivo){
+    modal("Leer el QR",
+      '<p class="note">'+esc(motivo||"")+' Toma una foto del código QR del certificado y lo leo de ahí.</p>'+
+      '<label class="btn btn-p btn-sm" style="margin-top:10px">📷 Tomar foto del QR'+
+      '<input id="qrFoto" type="file" accept="image/*" capture="environment" hidden></label>'+
+      '<p class="note" id="qrMsg" style="margin-top:10px"></p>',
+      "Cerrar", function(){ cerrar(); return true });
+    $("#qrFoto").addEventListener("change",function(){
+      var f=this.files&&this.files[0]; if(!f) return;
+      var msg=$("#qrMsg"); if(msg)msg.textContent="Leyendo…";
+      var img=new Image(), url=URL.createObjectURL(f);
+      img.onload=function(){
+        var max=1400, k=Math.min(1,max/Math.max(img.width,img.height));
+        cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k);
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        URL.revokeObjectURL(url);
+        leerCanvas(cv).then(function(txt){
+          if(!txt){ if(msg)msg.textContent="No se distingue el QR. Acércate más, con buena luz, y vuelve a intentar."; return }
+          entregar(txt);
+        });
+      };
+      img.onerror=function(){ if(msg)msg.textContent="No se pudo leer esa imagen." };
+      img.src=url;
+    });
+  }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ modoFoto("Este equipo no deja abrir la cámara en vivo."); return }
+  modal("Leer el QR",
+    '<p class="note">Apunta al código QR del certificado.</p>'+
+    '<div class="qrbox"><video id="qrVid" playsinline muted></video><div class="qrmira"></div></div>'+
+    '<p class="note" id="qrMsg" style="margin-top:8px">Abriendo la cámara…</p>',
+    "Cerrar", function(){ cerrar(); return true });
+  video=$("#qrVid");
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false})
+    .then(function(s){
+      stream=s; video.srcObject=s; video.play();
+      var msg=$("#qrMsg"); if(msg)msg.textContent="Buscando el código…";
+      (function loop(){
+        if(!vivo||!video) return;
+        if(!document.querySelector("#qrVid")){ cerrar(); return }   // cerraron el modal
+        if(video.videoWidth){
+          var max=640, k=Math.min(1,max/Math.max(video.videoWidth,video.videoHeight));
+          cv.width=Math.round(video.videoWidth*k); cv.height=Math.round(video.videoHeight*k);
+          cv.getContext("2d").drawImage(video,0,0,cv.width,cv.height);
+          leerCanvas(cv).then(function(txt){
+            if(txt&&vivo){ if(entregar(txt))return }
+            if(vivo)setTimeout(loop,320);
+          });
+          return;
+        }
+        setTimeout(loop,320);
+      })();
+    })
+    .catch(function(){ cerrar(); $("#modalRoot").innerHTML=""; modoFoto("No se pudo abrir la cámara en vivo."); });
+}
+
 /* ===================== CONCEPTOS EMITIDOS =====================
    Faltaba esta pantalla: las inspecciones ya hechas no se podían volver a
    abrir ni a reimprimir. */
@@ -2288,11 +2527,19 @@ function vVencimientos(v){
 function vVerificar(v){
   v.insertAdjacentHTML("beforeend",'<div class="card pad" style="max-width:520px;margin:0 auto">'+
     '<h3 style="font-size:18px">Verificar un concepto</h3>'+
-    '<p class="note" style="margin:6px 0 14px">Escanea el QR del certificado o ingresa el código y el distintivo. Esta vista simula la página pública donde el cliente también puede descargar su certificado.</p>'+
+    '<p class="note" style="margin:6px 0 14px">Escanea el QR del certificado, o escribe el código y el distintivo.</p>'+
+    '<button class="btn btn-p" id="vScan" style="width:100%">📷 Escanear el QR</button>'+
+    '<p class="note" style="text-align:center;margin:10px 0 4px">o escríbelo</p>'+
     '<div class="ff"><div><label class="lbl">Código</label><input id="vC" type="text" placeholder="RT-2026-0001"></div>'+
     '<div><label class="lbl">Distintivo</label><input id="vD" type="text" placeholder="6 caracteres"></div></div>'+
-    '<div style="margin-top:14px"><button class="btn btn-p" id="vGo">Verificar</button></div>'+
+    '<div style="margin-top:14px"><button class="btn btn-g" id="vGo">Verificar</button></div>'+
     '<div id="vRes" style="margin-top:16px"></div></div>');
+  $("#vScan").addEventListener("click",function(){
+    escanearQR(function(r){
+      $("#vC").value=r.c; $("#vD").value=r.d;
+      $("#vGo").click();                         // leído: se verifica solo
+    });
+  });
   $("#vGo").addEventListener("click",function(){
     var c=($("#vC").value||"").trim().toUpperCase(), dd=($("#vD").value||"").trim().toUpperCase();
     var insp=DB.inspecciones.find(function(x){return x.codigo===c&&x.estado==="finalizada"});

@@ -136,7 +136,7 @@
   </p>
 </main>
 
-<script src="logos.js?v=1.7"></script>
+<script src="logos.js?v=1.8"></script>
 <script>
 (function(){
 "use strict";
@@ -270,7 +270,9 @@ function reintentarEnElServidor(c,d){
   $("#estado").className = "state s-cargando";
   $("#estado").innerHTML = '<div class="ic"><span class="spin"></span></div>'+
     '<div><h2>Consultando…</h2><p>Abriendo la verificación oficial del CBVI.</p></div>';
-  var destino = BACKEND_URL + "?c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
+  /* basico=1: que el servidor responda él mismo. Sin esto, el servidor nos
+     devolvería a esta misma página y quedaríamos rebotando sin fin. */
+  var destino = BACKEND_URL + "?basico=1&c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
   setTimeout(function(){ location.replace(destino); }, 350);
 }
 function servidorNoResponde(){
