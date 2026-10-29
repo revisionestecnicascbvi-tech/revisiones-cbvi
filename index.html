@@ -1,0 +1,1228 @@
+<title>CBVI Revisiones Técnicas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  /* ===== Sistema de diseño — "Consola de campo" bomberil =====
+     Riel de mando carboncillo + lienzo claro de alto contraste; acento rojo brasa;
+     semáforo de vigencia (verde/ámbar/rojo/gris) como lenguaje visual transversal.
+     Saira (titulares/números) · Public Sans (texto) · IBM Plex Mono (códigos). */
+  :root{
+    --ink:#14181d; --ink-2:#2a3139; --paper:#eceef1; --paper-2:#e3e6ea;
+    --surface:#ffffff; --surface-2:#f6f7f9; --muted:#626b76; --faint:#8b94a0;
+    --line:#d9dde3; --line-2:#e8ebef;
+    --rail:#191d23; --rail-2:#22272f; --rail-ink:#cdd3db; --rail-faint:#79818c;
+    --ember:#dc3b2c; --ember-2:#b32a1e; --ember-ink:#ffffff;
+    --verde:#17864b; --verde-bg:#e4f1e8; --ambar:#c9790c; --ambar-bg:#f8eed8;
+    --rojo:#c0271f; --rojo-bg:#f7e4e2; --gris:#737c87; --gris-bg:#e9ecef;
+    --azul:#2563a8;
+    --radius:16px; --radius-sm:10px; --tap:52px;
+    --shadow:0 1px 2px rgba(16,20,26,.05),0 10px 26px -12px rgba(16,20,26,.18);
+    --shadow-rail:0 0 0 1px rgba(255,255,255,.04);
+    --ff-h:"Saira",system-ui,sans-serif; --ff:"Public Sans",system-ui,-apple-system,sans-serif;
+    --ff-m:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ink:#eef1f4; --ink-2:#c5ccd4; --paper:#0f1216; --paper-2:#0b0e11;
+    --surface:#171b20; --surface-2:#1d2229; --muted:#9aa3ae; --faint:#6b747f;
+    --line:#2b313a; --line-2:#232931;
+    --rail:#0c0f12; --rail-2:#161a1f; --rail-ink:#cdd3db; --rail-faint:#79818c;
+    --ember:#f05545; --ember-2:#c63426; --ember-ink:#14181d;
+    --verde:#49b97d; --verde-bg:#15271d; --ambar:#e0a23f; --ambar-bg:#2a2214; --rojo:#ef5a50; --rojo-bg:#2b1715;
+    --gris:#8a93a0; --gris-bg:#20262e; --azul:#5a9be0;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 30px -14px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --ink:#eef1f4; --ink-2:#c5ccd4; --paper:#0f1216; --paper-2:#0b0e11;
+    --surface:#171b20; --surface-2:#1d2229; --muted:#9aa3ae; --faint:#6b747f;
+    --line:#2b313a; --line-2:#232931;
+    --rail:#0c0f12; --rail-2:#161a1f; --rail-ink:#cdd3db; --rail-faint:#79818c;
+    --ember:#f05545; --ember-2:#c63426; --ember-ink:#14181d;
+    --verde:#49b97d; --verde-bg:#15271d; --ambar:#e0a23f; --ambar-bg:#2a2214; --rojo:#ef5a50; --rojo-bg:#2b1715;
+    --gris:#8a93a0; --gris-bg:#20262e; --azul:#5a9be0;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 30px -14px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff);line-height:1.45;-webkit-text-size-adjust:100%}
+  h1,h2,h3,h4{font-family:var(--ff-h);margin:0;letter-spacing:.2px;text-wrap:balance}
+  .num{font-family:var(--ff-h);font-variant-numeric:tabular-nums}
+  .mono{font-family:var(--ff-m);font-variant-numeric:tabular-nums}
+  button{font-family:inherit;cursor:pointer}
+  [hidden]{display:none!important}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+
+  /* ===== Login ===== */
+  #login{min-height:100%;display:grid;place-items:center;
+    padding:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right));
+    background:radial-gradient(130% 90% at 50% -10%, rgba(220,59,44,.14), transparent 60%), var(--paper)}
+  .login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+  .login-top{background:var(--rail);color:#fff;padding:26px 24px;display:flex;align-items:center;gap:14px}
+  .emblem{width:46px;height:46px;border-radius:12px;background:var(--ember);color:#fff;display:grid;place-items:center;font-family:var(--ff-h);font-weight:700;font-size:16px;flex:0 0 auto}
+  .logo-chip{background:#fff;border-radius:12px;padding:5px;display:grid;place-items:center;flex:0 0 auto;width:46px;height:46px}
+  .logo-chip img{width:100%;height:100%;object-fit:contain;display:block}
+  .logo-chip.sm{width:40px;height:40px;border-radius:10px;padding:4px}
+  .login-top h1{font-size:19px;line-height:1.05}
+  .login-top p{margin:3px 0 0;font-size:11px;letter-spacing:2.5px;color:var(--rail-faint)}
+  .login-body{padding:22px 24px 26px;display:flex;flex-direction:column;gap:16px}
+  .login-body h2{font-size:15px;font-weight:600;color:var(--muted);font-family:var(--ff)}
+  .userpick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .userpick button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:13px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink)}
+  .userpick button .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--paper-2);font-size:18px}
+  .userpick button b{font-size:13.5px;font-family:var(--ff-h)}
+  .userpick button small{font-size:11px;color:var(--muted)}
+  .userpick button.sel{border-color:var(--ember);background:color-mix(in srgb,var(--ember) 8%,var(--surface))}
+  .pin{display:flex;gap:10px;justify-content:center}
+  .pin input{width:52px;height:60px;text-align:center;font-size:24px;font-family:var(--ff-m);border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink)}
+  .pin input:focus{outline:2px solid var(--ember);border-color:var(--ember)}
+  .login-hint{font-size:12px;color:var(--faint);text-align:center}
+
+  /* ===== App shell ===== */
+  #app{min-height:100%;display:grid;grid-template-columns:232px 1fr;grid-template-rows:auto 1fr}
+  .rail{grid-row:1 / span 2;background:var(--rail);color:var(--rail-ink);display:flex;flex-direction:column;
+    padding:16px 12px calc(16px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));position:sticky;top:0;height:100vh}
+  .rail .brand{display:flex;align-items:center;gap:11px;padding:6px 8px 18px}
+  .rail .brand b{font-family:var(--ff-h);font-weight:700;font-size:16px;color:#fff;line-height:1}
+  .rail .brand span{font-size:9.5px;letter-spacing:2px;color:var(--rail-faint);display:block;margin-top:3px}
+  .rail nav{display:flex;flex-direction:column;gap:3px;flex:1}
+  .rail nav button{display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--rail-ink);
+    padding:11px 12px;border-radius:11px;font-size:14px;font-weight:500;text-align:left;width:100%}
+  .rail nav button .ic{width:20px;text-align:center;font-size:16px;opacity:.85}
+  .rail nav button:hover{background:var(--rail-2)}
+  .rail nav button.on{background:var(--ember);color:#fff}
+  .rail nav button.on .ic{opacity:1}
+  .rail nav button .badge{margin-left:auto;background:var(--ember);color:#fff;border-radius:999px;font-size:11px;font-family:var(--ff-m);padding:1px 7px;min-width:20px;text-align:center}
+  .rail nav button.on .badge{background:rgba(0,0,0,.25)}
+  .rail .who{border-top:1px solid var(--rail-2);padding-top:12px;display:flex;align-items:center;gap:10px;font-size:13px}
+  .rail .who .av{width:32px;height:32px;border-radius:50%;background:var(--rail-2);display:grid;place-items:center;font-family:var(--ff-h);font-weight:600;color:#fff;font-size:13px}
+  .rail .who .nm{flex:1;min-width:0}
+  .rail .who .nm b{color:#fff;font-size:13px;display:block;font-family:var(--ff);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rail .who .nm small{color:var(--rail-faint);font-size:11px}
+  .rail .who button{background:none;border:0;color:var(--rail-faint);font-size:17px;padding:4px}
+
+  .topbar{grid-column:2;background:var(--surface);border-bottom:1px solid var(--line);
+    padding:0 clamp(16px,3vw,28px);height:62px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
+  .topbar h2{font-size:19px;font-family:var(--ff-h);font-weight:600}
+  .topbar .sub{color:var(--muted);font-size:13px;margin-left:2px;align-self:center}
+  .topbar .sp{flex:1}
+  .icbtn{width:42px;height:42px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:16px;display:grid;place-items:center}
+  .icbtn:hover{border-color:var(--ember)}
+  .syncbadge{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+  .syncbadge.ok{color:var(--verde);background:var(--verde-bg);border-color:var(--verde)}
+  .syncbadge.pend{color:var(--ambar);background:var(--ambar-bg);border-color:var(--ambar)}
+  .syncbadge.off{color:var(--muted);background:var(--surface-2)}
+  main{grid-column:2;padding:clamp(16px,3vw,28px);padding-bottom:96px}
+  .maxw{max-width:1080px;margin:0 auto}
+
+  /* ===== Bottom tabs (móvil) ===== */
+  .tabs{display:none}
+  @media (max-width:860px){
+    #app{grid-template-columns:1fr}
+    .rail{display:none}
+    .topbar{grid-column:1}
+    main{grid-column:1;padding-bottom:84px}
+    .tabs{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--rail);
+      padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));justify-content:space-around}
+    .tabs button{background:none;border:0;color:var(--rail-faint);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:4px 8px;border-radius:10px;flex:1}
+    .tabs button .ic{font-size:19px}
+    .tabs button.on{color:#fff}
+    .tabs button.on .ic{color:var(--ember)}
+  }
+
+  /* ===== Componentes ===== */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .pad{padding:18px}
+  .grid{display:grid;gap:16px}
+  .btn{appearance:none;border:1px solid transparent;border-radius:12px;min-height:var(--tap);padding:0 20px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .btn-p{background:var(--ember);color:var(--ember-ink);box-shadow:0 2px 0 var(--ember-2)}
+  .btn-p:active{transform:translateY(1px);box-shadow:none}
+  .btn-g{background:var(--surface);color:var(--ink);border-color:var(--line)}
+  .btn-g:hover{background:var(--surface-2)}
+  .btn-sm{min-height:42px;font-size:13.5px;padding:0 14px;border-radius:10px}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;line-height:1.3}
+  .chip .dotc{width:8px;height:8px;border-radius:50%}
+  .st-vigente{color:var(--verde);background:var(--verde-bg)} .st-vigente .dotc{background:var(--verde)}
+  .st-porvencer{color:var(--ambar);background:var(--ambar-bg)} .st-porvencer .dotc{background:var(--ambar)}
+  .st-vencido{color:var(--rojo);background:var(--rojo-bg)} .st-vencido .dotc{background:var(--rojo)}
+  .st-sinrev{color:var(--gris);background:var(--gris-bg)} .st-sinrev .dotc{background:var(--gris)}
+  .st-nofav{color:#fff;background:var(--rojo)} .st-nofav .dotc{background:#fff}
+
+  .sech{display:flex;align-items:center;gap:10px;margin:26px 2px 12px}
+  .sech h3{font-size:14px;font-weight:700;letter-spacing:.4px;color:var(--ink)}
+  .sech .ln{flex:1;height:1px;background:var(--line)}
+  .sech .act{font-size:13px;color:var(--ember);font-weight:600;background:none;border:0}
+
+  /* Dashboard tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:3px}
+  .tile .v{font-family:var(--ff-h);font-size:32px;font-weight:700;line-height:1}
+  .tile .k{font-size:13px;color:var(--muted)}
+  .tile .bar{height:5px;border-radius:3px;background:var(--paper-2);margin-top:8px;overflow:hidden}
+  .tile .bar i{display:block;height:100%}
+  .tile.accent{background:linear-gradient(140% 160% at 100% 0,color-mix(in srgb,var(--ember) 14%,var(--surface)),var(--surface))}
+
+  /* Meta gauge */
+  .metacard{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .ring{--p:0;width:122px;height:122px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--ember) calc(var(--p)*1%), var(--paper-2) 0);display:grid;place-items:center;position:relative}
+  .ring::after{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--surface)}
+  .ring .in{position:relative;text-align:center;z-index:1}
+  .ring .in b{font-family:var(--ff-h);font-size:28px;display:block;line-height:1}
+  .ring .in small{font-size:11px;color:var(--muted)}
+  .metalist{flex:1;min-width:220px;display:grid;gap:10px}
+  .metarow{display:grid;gap:5px}
+  .metarow .t{display:flex;justify-content:space-between;font-size:13px}
+  .metarow .t b{font-family:var(--ff-h)}
+  .metarow .bar{height:7px;border-radius:4px;background:var(--paper-2);overflow:hidden}
+  .metarow .bar i{display:block;height:100%;background:var(--ember)}
+
+  /* Listas / filas */
+  .row-item{display:flex;align-items:center;gap:14px;padding:13px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;width:100%;text-align:left;color:inherit}
+  .row-item:hover{border-color:var(--ember)}
+  .row-item .ava{width:44px;height:44px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;font-size:19px;background:var(--surface-2);border:1px solid var(--line)}
+  .row-item .meta{flex:1;min-width:0}
+  .row-item .meta b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--ff-h);font-weight:600}
+  .row-item .meta small{color:var(--muted);font-size:12.5px}
+  .listgrid{display:grid;gap:10px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .search{flex:1;min-width:180px;position:relative}
+  .search input{width:100%}
+  .filterpills{display:flex;gap:7px;flex-wrap:wrap}
+  .filterpills button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .filterpills button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  /* Inputs */
+  label.lbl{font-size:11.5px;letter-spacing:.3px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px}
+  input[type=text],input[type=number],input[type=email],input[type=tel],input[type=date],select,textarea{
+    font-family:inherit;font-size:15px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:11px 13px;min-height:46px;width:100%}
+  textarea{min-height:60px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--ember);outline-offset:1px;border-color:var(--ember)}
+  .ff{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:13px}
+  .ff .wide{grid-column:1/-1}
+
+  /* Mapa de barrido (dibujado) */
+  .mapwrap{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:
+    linear-gradient(0deg,rgba(0,0,0,.02),rgba(0,0,0,.02)),var(--surface-2);box-shadow:var(--shadow)}
+  .mapwrap svg{display:block;width:100%;height:auto}
+  .mk{cursor:pointer}
+  .mk circle{stroke:var(--surface);stroke-width:2.5}
+  .maplegend{display:flex;gap:14px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  .maplegend span{display:inline-flex;align-items:center;gap:6px}
+  .maplegend i{width:10px;height:10px;border-radius:50%}
+
+  /* Inspección */
+  .modeseg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .modeseg button{border:0;background:none;padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted)}
+  .modeseg button.on{background:var(--ember);color:#fff}
+  .modhead{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-2);background:var(--surface-2);border-radius:16px 16px 0 0}
+  .modhead .n{width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--ff-h);font-weight:700}
+  .modhead h4{font-size:15.5px;font-family:var(--ff-h)}
+  .modhead .mx{margin-left:auto;font-family:var(--ff-m);font-size:12px;color:var(--muted);background:var(--paper-2);border-radius:7px;padding:3px 8px}
+  .item{padding:14px 16px;border-bottom:1px solid var(--line-2)}
+  .item:last-child{border-bottom:0}
+  .item .q{font-size:14.5px;margin-bottom:9px}
+  .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .opt{border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:10px;min-height:44px;padding:0 15px;font-size:14px;font-weight:600}
+  .opt.sel{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .opt.sel.good{background:var(--verde);border-color:var(--verde);color:#fff}
+  .opt.sel.bad{background:var(--rojo);border-color:var(--rojo);color:#fff}
+  .itools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .mini{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:9px;min-height:38px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .mini:hover{border-color:var(--ember);color:var(--ink)}
+  .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .thumbs figure{position:relative;margin:0;width:62px;height:62px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .thumbs img{width:100%;height:100%;object-fit:cover}
+  .thumbs button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:12px}
+  .fuentes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+  .fchk{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--surface-2);font-size:13px;min-height:42px}
+  .fchk.on{background:var(--rojo-bg);border-color:var(--rojo);color:var(--rojo);font-weight:600}
+
+  .scorebar{position:fixed;bottom:0;left:232px;right:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+    box-shadow:0 -6px 20px -8px rgba(16,20,26,.25);
+    padding:10px clamp(16px,3vw,28px) calc(10px + env(safe-area-inset-bottom))}
+  @media (max-width:860px){.scorebar{left:0;bottom:64px}}
+  .scorebar .in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:16px}
+  .minigauge{width:54px;height:54px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;position:relative;--p:0;--c:var(--gris);
+    background:conic-gradient(var(--c) calc(var(--p)*1%),var(--paper-2) 0)}
+  .minigauge::after{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--surface)}
+  .minigauge b{position:relative;font-family:var(--ff-h);font-size:17px}
+  .scorebar .vd{flex:1;min-width:0}
+  .scorebar .vd .r{font-family:var(--ff-h);font-size:16px}
+  .scorebar .vd .d{font-size:12px;color:var(--muted)}
+
+  /* Certificado */
+  .cert{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .cert .top{background:var(--rail);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:14px}
+  .cert .top h3{font-size:18px}
+  .cert .top small{font-size:10px;letter-spacing:2px;color:var(--rail-faint);display:block}
+  .cert .bd{padding:20px}
+  .verdict{border-radius:13px;padding:16px;margin-bottom:16px;display:flex;gap:16px;align-items:center;border:1.5px solid}
+  .verdict.fav{background:var(--verde-bg);border-color:var(--verde);color:var(--verde)}
+  .verdict.no{background:var(--rojo-bg);border-color:var(--rojo);color:var(--rojo)}
+  .verdict .big{font-family:var(--ff-h);font-size:30px;line-height:.9}
+  .verdict p{margin:4px 0 0;color:var(--ink);font-size:13px}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px}
+  .kv .k{font-size:11px;letter-spacing:.3px;color:var(--muted)}
+  .kv .v{font-size:14.5px;font-weight:600}
+  .reclist{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:7px}
+  .reclist li{display:flex;gap:9px;font-size:13.5px;padding:9px 11px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:9px}
+  .reclist li .ex{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--ambar);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+  .signrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .pad-c{border:1px solid var(--line);border-radius:10px;background:var(--surface-2);height:140px;width:100%;touch-action:none}
+  .qrbox{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+  .qrbox .qr{width:118px;height:118px;background:#fff;border-radius:9px;padding:7px;display:grid;place-items:center}
+  .qrbox .qr img,.qrbox .qr canvas{width:100%!important;height:100%!important}
+
+  .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:34px;text-align:center;color:var(--muted)}
+  .seedtag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+  .modal{position:fixed;inset:0;z-index:70;background:rgba(10,13,16,.55);display:grid;place-items:center;padding:20px}
+  .modal .box{background:var(--surface);border:1px solid var(--line);border-radius:18px;max-width:440px;width:100%;box-shadow:var(--shadow);overflow:hidden}
+  .modal .box header{padding:16px 18px;border-bottom:1px solid var(--line-2);font-family:var(--ff-h);font-size:17px;font-weight:600}
+  .modal .box .c{padding:18px;display:grid;gap:13px}
+  .modal .box footer{padding:14px 18px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--line-2)}
+  .note{font-size:12.5px;color:var(--muted)}
+  .progwrap{height:6px;border-radius:4px;background:var(--paper-2);overflow:hidden;margin:10px 0}
+  .progwrap i{display:block;height:100%;background:var(--ember);transition:width .25s}
+  .stepnav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+  .stepchip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+  .stepchip.on{background:var(--ember);color:#fff;border-color:var(--ember)}
+  .stepchip.done{border-color:var(--verde);color:var(--verde)}
+  .stepchip.on.done{background:var(--verde);border-color:var(--verde);color:#fff}
+  .guia{font-size:12.5px;color:var(--muted);margin:-2px 0 9px;line-height:1.4}
+  .guidebtn{border:1px solid var(--line);background:var(--surface-2);color:var(--azul);border-radius:9px;min-height:36px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;margin-bottom:4px}
+  .ejbtn{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:9px;min-height:36px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 0 4px 6px}
+  .ejbox{font-size:13px;color:var(--ink);background:var(--surface-2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin:4px 0 10px;line-height:1.45}
+  .guidebox{margin:4px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:12px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .guidebox .gt{flex-basis:100%;font-family:var(--ff-h);font-weight:600;font-size:13.5px;color:var(--ink);margin-bottom:-2px}
+  .guidebox .dg{flex:0 0 auto;width:180px;color:var(--ink)}
+  .guidebox .dg svg{width:100%;height:auto}
+  .guidebox ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--muted);display:grid;gap:4px;flex:1;min-width:170px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+  @media (max-width:520px){.signrow{grid-template-columns:1fr}}
+</style>
+
+<!-- ===================== LOGIN ===================== -->
+<section id="login">
+  <div class="login-card">
+    <div class="login-top">
+      <div class="logo-chip"><img src="logo.png" alt="Bomberos Voluntarios de Inírida"></div>
+      <div><h1>Revisiones Técnicas</h1><p>CUERPO DE BOMBEROS · INÍRIDA</p></div>
+    </div>
+    <div class="login-body">
+      <h2>Inicia sesión para continuar</h2>
+      <div><label class="lbl">Correo (para entrar en línea)</label><input id="loginEmail" type="email" placeholder="correo registrado" autocomplete="username" style="margin-bottom:4px"></div>
+      <div class="userpick" id="userpick">
+        <button data-role="comandante"><span class="ic">★</span><b>Comandante</b><small>Jeferson Rangel</small></button>
+        <button data-role="inspector"><span class="ic">🧭</span><b>Inspector</b><small>Unidad de revisiones</small></button>
+      </div>
+      <div>
+        <label class="lbl">PIN de acceso</label>
+        <div class="pin" id="pin">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 1">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 2">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 3">
+          <input inputmode="numeric" maxlength="1" aria-label="dígito 4">
+        </div>
+      </div>
+      <button class="btn btn-p" id="btnLogin" style="width:100%">Entrar</button>
+      <p class="login-hint">Con correo + PIN entras en línea a tu servidor. Sin correo, elige un rol para el modo demo (local).</p>
+      <p class="login-hint" style="margin-top:2px">¿No tienes acceso? <a href="#" id="solicitar" style="color:var(--ember);font-weight:600;text-decoration:none">Solicítalo al administrador</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== APP ===================== -->
+<div id="app" hidden>
+  <aside class="rail">
+    <div class="brand"><div class="logo-chip sm"><img src="logo.png" alt="CBVI"></div>
+      <div><b>Revisiones</b><span>ABNEGACIÓN Y DISCIPLINA</span></div></div>
+    <nav id="nav"></nav>
+    <div class="who" id="who"></div>
+  </aside>
+  <header class="topbar">
+    <h2 id="viewTitle">Inicio</h2>
+    <span class="sub" id="viewSub"></span>
+    <span class="sp"></span>
+    <span class="syncbadge off" id="syncBadge" title="Estado de sincronización">Local</span>
+    <button class="icbtn" id="btnSync" title="Sincronizar">⟳</button>
+    <button class="icbtn" id="btnConfig" title="Configuración">⚙</button>
+    <button class="icbtn" id="btnTheme" title="Tema">◐</button>
+  </header>
+  <main><div class="maxw" id="view"></div></main>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="modalRoot"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="form-inspeccion.js"></script>
+<script src="guias.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]})};
+var LS="cbvi_rt_eco_v1", THEME="cbvi_rt_theme", SESK="cbvi_rt_ses_v2";
+var MOD=window.MODULOS||[], META=window.FORM_META||{}, OCUP=window.OCUPACIONES_NSR10||[], INTER=new Set(window.ITEMS_INTERMEDIO||[]), INTERT=new Set(window.TOGGLES_INTERMEDIO||[]);
+var GUIAS=window.GUIAS||{}, DIAGRAMS=window.DIAGRAMS||{}, ITEM_TOPIC=window.ITEM_TOPIC||{}, OCUP_QUICK=window.OCUP_QUICK||[], EJEMPLOS=window.EJEMPLOS||{};
+var GATES=new Set();MOD.forEach(function(m){m.items.forEach(function(it){if(it.dependsOn)GATES.add(it.dependsOn.item)})});
+function applyDeps(root){if(!root)return;Array.prototype.slice.call(root.querySelectorAll('[data-dep-item]')).forEach(function(w){w.hidden=(FORM&&FORM.ans[w.dataset.depItem]!==w.dataset.depVal)})}
+var LOGO_DATA=null;(function(){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);LOGO_DATA=c.toDataURL("image/png")}catch(e){}};im.src="logo.png"})();
+function isAdmin(){return SES&&SES.role==="comandante"}
+var SECRET="CBVI-INIRIDA-2026"; // demo; en producción vive en Script Properties
+var VERIFY="https://cbvi.gov.co/verificar";
+var NOW=new Date();
+var _t;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(_t);_t=setTimeout(function(){t.classList.remove("show")},2300)}
+
+/* ---------- store ---------- */
+function load(){try{return JSON.parse(localStorage.getItem(LS))}catch(e){return null}}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}}
+function defcfg(){return {metaRevisiones:12,metaRenovaciones:6,metaBarrido:30,vigenciaMeses:12,cobroActivo:false,tarifas:[{nivel:"Impacto 1",valor:97000},{nivel:"Impacto 2",valor:196000},{nivel:"Impacto 3",valor:327000}]}}
+function emptyDB(){return {establecimientos:[],inspecciones:[],config:defcfg()}}
+var DB=load()||emptyDB();
+
+/* ---------- backend / sincronización offline-first ---------- */
+var BACKEND_URL="https://script.google.com/macros/s/AKfycbzXkG5Kw1kapPK1dwL55PdhUwCrkZP0Qmdok84rE7PpO-iWl4pIR8-u-yuZrS73T3Kp/exec";
+var QK="cbvi_rt_queue_v1";
+function loadQ(){try{return JSON.parse(localStorage.getItem(QK))||[]}catch(e){return[]}}
+function saveQ(){try{localStorage.setItem(QK,JSON.stringify(QUEUE))}catch(e){}}
+var QUEUE=loadQ(), _flushing=false;
+function esOnline(){return !!(SES&&SES.pase)}
+function api(accion,payload){var body=JSON.stringify(Object.assign({accion:accion,pase:(SES&&SES.pase)||""},payload||{}));return fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:body}).then(function(r){return r.json()})}
+function setSync(t,c){var b=$("#syncBadge");if(b){b.textContent=t;b.className="syncbadge "+(c||"")}}
+function updateSync(){if(!esOnline()){setSync("Local","off");return}if(navigator.onLine===false){setSync("Sin red","off");return}setSync(QUEUE.length?(QUEUE.length+" pend."):"Sincronizado",QUEUE.length?"pend":"ok")}
+function enqueue(a,p){if(!esOnline())return;QUEUE.push({a:a,p:p});saveQ();updateSync();flush()}
+function flush(){if(_flushing||!esOnline()||navigator.onLine===false||!QUEUE.length){updateSync();return}_flushing=true;var op=QUEUE[0];
+  api(op.a,op.p).then(function(res){if(res&&res.ok&&op.a==="guardarInspeccion"&&res.inspeccion){var l=DB.inspecciones.find(function(x){return x.id===op.p.inspeccion.idCliente});if(l){l.codigo=res.inspeccion.codigo;l.sig=res.inspeccion.sig;l._sync=true;persist()}}
+    QUEUE.shift();saveQ();_flushing=false;updateSync();flush()}).catch(function(){_flushing=false;updateSync()})}
+function pullAll(){if(!esOnline())return Promise.resolve();setSync("Sincronizando…","pend");
+  return Promise.all([api("listarEstablecimientos").catch(function(){return{}}),api("listarInspecciones").catch(function(){return{}}),api("getConfig").catch(function(){return{}})]).then(function(r){
+    if(r[0]&&r[0].ok&&r[0].establecimientos)DB.establecimientos=mergeBy(DB.establecimientos,r[0].establecimientos.map(estFromServer),"id");
+    if(r[1]&&r[1].ok&&r[1].inspecciones)DB.inspecciones=mergeInsp(DB.inspecciones,r[1].inspecciones);
+    if(r[2]&&r[2].ok&&r[2].config)DB.config=Object.assign(defcfg(),r[2].config);
+    DB._ejemplo=false;persist();updateSync();if(!$("#app").hidden)render()}).catch(function(){updateSync()})}
+function mergeBy(local,server,key){var m={};server.forEach(function(s){m[String(s[key])]=s});local.forEach(function(l){var k=String(l[key]);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
+function mergeInsp(local,server){var m={};server.forEach(function(s){var rj=typeof s.respuestas==="string"?tryj(s.respuestas):(s.respuestas||{});s.ans=rj.ans||{};s.fuentes=rj.fuentes||{};s.fotos=s.fotos||{};s.obs=s.obs||{};s.recs=typeof s.recomendaciones==="string"?tryj(s.recomendaciones):(s.recomendaciones||[]);s.score100=+s.score100||0;s.concepto={favorable:String(s.favorable)==="true",riesgo:s.riesgo||"",texto:""};s.id=String(s.idCliente||s.id);s._sync=true;m[s.id]=s});local.forEach(function(l){var k=String(l.idCliente||l.id);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
+function tryj(s){try{return JSON.parse(s)}catch(e){return (typeof s==="object"&&s)?s:{}}}
+function estFromServer(s){return {id:s.id,codigo:s.codigo,nombre:s.nombre,nit:s.nit,tipo:s.tipo,ocup:s.ocup,act:s.actividad,dir:s.direccion,barrio:s.barrio,x:+s.lat||(.2+Math.random()*.6),y:+s.lng||(.2+Math.random()*.55),rep:s.repLegal,correo:s.correo,tel:s.tel,estado:s.estado,creado:s.creado}}
+function estToServer(e){return {establecimiento:{id:e.id,codigo:e.codigo,nombre:e.nombre,nit:e.nit||"",tipo:e.tipo||"",ocup:e.ocup||"",actividad:e.act||"",direccion:e.dir||"",barrio:e.barrio||"",lat:e.x||"",lng:e.y||"",repLegal:e.rep||"",correo:e.correo||"",tel:e.tel||""}}}
+function insToServer(f){var r=compute(f);return {inspeccion:{idCliente:f.id,codigo:f.codigo,establecimientoId:f.establecimientoId,radicado:f.radicado||"",tramite:f.tramite||"",nivel:f.nivel||"",inspectorNombre:f.inspector||"",inspectorCodigo:"",fecha:f.fecha,ocupacion:f.ocupacion||"",clasifRiesgo:f.clasifRiesgo||"",X:r.X,Y:r.Y,total:r.raw,score100:f.score100,favorable:!!(f.concepto&&f.concepto.favorable),riesgo:(f.concepto&&f.concepto.riesgo)||"",estado:f.estado,vigenciaHasta:f.vigenciaHasta||"",recomendaciones:JSON.stringify(f.recs||[]),respuestas:JSON.stringify({ans:f.ans,fuentes:f.fuentes}),nCobro:""}}}
+function pushEst(e){enqueue("crearEstablecimiento",estToServer(e))}
+var SES=null, VIEW="dashboard", FORM=null, padI=null, padR=null;
+
+function seed(){
+  var mk=function(o){return o};
+  var est=[
+    {id:"e1",codigo:"EST-001",nombre:"Supermercado La Economía",tipo:"Comercio",ocup:"C-1",act:"Venta al por menor",barrio:"Centro",dir:"Cra 7 #12-30",nit:"900123-1",rep:"María Peña",tel:"3104567890",x:.42,y:.38},
+    {id:"e2",codigo:"EST-002",nombre:"Ferretería El Tornillo",tipo:"Comercio / bodega",ocup:"A-2",act:"Ferretería",barrio:"La Primavera",dir:"Cl 10 #8-15",nit:"900555-2",rep:"Jorge Díaz",tel:"3115550011",x:.58,y:.3},
+    {id:"e3",codigo:"EST-003",nombre:"Hotel Guainía",tipo:"Hotel",ocup:"R-3",act:"Alojamiento",barrio:"Centro",dir:"Cra 6 #9-02",nit:"900777-3",rep:"Luz Ríos",tel:"3129990022",x:.5,y:.46},
+    {id:"e4",codigo:"EST-004",nombre:"Restaurante El Sabor Llanero",tipo:"Restaurante",ocup:"C-1",act:"Restaurante",barrio:"Las Américas",dir:"Cl 14 #5-40",nit:"900333-4",rep:"Ana Gómez",tel:"3101112233",x:.3,y:.56},
+    {id:"e5",codigo:"EST-005",nombre:"Bar La Terraza",tipo:"Bar",ocup:"L-3",act:"Expendio de bebidas",barrio:"Berlín",dir:"Cl 16 #3-21",nit:"900444-5",rep:"Pedro Ruiz",tel:"3134445566",x:.68,y:.58},
+    {id:"e6",codigo:"EST-006",nombre:"Droguería Salud Total",tipo:"Comercio",ocup:"C-1",act:"Farmacia",barrio:"La Esperanza",dir:"Cra 9 #11-10",nit:"900888-6",rep:"Sara Luna",tel:"3157778899",x:.4,y:.24},
+    {id:"e7",codigo:"EST-007",nombre:"Colegio Custodio García",tipo:"Educativo",ocup:"I-3",act:"Educación",barrio:"El Paujil",dir:"Av Principal #20-00",nit:"800222-7",rep:"Rectoría",tel:"3160001122",x:.24,y:.4},
+    {id:"e8",codigo:"EST-008",nombre:"Depósito de Gas del Río",tipo:"Alta peligrosidad",ocup:"P",act:"Almacenamiento GLP",barrio:"Zona industrial",dir:"Vía al puerto km 1",nit:"901000-8",rep:"Distribuidora GLP",tel:"3170003344",x:.78,y:.7}
+  ];
+  est.forEach(function(e){e.creado=NOW.toISOString()});
+  function iso(days){var d=new Date(NOW);d.setDate(d.getDate()+days);return d.toISOString()}
+  var insp=[
+    {estId:"e1",dias:360,score:88,fav:true},   // vigente (inspeccionado este mes)
+    {estId:"e2",dias:18,score:83,fav:true},     // por vencer
+    {estId:"e3",dias:-60,score:72,fav:false},   // vencido (y fue no favorable)
+    {estId:"e4",dias:352,score:91,fav:true},    // vigente (este mes)
+    {estId:"e5",dias:120,score:44,fav:false},   // no favorable
+    {estId:"e7",dias:345,score:95,fav:true},    // vigente (este mes)
+    {estId:"e8",dias:12,score:79,fav:false}     // por vencer + no favorable
+  ];
+  var inspecciones=insp.map(function(s,i){
+    var vig=new Date(NOW);vig.setDate(vig.getDate()+s.dias);
+    var fecha=new Date(vig);fecha.setFullYear(fecha.getFullYear()-1);
+    var cod="RT-2026-"+String(i+1).padStart(4,"0");
+    return {id:"i"+(i+1),codigo:cod,establecimientoId:s.estId,modo:"intermedia",estado:"finalizada",
+      inspector:"Inspector de revisiones",fecha:fecha.toISOString(),vigenciaHasta:vig.toISOString(),
+      ocupacion:est.find(function(e){return e.id===s.estId}).ocup,clasifRiesgo:s.fav?"Bajo":"Alto",
+      ans:{},fuentes:{},fotos:{},obs:{},score100:s.score,X:0,Y:0,
+      concepto:{favorable:s.fav,riesgo:s.score>=81?"BAJO":(s.score>=51?"MEDIO":"ALTO")},sig:sign(cod)};
+  });
+  return {establecimientos:est,inspecciones:inspecciones,
+    config:{metaRevisiones:12,metaBarrido:30,metaRenovaciones:6,vigenciaMeses:12,cobroActivo:false,
+            tarifas:[{nivel:"Impacto 1",valor:97000},{nivel:"Impacto 2",valor:196000},{nivel:"Impacto 3",valor:327000}]},
+    _ejemplo:true};
+}
+function sign(cod){var s=0,str=cod+SECRET;for(var i=0;i<str.length;i++){s=(s*31+str.charCodeAt(i))>>>0}return s.toString(36).toUpperCase().slice(0,6)}
+
+/* ---------- estado / vigencia ---------- */
+function ultimaInsp(estId){return DB.inspecciones.filter(function(x){return x.establecimientoId===estId&&x.estado==="finalizada"})
+  .sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)})[0]}
+function estadoEst(e){
+  var u=ultimaInsp(e.id); if(!u)return{k:"sinrev",t:"Sin revisión",u:null};
+  if(u.concepto&&u.concepto.favorable===false)return{k:"nofav",t:"No favorable",u:u};
+  var dias=Math.round((new Date(u.vigenciaHasta)-NOW)/86400000);
+  if(dias<0)return{k:"vencido",t:"Vencido",u:u,dias:dias};
+  if(dias<=30)return{k:"porvencer",t:"Por vencer",u:u,dias:dias};
+  return{k:"vigente",t:"Vigente",u:u,dias:dias};
+}
+var ST={vigente:"st-vigente",porvencer:"st-porvencer",vencido:"st-vencido",sinrev:"st-sinrev",nofav:"st-nofav"};
+var STCOL={vigente:"var(--verde)",porvencer:"var(--ambar)",vencido:"var(--rojo)",sinrev:"var(--gris)",nofav:"var(--rojo)"};
+function chip(k,t){return '<span class="chip '+ST[k]+'"><span class="dotc"></span>'+esc(t)+'</span>'}
+
+/* ---------- scoring ---------- */
+function itemMax(it){if(it.score===false||it.tipo==="texto")return 0;if(it.tipo==="fuentes")return it.maxPuntos||(it.fuentes?it.fuentes.length:0);return Math.max.apply(null,(it.opts||[{p:0}]).map(function(o){return o.p}))}
+function inInter(it){return INTER.has(it.id)}
+function scoreVal(f,it){ if(it.tipo==="fuentes"){var pr=(f.fuentes[it.id]||[]).length;return Math.max(0,(it.maxPuntos||it.fuentes.length)-pr*(it.puntosPorAusencia||1))}
+  var v=f.ans[it.id];if(v==null)return null;var o=(it.opts||[]).find(function(o){return o.v===v});return o?o.p:null}
+function depOk(f,it){ if(!it.dependsOn)return true; return f.ans[it.dependsOn.item]===it.dependsOn.value }
+function compute(f){
+  var intermedia=f.modo==="intermedia";
+  var X=0,Y=0,got=0,tot=0,recs=[],sumMax=0,sumVal=0;
+  MOD.forEach(function(m){
+    var toggleNo=false, modVal=0, modMax=0;
+    if(m.toggle){ var tv=f.ans[m.toggle.id];
+      var tInc=!intermedia||INTERT.has(m.toggle.id);
+      if(tInc){tot++; if(tv)got++;}
+      if(tv==="NO"){toggleNo=true; modVal+=m.toggle.noScore; modMax+=m.toggle.noScore;}
+    }
+    if(!toggleNo){ m.items.forEach(function(it){
+      if(it.score===false||it.tipo==="texto")return;
+      if(intermedia&&!inInter(it))return;
+      if(!depOk(f,it))return;                 // no aplica (dependencia) -> no se cuenta
+      var mx=itemMax(it); modMax+=mx; tot++;
+      var p=scoreVal(f,it);
+      var ans=(it.tipo==="fuentes")?(f.fuentes[it.id]!==undefined):(f.ans[it.id]!=null);
+      if(ans){got++; modVal+=(p||0);
+        if(it.tipo!=="fuentes"&&p!=null&&p<mx)recs.push({q:it.label,r:f.ans[it.id]});
+        if(it.tipo==="fuentes"){var pr=f.fuentes[it.id]||[];if(pr.length)recs.push({q:"Fuentes de ignición observadas",r:pr.join(", ")})}
+      }
+    });}
+    if(m.clase==="agravante")X+=modVal; else if(m.clase==="reductor")Y+=modVal;
+    sumMax+=modMax; sumVal+=modVal;
+  });
+  var raw=sumVal, max=sumMax||1, s100=Math.round(raw/max*100);
+  var band=(META.matriz||[]).find(function(b){return s100>=b.min&&s100<=b.max})||{riesgo:"—",favorable:false,texto:""};
+  return {X:X,Y:Y,raw:raw,max:max,s100:s100,band:band,got:got,tot:tot,recs:recs,intermedia:intermedia};
+}
+
+/* ======================================================= NAV */
+var NAVITEMS=[
+  {id:"dashboard",t:"Inicio",ic:"◉",roles:["comandante","inspector"]},
+  {id:"barrido",t:"Barrido",ic:"🗺",roles:["comandante","inspector"]},
+  {id:"establecimientos",t:"Establecimientos",ic:"▦",roles:["comandante","inspector"]},
+  {id:"metas",t:"Metas",ic:"◎",roles:["comandante","inspector"]},
+  {id:"vencimientos",t:"Vencimientos",ic:"timer",roles:["comandante","inspector"]},
+  {id:"verificar",t:"Verificar",ic:"❖",roles:["comandante","inspector"]},
+  {id:"config",t:"Configuración",ic:"⚙",roles:["comandante"]},
+  {id:"usuarios",t:"Usuarios",ic:"👥",roles:["comandante"]}
+];
+var ICMAP={dashboard:"◉",barrido:"🗺",establecimientos:"▦",metas:"◎",vencimientos:"⏳",verificar:"❖",config:"⚙",usuarios:"👥"};
+function navTo(v){VIEW=v;FORM=null;render();window.scrollTo(0,0)}
+function renderNav(){
+  var nav=$("#nav");nav.innerHTML="";var tabs=$("#tabs");tabs.innerHTML="";
+  var venc=DB.establecimientos.filter(function(e){var s=estadoEst(e).k;return s==="vencido"||s==="porvencer"}).length;
+  NAVITEMS.forEach(function(n){
+    if(SES&&n.roles.indexOf(SES.role)<0)return;
+    var b=el("button","");if(n.id===VIEW)b.className="on";
+    b.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+n.t+(n.id==="vencimientos"&&venc?'<span class="badge">'+venc+'</span>':'');
+    b.addEventListener("click",function(){navTo(n.id)});
+    nav.appendChild(b);
+    // bottom tabs (primeros 5)
+    if(["dashboard","barrido","establecimientos","vencimientos","verificar"].indexOf(n.id)>=0){
+      var t=el("button","");if(n.id===VIEW)t.className="on";
+      t.innerHTML='<span class="ic">'+(ICMAP[n.id]||n.ic)+'</span>'+n.t;
+      t.addEventListener("click",function(){navTo(n.id)});tabs.appendChild(t);
+    }
+  });
+  var who=$("#who");
+  who.innerHTML='<div class="av">'+(SES?esc(SES.name[0]):"?")+'</div><div class="nm"><b>'+esc(SES?SES.name:"")+'</b><small>'+esc(SES?SES.role:"")+'</small></div>';
+  var lo=el("button","","⎋");lo.title="Salir";lo.addEventListener("click",logout);who.appendChild(lo);
+}
+
+/* ======================================================= RENDER */
+function render(){
+  renderNav();
+  var v=$("#view");v.innerHTML="";
+  var old=$(".scorebar");if(old)old.remove();
+  var T={dashboard:["Inicio",""],barrido:["Barrido de la ciudad","Censo y estado de los establecimientos"],
+    establecimientos:["Establecimientos",""],metas:["Metas","Rendimiento del inspector"],
+    vencimientos:["Vencimientos","Lo que vence pronto y lo vencido"],verificar:["Verificar concepto",""],config:["Configuración","Importar, exportar y mantenimiento"],usuarios:["Usuarios","Aprueba inspectores y asigna sus PIN"],
+    inspeccion:["Inspección técnica",""],certificado:["Concepto técnico",""],ficha:["Ficha del establecimiento",""]};
+  $("#viewTitle").textContent=(T[VIEW]||["",""])[0]; $("#viewSub").textContent=(T[VIEW]||["",""])[1];
+  ({dashboard:vDashboard,barrido:vBarrido,establecimientos:vEstablecimientos,ficha:vFicha,
+    metas:vMetas,vencimientos:vVencimientos,verificar:vVerificar,config:vConfig,usuarios:vUsuarios,inspeccion:vInspeccion,certificado:vCertificado}[VIEW]||vDashboard)(v);
+}
+
+/* -------- Dashboard -------- */
+function counts(){var c={vigente:0,porvencer:0,vencido:0,sinrev:0,nofav:0};DB.establecimientos.forEach(function(e){c[estadoEst(e).k]++});return c}
+function mesInsp(){return DB.inspecciones.filter(function(x){var d=new Date(x.fecha);return x.estado==="finalizada"&&d.getMonth()===NOW.getMonth()&&d.getFullYear()===NOW.getFullYear()})}
+function vDashboard(v){
+  var c=counts(), cfg=DB.config;
+  var mes=mesInsp().length, barr=DB.establecimientos.length;
+  var metaTotal=cfg.metaRevisiones+cfg.metaRenovaciones, pct=Math.min(100,Math.round(mes/Math.max(1,metaTotal)*100));
+  if(DB._ejemplo)v.insertAdjacentHTML("beforeend",'<div style="margin-bottom:14px"><span class="seedtag">● Datos de ejemplo — bórralos cuando cargues los reales</span></div>');
+  // Meta hero
+  var hero=el("div","card pad");hero.style.marginBottom="16px";
+  hero.innerHTML='<div class="sech" style="margin-top:0"><h3>Meta del mes</h3><div class="ln"></div>'+
+    '<button class="act" id="goMetas">Configurar</button></div>'+
+    '<div class="metacard"><div class="ring" style="--p:'+pct+'"><div class="in"><b>'+pct+'%</b><small>'+mes+' de '+metaTotal+'</small></div></div>'+
+    '<div class="metalist">'+metaRow("Revisiones y renovaciones",mes,metaTotal)+
+      metaRow("Establecimientos en base",barr,cfg.metaBarrido)+'</div></div>';
+  v.appendChild(hero);
+  $("#goMetas",hero).addEventListener("click",function(){navTo("metas")});
+  // estado ciudad
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Estado de la ciudad</h3><div class="ln"></div></div>');
+  var tiles=el("div","tiles");
+  tiles.appendChild(tile(c.vigente,"Vigentes","var(--verde)"));
+  tiles.appendChild(tile(c.porvencer,"Por vencer","var(--ambar)"));
+  tiles.appendChild(tile(c.vencido+c.nofav,"Vencidos / no favorables","var(--rojo)"));
+  tiles.appendChild(tile(c.sinrev,"Sin revisión","var(--gris)"));
+  v.appendChild(tiles);
+  // acciones
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Acciones rápidas</h3><div class="ln"></div></div>');
+  var acc=el("div");acc.style.cssText="display:flex;gap:10px;flex-wrap:wrap";
+  acc.innerHTML='<button class="btn btn-p" id="aNueva">+ Nueva inspección</button>'+
+    '<button class="btn btn-g" id="aBarrido">Ir al barrido</button>'+
+    '<button class="btn btn-g" id="aVerif">Verificar un concepto</button>';
+  v.appendChild(acc);
+  $("#aNueva",acc).addEventListener("click",function(){nuevaInspeccion()});
+  $("#aBarrido",acc).addEventListener("click",function(){navTo("barrido")});
+  $("#aVerif",acc).addEventListener("click",function(){navTo("verificar")});
+  // próximos a vencer
+  var prox=DB.establecimientos.map(function(e){return{e:e,s:estadoEst(e)}}).filter(function(o){return o.s.k==="porvencer"||o.s.k==="vencido"})
+    .sort(function(a,b){return (a.s.dias||0)-(b.s.dias||0)}).slice(0,4);
+  if(prox.length){v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Atención pronta</h3><div class="ln"></div><button class="act" id="goVenc">Ver todos</button></div>');
+    var lg=el("div","listgrid");prox.forEach(function(o){lg.appendChild(estRow(o.e))});v.appendChild(lg);
+    $("#goVenc").addEventListener("click",function(){navTo("vencimientos")});}
+}
+function tile(v,k,col){var t=el("div","tile");t.innerHTML='<div class="v" style="color:'+col+'">'+v+'</div><div class="k">'+esc(k)+'</div>';return t}
+function metaRow(lbl,v,m){var p=Math.min(100,Math.round(v/Math.max(1,m)*100));return '<div class="metarow"><div class="t"><span>'+esc(lbl)+'</span><b>'+v+'/'+m+'</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}
+
+/* -------- Barrido (mapa dibujado) -------- */
+function vBarrido(v){
+  var W=680,H=440;
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Mapa de barrido">';
+  // "río" y calles estilizadas
+  svg+='<defs><linearGradient id="riv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82b5" stop-opacity=".25"/><stop offset="1" stop-color="#3b82b5" stop-opacity=".1"/></linearGradient></defs>';
+  svg+='<path d="M0,370 C160,340 240,410 400,380 C520,358 600,400 680,386 L680,440 L0,440 Z" fill="url(#riv)"/>';
+  for(var gx=1;gx<8;gx++)svg+='<line x1="'+(gx*W/8)+'" y1="0" x2="'+(gx*W/8)+'" y2="'+H+'" stroke="var(--line)" stroke-width="1" opacity=".5"/>';
+  for(var gy=1;gy<6;gy++)svg+='<line x1="0" y1="'+(gy*H/6)+'" x2="'+W+'" y2="'+(gy*H/6)+'" stroke="var(--line)" stroke-width="1" opacity=".5"/>';
+  svg+='<rect x="'+(.46*W)+'" y="'+(.4*H)+'" width="46" height="34" rx="4" fill="var(--ember)" opacity=".9"/><text x="'+(.46*W+23)+'" y="'+(.4*H+22)+'" fill="#fff" font-size="11" text-anchor="middle" font-family="sans-serif">🚒</text>';
+  DB.establecimientos.forEach(function(e){
+    var s=estadoEst(e),col=STCOL[s.k],cx=e.x*W,cy=e.y*H;
+    svg+='<g class="mk" data-id="'+e.id+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="'+col+'"/></g>';
+  });
+  svg+='</svg>';
+  v.insertAdjacentHTML("beforeend",'<div class="toolbar"><button class="btn btn-p btn-sm" id="altaExpr">+ Censar establecimiento</button>'+
+    '<span class="note">Toca un punto para ver o inspeccionar. '+DB.establecimientos.length+' establecimientos.</span></div>');
+  var mw=el("div","mapwrap");mw.innerHTML=svg+'<div class="maplegend">'+
+    '<span><i style="background:var(--verde)"></i>Vigente</span><span><i style="background:var(--ambar)"></i>Por vencer</span>'+
+    '<span><i style="background:var(--rojo)"></i>Vencido / no favorable</span><span><i style="background:var(--gris)"></i>Sin revisión</span></div>';
+  v.appendChild(mw);
+  $$(".mk",mw).forEach(function(g){g.addEventListener("click",function(){openFicha(g.dataset.id)})});
+  $("#altaExpr").addEventListener("click",altaExpres);
+  // lista corta bajo el mapa
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Sin revisión o por vencer</h3><div class="ln"></div></div>');
+  var lg=el("div","listgrid");
+  DB.establecimientos.map(function(e){return{e:e,s:estadoEst(e)}}).filter(function(o){return o.s.k==="sinrev"||o.s.k==="porvencer"||o.s.k==="vencido"})
+    .forEach(function(o){lg.appendChild(estRow(o.e))});
+  if(!lg.children.length)lg.innerHTML='<div class="empty">Todo al día ✔</div>';
+  v.appendChild(lg);
+}
+
+/* -------- Establecimientos -------- */
+var estFilter="todos", estQuery="";
+function vEstablecimientos(v){
+  v.insertAdjacentHTML("beforeend",'<div class="toolbar"><div class="search"><input id="qEst" type="text" placeholder="Buscar por nombre, código o barrio…" value="'+esc(estQuery)+'"></div>'+
+    '<button class="btn btn-p btn-sm" id="nuevoEst">+ Nuevo</button></div>'+
+    '<div class="filterpills" id="fpills">'+["todos","vigente","porvencer","vencido","sinrev"].map(function(k){
+      var lbl={todos:"Todos",vigente:"Vigentes",porvencer:"Por vencer",vencido:"Vencidos",sinrev:"Sin revisión"}[k];
+      return '<button data-k="'+k+'" class="'+(estFilter===k?"on":"")+'">'+lbl+'</button>'}).join("")+'</div>');
+  var lg=el("div","listgrid");lg.style.marginTop="14px";v.appendChild(lg);
+  function rebuild(){
+    var q=estQuery.toLowerCase();
+    var list=DB.establecimientos.filter(function(e){
+      if(estFilter!=="todos"&&estadoEst(e).k!==estFilter)return false;
+      if(estQuery)return (e.nombre+e.codigo+e.barrio).toLowerCase().indexOf(q)>=0;
+      return true});
+    lg.innerHTML="";
+    if(!list.length){lg.innerHTML='<div class="empty">Sin resultados.</div>';return}
+    list.forEach(function(e){lg.appendChild(estRow(e))});
+  }
+  rebuild();
+  $("#qEst").addEventListener("input",function(){estQuery=this.value;rebuild()});
+  $$("#fpills button").forEach(function(b){b.addEventListener("click",function(){estFilter=b.dataset.k;render()})});
+  $("#nuevoEst").addEventListener("click",altaExpres);
+}
+function estRow(e){
+  var s=estadoEst(e);
+  var b=el("button","row-item");
+  b.innerHTML='<div class="ava">'+tipoIcon(e.tipo)+'</div><div class="meta"><b>'+esc(e.nombre)+'</b>'+
+    '<small><span class="mono">'+esc(e.codigo)+'</span> · '+esc(e.barrio)+(s.u?' · vence '+fmt(s.u.vigenciaHasta):'')+'</small></div>'+chip(s.k,s.t);
+  b.addEventListener("click",function(){openFicha(e.id)});
+  return b;
+}
+function tipoIcon(t){t=(t||"").toLowerCase();if(t.indexOf("hotel")>=0)return"🏨";if(t.indexOf("rest")>=0)return"🍽";if(t.indexOf("bar")>=0)return"🍸";if(t.indexOf("educ")>=0||t.indexOf("coleg")>=0)return"🏫";if(t.indexOf("gas")>=0||t.indexOf("pelig")>=0)return"⚠️";if(t.indexOf("bodeg")>=0||t.indexOf("ferr")>=0)return"🔧";return"🏪"}
+function fmt(iso){if(!iso)return"—";var d=new Date(iso);return d.toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"})}
+
+/* -------- Ficha -------- */
+var fichaId=null;
+function openFicha(id){fichaId=id;VIEW="ficha";render();window.scrollTo(0,0)}
+function vFicha(v){
+  var e=DB.establecimientos.find(function(x){return x.id===fichaId});if(!e){navTo("establecimientos");return}
+  var s=estadoEst(e);
+  var head=el("div","card pad");head.style.marginBottom="16px";
+  head.innerHTML='<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">'+
+    '<div class="ava" style="width:54px;height:54px;font-size:24px">'+tipoIcon(e.tipo)+'</div>'+
+    '<div style="flex:1;min-width:200px"><h3 style="font-size:20px">'+esc(e.nombre)+'</h3>'+
+    '<div class="note" style="margin-top:4px"><span class="mono">'+esc(e.codigo)+'</span> · '+esc(e.tipo)+' · '+esc(e.ocup)+'</div></div>'+
+    chip(s.k,s.t)+'</div>'+
+    '<div class="kv" style="margin-top:16px">'+kv("Dirección",e.dir+", "+e.barrio)+kv("Actividad",e.act)+kv("NIT",e.nit)+
+    kv("Representante",e.rep)+kv("Teléfono",e.tel)+(s.u?kv("Vigencia",fmt(s.u.vigenciaHasta)):"")+'</div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><button class="btn btn-p" id="fInsp">+ Nueva inspección</button>'+
+    '<button class="btn btn-g btn-sm" id="fBack">← Volver</button></div>';
+  v.appendChild(head);
+  $("#fInsp",head).addEventListener("click",function(){nuevaInspeccion(e.id)});
+  $("#fBack",head).addEventListener("click",function(){navTo("establecimientos")});
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Historial de revisiones</h3><div class="ln"></div></div>');
+  var hs=DB.inspecciones.filter(function(x){return x.establecimientoId===e.id}).sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)});
+  var lg=el("div","listgrid");
+  if(!hs.length)lg.innerHTML='<div class="empty">Aún no se ha inspeccionado este establecimiento.</div>';
+  hs.forEach(function(x){
+    var b=el("button","row-item");var fav=x.concepto&&x.concepto.favorable;
+    b.innerHTML='<div class="ava">'+(fav?"✔":"✖")+'</div><div class="meta"><b><span class="mono">'+esc(x.codigo)+'</span></b>'+
+      '<small>'+fmt(x.fecha)+' · '+(x.modo==="intermedia"?"Intermedia":"Completa")+' · puntaje '+x.score100+'/100</small></div>'+
+      '<span class="chip '+(fav?"st-vigente":"st-nofav")+'"><span class="dotc"></span>'+(fav?"Favorable":"No favorable")+'</span>';
+    b.addEventListener("click",function(){FORM=x;VIEW="certificado";render()});
+    lg.appendChild(b);
+  });
+  v.appendChild(lg);
+}
+function kv(k,val){return '<div><div class="k">'+esc(k)+'</div><div class="v">'+esc(val||"—")+'</div></div>'}
+
+/* -------- alta exprés -------- */
+function altaExpres(){
+  modal("Censar establecimiento",
+    '<div class="ff"><div class="wide"><label class="lbl">Nombre del establecimiento</label><input id="aeNom" type="text" placeholder="Ej. Panadería La Espiga"></div>'+
+    '<div><label class="lbl">Tipo</label><input id="aeTipo" type="text" placeholder="Comercio, hotel…"></div>'+
+    '<div><label class="lbl">Barrio</label><input id="aeBar" type="text"></div>'+
+    '<div class="wide"><label class="lbl">Dirección</label><input id="aeDir" type="text"></div></div>'+
+    '<p class="note">Se crea con estado “Sin revisión”. Luego puedes inspeccionarlo.</p>',
+    "Guardar",function(){
+      var nom=$("#aeNom").value.trim();if(!nom){toast("Escribe un nombre");return false}
+      var n=DB.establecimientos.length+1;
+      var ne={id:"e"+Date.now(),codigo:"EST-"+String(n).padStart(3,"0"),nombre:nom,
+        tipo:$("#aeTipo").value||"Comercio",barrio:$("#aeBar").value||"—",dir:$("#aeDir").value||"—",
+        ocup:"",act:"",nit:"",rep:"",tel:"",x:.2+Math.random()*.6,y:.2+Math.random()*.55,creado:NOW.toISOString()};
+      DB.establecimientos.push(ne);persist();if(esOnline())pushEst(ne);toast("Establecimiento censado");render();return true;
+    });
+}
+
+/* -------- Inspección -------- */
+function nuevaInspeccion(estId){
+  FORM={id:"i"+Date.now(),codigo:"RT-2026-"+String(DB.inspecciones.length+1).padStart(4,"0"),
+    establecimientoId:estId||null,modo:"completa",_step:0,estado:"borrador",inspector:SES?SES.name:"",
+    fecha:NOW.toISOString(),ocupacion:"",clasifRiesgo:"",ans:{},fuentes:{},fotos:{},obs:{}};
+  VIEW="inspeccion";render();window.scrollTo(0,0);
+}
+function vInspeccion(v){
+  if(!FORM){navTo("dashboard");return}
+  FORM.modo="completa";
+  if(FORM._step==null)FORM._step=0;
+  var est=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});
+  var steps=[{k:"datos",t:"Datos"}];
+  MOD.forEach(function(m){steps.push({k:m.id,t:"M"+m.id.replace("m",""),mod:m})});
+  steps.push({k:"resumen",t:"Concepto"});
+  if(FORM._step<0)FORM._step=0; if(FORM._step>steps.length-1)FORM._step=steps.length-1;
+  var step=steps[FORM._step], prog=Math.round(FORM._step/(steps.length-1)*100);
+  var head=el("div","card");head.style.marginBottom="14px";
+  head.innerHTML='<div class="pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
+    '<b class="num" style="font-size:13px;color:var(--muted)">Paso '+(FORM._step+1)+' de '+steps.length+'</b>'+
+    '<span class="mono" style="font-size:12px;color:var(--muted)">'+esc(FORM.codigo)+'</span></div>'+
+    '<div class="progwrap"><i style="width:'+prog+'%"></i></div>'+
+    '<div class="stepnav">'+steps.map(function(s,i){return '<button class="stepchip '+(i===FORM._step?"on":"")+(i<FORM._step?" done":"")+'" data-i="'+i+'">'+esc(s.t)+'</button>'}).join("")+'</div></div>';
+  v.appendChild(head);
+  $$(".stepchip",head).forEach(function(b){b.addEventListener("click",function(){FORM._step=+b.dataset.i;render();window.scrollTo(0,0)})});
+  var body=el("div");v.appendChild(body);
+  if(step.k==="datos")renderDatos(body,est);
+  else if(step.k==="resumen")renderResumen(body,est);
+  else renderModuleStep(body,step.mod);
+  var nav=el("div");nav.style.cssText="display:flex;gap:10px;margin-top:16px";
+  nav.innerHTML=(FORM._step>0?'<button class="btn btn-g" id="pv">← Anterior</button>':'')+
+    (FORM._step<steps.length-1?'<button class="btn btn-p" id="nx" style="margin-left:auto">Siguiente →</button>':'<button class="btn btn-p" id="gen" style="margin-left:auto">Generar concepto</button>');
+  v.appendChild(nav);
+  if($("#pv",nav))$("#pv",nav).addEventListener("click",function(){FORM._step--;render();window.scrollTo(0,0)});
+  if($("#nx",nav))$("#nx",nav).addEventListener("click",function(){FORM._step++;render();window.scrollTo(0,0)});
+  if($("#gen",nav))$("#gen",nav).addEventListener("click",function(){var r=compute(FORM);if(r.got<3){toast("Diligencia la inspección primero");return}finalizar()});
+  buildScorebar();refreshScore();
+}
+function renderDatos(body,est){
+  if(!FORM.tramite)FORM.tramite="primera";
+  if(!FORM.docs)FORM.docs={};
+  var top=el("div","card");
+  top.innerHTML='<div class="modhead"><div class="n">i</div><h4>Solicitud y datos del establecimiento</h4></div><div class="pad">'+
+    '<label class="lbl">Tipo de trámite</label>'+
+    '<div class="modeseg" id="tramiteSeg" style="margin-bottom:6px;flex-wrap:wrap">'+
+      [["primera","Primera vez"],["renovacion","Renovación"],["cambio","Cambio (razón social / dueño)"]].map(function(p){return '<button data-t="'+p[0]+'" class="'+(FORM.tramite===p[0]?"on":"")+'">'+p[1]+'</button>'}).join("")+'</div>'+
+    '<div class="guia" id="tramiteGuia"></div><div id="docsBox"></div>'+
+    '<div class="ff" style="margin-top:14px">'+
+    '<div class="wide"><label class="lbl">Establecimiento</label><input id="iNom" type="text" value="'+esc(est?est.nombre:"")+'" placeholder="Nombre del local"></div>'+
+    '<div><label class="lbl">Dirección / barrio</label><input id="iDir" type="text" value="'+esc(est?((est.dir||"")+", "+(est.barrio||"")):"")+'"></div>'+
+    '<div><label class="lbl">Representante / responsable</label><input id="iRep" type="text" value="'+esc(est?est.rep:"")+'"></div>'+
+    '<div><label class="lbl">Inspector</label><input id="iInsp" type="text" value="'+esc(FORM.inspector)+'"></div>'+
+    '</div>'+
+    '<label class="lbl" style="margin-top:14px">¿Qué tipo de negocio es? — atajo para ocupación y riesgo</label>'+
+    '<div class="filterpills" id="ocupQuick" style="margin-bottom:8px">'+OCUP_QUICK.map(function(q,i){return '<button data-i="'+i+'">'+esc(q.label)+'</button>'}).join("")+'</div>'+
+    '<div class="ff">'+
+    '<div><label class="lbl">Ocupación NSR-10</label><select id="iOcup"><option value="">Seleccione…</option>'+
+      OCUP.map(function(o){return '<option value="'+o.c+'"'+(FORM.ocupacion===o.c?" selected":"")+'>'+o.c+' · '+o.t+'</option>'}).join("")+'</select></div>'+
+    '<div><label class="lbl">Clasificación del riesgo</label><select id="iRiesgo">'+["","Bajo","Moderado","Alto","Especial"].map(function(r){return '<option'+(FORM.clasifRiesgo===r?" selected":"")+'>'+(r||"Seleccione…")+'</option>'}).join("")+'</select></div>'+
+    '</div><div class="guia" style="margin-top:8px">'+esc(GUIAS.ocupacion||"")+'</div><div class="guia">'+esc(GUIAS.clasifRiesgo||"")+'</div></div>';
+  body.appendChild(top);
+  function paintTramite(){
+    var t=FORM.tramite;
+    $("#tramiteGuia",top).textContent=t==="renovacion"?"Renovación: basta el formato diligenciado y la consignación según el nivel.":(t==="cambio"?"Cambio de razón social o propietario: se vuelve a pedir la documentación como primera vez.":"Primera vez: se piden RUT, cámara de comercio y uso del suelo, y la consignación según el nivel.");
+    var docs=t==="renovacion"?[["formato","Formato diligenciado"],["consignacion","Consignación (según nivel)"]]:[["rut","Copia del RUT"],["camara","Cámara de comercio"],["suelo","Uso del suelo"],["consignacion","Consignación (según nivel)"]];
+    var html='<label class="lbl" style="margin-top:6px">Documentos para la solicitud</label><div class="fuentes">'+
+      docs.map(function(d){return '<label class="fchk '+(FORM.docs[d[0]]?"on":"")+'"><input type="checkbox" data-d="'+d[0]+'"'+(FORM.docs[d[0]]?" checked":"")+'><span>'+d[1]+'</span></label>'}).join("")+'</div>'+
+      '<div style="margin-top:10px;max-width:230px"><label class="lbl">Nivel de impacto (tarifa)</label><select id="iNivel"><option value="">—</option>'+
+      [["1","Nivel 1 · $97.000"],["2","Nivel 2 · $196.000"],["3","Nivel 3 · $327.000"]].map(function(n){return '<option value="'+n[0]+'"'+(FORM.nivel===n[0]?" selected":"")+'>'+n[1]+'</option>'}).join("")+'</select></div>';
+    var box=$("#docsBox",top);box.innerHTML=html;
+    $$('[data-d]',box).forEach(function(cb){cb.addEventListener("change",function(){FORM.docs[cb.dataset.d]=cb.checked;cb.closest(".fchk").classList.toggle("on",cb.checked);scheduleSave()})});
+    $("#iNivel",box).addEventListener("change",function(){FORM.nivel=this.value;scheduleSave()});
+  }
+  paintTramite();
+  $$("#tramiteSeg button",top).forEach(function(b){b.addEventListener("click",function(){FORM.tramite=b.dataset.t;$$("#tramiteSeg button",top).forEach(function(x){x.classList.remove("on")});b.classList.add("on");scheduleSave();paintTramite()})});
+  $$("#ocupQuick button",top).forEach(function(b){b.addEventListener("click",function(){var q=OCUP_QUICK[+b.dataset.i];FORM.ocupacion=q.ocup;FORM.clasifRiesgo=q.riesgo;$("#iOcup",top).value=q.ocup;$("#iRiesgo",top).value=q.riesgo;scheduleSave();toast(q.label+" → "+q.ocup+" ("+q.riesgo+")")})});
+  var bindTxt=function(id,set){$(id,top).addEventListener("input",function(){set(this.value);scheduleSave()})};
+  bindTxt("#iNom",function(x){FORM._nom=x});bindTxt("#iDir",function(x){FORM._dir=x});bindTxt("#iRep",function(x){FORM._rep=x});bindTxt("#iInsp",function(x){FORM.inspector=x});
+  $("#iOcup",top).addEventListener("change",function(){FORM.ocupacion=this.value;scheduleSave()});
+  $("#iRiesgo",top).addEventListener("change",function(){FORM.clasifRiesgo=this.value;scheduleSave()});
+}
+function renderModuleStep(body,m){
+  var card=el("div","card");
+  card.innerHTML='<div class="modhead"><div class="n">'+m.id.replace("m","")+'</div><h4>'+esc(m.titulo.replace(/^Módulo\s*\d+\.\s*/,""))+'</h4><span class="mx">'+(m.clase==="agravante"?"agravante":"reductor")+'</span></div>';
+  var bd=el("div");bd.style.cssText="padding:2px 0";
+  if(m.toggle)bd.appendChild(renderToggle(m));
+  var wrap=el("div");wrap.dataset.items=m.id;
+  m.items.forEach(function(it){wrap.appendChild(renderItem(m,it))});
+  bd.appendChild(wrap);card.appendChild(bd);body.appendChild(card);
+  if(m.toggle)applyToggle(m,card);
+  applyDeps(wrap);
+}
+function renderResumen(body,est){
+  var r=compute(FORM);var fav=r.band.favorable;
+  var col=r.got?(fav?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):"var(--gris)";
+  var c=el("div","card pad");
+  c.innerHTML='<div class="metacard"><div class="ring" style="--p:'+(r.got?r.s100:0)+'"><div class="in"><b>'+(r.got?r.s100:0)+'</b><small>/100</small></div></div>'+
+    '<div class="metalist"><div style="font-family:var(--ff-h);font-size:18px;color:'+col+'">'+(r.got?(fav?"Concepto FAVORABLE":"No favorable — riesgo "+String(r.band.riesgo).toLowerCase()):"Faltan campos por diligenciar")+'</div>'+
+    '<p class="note">'+r.got+' de '+r.tot+' campos aplicables · X '+r.X+' · Y '+r.Y+' · '+r.raw+'/'+r.max+' pts</p>'+
+    '<p class="note">'+esc(r.band.texto||"")+'</p>'+
+    (r.recs&&r.recs.length?'<p class="note"><b>'+r.recs.length+'</b> hallazgo(s) para recomendar en el concepto.</p>':'')+'</div></div>'+
+    '<p class="note" style="margin-top:14px">Revisa y pulsa <b>Generar concepto</b> para el certificado con QR.</p>';
+  body.appendChild(c);
+}
+function buildScorebar(){
+  var sb=el("div","scorebar");
+  sb.innerHTML='<div class="in"><div class="minigauge" id="mg"><b id="mgv">0</b></div>'+
+    '<div class="vd"><div class="r" id="vr">Diligencia la inspección</div><div class="d" id="vd"></div></div>'+
+    '<button class="btn btn-p btn-sm" id="sbGen">Concepto</button></div>';
+  document.body.appendChild(sb);
+  $("#sbGen",sb).addEventListener("click",function(){var r=compute(FORM);if(r.got<3){toast("Diligencia la inspección primero");return}finalizar()});
+}
+function renderToggle(m){
+  var it=el("div","item");
+  it.innerHTML='<div class="q"><b>'+esc(m.toggle.label)+'</b></div>';
+  var opts=el("div","opts");
+  [["SI","Sí, aplica"],["NO","No aplica"]].forEach(function(p){
+    var o=el("button","opt",p[1]);if(FORM.ans[m.toggle.id]===p[0])o.classList.add("sel");
+    o.addEventListener("click",function(){FORM.ans[m.toggle.id]=p[0];scheduleSave();$$(".opt",opts).forEach(function(x){x.classList.remove("sel")});o.classList.add("sel");applyToggle(m,o.closest(".card"));refreshScore()});
+    opts.appendChild(o);
+  });
+  it.appendChild(opts);return it;
+}
+function applyToggle(m,card){var w=card&&card.querySelector('[data-items="'+m.id+'"]');if(w)w.hidden=(FORM.ans[m.toggle.id]==="NO")}
+function renderItem(m,it){
+  var wrap=el("div","item");wrap.dataset.it=it.id;
+  if(it.dependsOn){wrap.dataset.depItem=it.dependsOn.item;wrap.dataset.depVal=it.dependsOn.value;}
+  wrap.innerHTML='<div class="q">'+esc(it.label)+(it.score!==false&&it.tipo!=="fuentes"&&it.tipo!=="texto"?' <span class="note">(máx '+itemMax(it)+')</span>':'')+'</div>';
+  var g=GUIAS[it.id]||it.nota;
+  if(g)wrap.insertAdjacentHTML("beforeend",'<div class="guia">'+esc(g)+'</div>');
+  var topic=ITEM_TOPIC[it.id];
+  if(topic&&DIAGRAMS[topic]){
+    var gb=el("button","guidebtn");gb.type="button";gb.innerHTML="◉ ¿Cómo lo reviso?";
+    var box=el("div","guidebox");box.hidden=true;var d=DIAGRAMS[topic];
+    box.innerHTML=(d.titulo?'<b class="gt">'+esc(d.titulo)+'</b>':'')+'<div class="dg">'+d.svg+'</div>'+(d.tips?'<ul>'+d.tips.map(function(t){return '<li>'+esc(t)+'</li>'}).join("")+'</ul>':'');
+    gb.addEventListener("click",function(){box.hidden=!box.hidden});
+    wrap.appendChild(gb);wrap.appendChild(box);
+  }
+  if(EJEMPLOS[it.id]){
+    var eb=el("button","ejbtn");eb.type="button";eb.innerHTML="💬 Ejemplo";
+    var ebx=el("div","ejbox");ebx.hidden=true;ebx.textContent=EJEMPLOS[it.id];
+    eb.addEventListener("click",function(){ebx.hidden=!ebx.hidden});
+    wrap.appendChild(eb);wrap.appendChild(ebx);
+  }
+  if(it.tipo==="texto"){var inp=el("input");inp.type="text";inp.value=FORM.ans[it.id]||"";inp.style.marginTop="8px";inp.addEventListener("input",function(){FORM.ans[it.id]=inp.value;scheduleSave()});wrap.appendChild(inp);return wrap}
+  if(it.tipo==="fuentes"){
+    var fg=el("div","fuentes");if(FORM.fuentes[it.id]===undefined)FORM.fuentes[it.id]=[];
+    it.fuentes.forEach(function(fn){var sel=(FORM.fuentes[it.id]||[]).indexOf(fn)>=0;var lab=el("label","fchk"+(sel?" on":""));
+      var cb=el("input");cb.type="checkbox";cb.checked=sel;
+      cb.addEventListener("change",function(){var cur=FORM.fuentes[it.id]||[];if(cb.checked){if(cur.indexOf(fn)<0)cur.push(fn);lab.classList.add("on")}else{cur=cur.filter(function(x){return x!==fn});lab.classList.remove("on")}FORM.fuentes[it.id]=cur;scheduleSave();refreshScore()});
+      lab.appendChild(cb);lab.appendChild(el("span","",fn));fg.appendChild(lab)});
+    wrap.appendChild(fg);
+  } else {
+    var opts=el("div","opts");
+    it.opts.forEach(function(o){var mx=itemMax(it);var b=el("button","opt",o.v);
+      if(FORM.ans[it.id]===o.v)b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));
+      b.addEventListener("click",function(){FORM.ans[it.id]=o.v;scheduleSave();$$(".opt",opts).forEach(function(x){x.className="opt"});b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));if(GATES.has(it.id))applyDeps(wrap.parentNode);refreshScore()});
+      opts.appendChild(b)});
+    wrap.appendChild(opts);
+  }
+  var tools=el("div","itools");
+  var fl=el("label","mini");fl.innerHTML="📷 Fotos";var fi=el("input");fi.type="file";fi.accept="image/*";fi.multiple=true;fi.hidden=true;
+  fi.addEventListener("change",function(){if(fi.files&&fi.files.length)addFotos(it.id,fi.files,wrap);fi.value=""});fl.appendChild(fi);
+  var ob=el("button","mini","✎ Nota");
+  tools.appendChild(fl);tools.appendChild(ob);wrap.appendChild(tools);
+  var tx=el("textarea");tx.placeholder="Observación / hallazgo…";tx.value=FORM.obs[it.id]||"";tx.hidden=!FORM.obs[it.id];tx.style.marginTop="8px";
+  tx.addEventListener("input",function(){FORM.obs[it.id]=tx.value;scheduleSave()});
+  ob.addEventListener("click",function(){tx.hidden=!tx.hidden;if(!tx.hidden)tx.focus()});
+  wrap.appendChild(tx);
+  var th=el("div","thumbs");th.dataset.th=it.id;wrap.appendChild(th);renderThumbs(it.id,th);
+  return wrap;
+}
+function addFotos(id,files,wrap){
+  var arr=[].slice.call(files),done=0;
+  arr.forEach(function(file){var r=new FileReader();r.onload=function(){var img=new Image();img.onload=function(){
+    var mx=1200,s=Math.min(1,mx/Math.max(img.width,img.height));var cv=document.createElement("canvas");cv.width=img.width*s;cv.height=img.height*s;
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);(FORM.fotos[id]=FORM.fotos[id]||[]).push(cv.toDataURL("image/jpeg",.6));
+    done++;scheduleSave();renderThumbs(id,wrap.querySelector('[data-th="'+id+'"]'));
+    if(done===arr.length)toast(arr.length>1?(arr.length+" fotos agregadas"):"Evidencia agregada")};img.src=r.result};r.readAsDataURL(file)});
+}
+function renderThumbs(id,c){if(!c)return;c.innerHTML="";(FORM.fotos[id]||[]).forEach(function(d,i){var f=el("figure");var im=el("img");im.src=d;var x=el("button","","×");x.addEventListener("click",function(){FORM.fotos[id].splice(i,1);scheduleSave();renderThumbs(id,c)});f.appendChild(im);f.appendChild(x);c.appendChild(f)})}
+var _sv;function scheduleSave(){clearTimeout(_sv);_sv=setTimeout(saveInsp,400)}
+function saveInsp(){if(!FORM)return;if(FORM._nom!==undefined||FORM._dir!==undefined||FORM._rep!==undefined)syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
+function syncEst(){ // crea/actualiza el establecimiento desde el encabezado
+  var e=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});
+  if(!e&&FORM._nom){e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),x:.2+Math.random()*.6,y:.2+Math.random()*.55,creado:NOW.toISOString()};DB.establecimientos.push(e);FORM.establecimientoId=e.id}
+  if(e){if(FORM._nom!==undefined)e.nombre=FORM._nom;if(FORM._rep!==undefined)e.rep=FORM._rep;if(FORM.ocupacion)e.ocup=FORM.ocupacion;
+    if(FORM._dir!==undefined){var p=FORM._dir.split(",");e.dir=p[0]||e.dir;e.barrio=(p[1]||e.barrio||"").trim()}}
+}
+function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
+  var col=r.got?(r.band.favorable?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):"var(--gris)";
+  mg.style.setProperty("--p",r.s100);mg.style.setProperty("--c",col);$("#mgv").textContent=r.got?r.s100:"0";
+  $("#vr").textContent=r.got?(r.band.favorable?"Concepto FAVORABLE":"No favorable — riesgo "+String(r.band.riesgo).toLowerCase()):"Diligencia la inspección";
+  $("#vr").style.color=r.got?col:"var(--ink)";
+  $("#vd").textContent=r.got+"/"+r.tot+" campos · X "+r.X+" · Y "+r.Y+" · "+r.raw+"/"+r.max+" pts";
+}
+function finalizar(){
+  saveInsp();var r=compute(FORM);
+  FORM.estado="finalizada";FORM.score100=r.s100;FORM.X=r.X;FORM.Y=r.Y;
+  FORM.concepto={favorable:r.band.favorable,riesgo:r.band.riesgo,texto:r.band.texto};
+  FORM.recs=r.recs;var vig=new Date(NOW);vig.setMonth(vig.getMonth()+(DB.config.vigenciaMeses||12));FORM.vigenciaHasta=vig.toISOString();
+  FORM.sig=sign(FORM.codigo);FORM.fecha=NOW.toISOString();
+  saveInsp();
+  if(esOnline()){var e=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});if(e)pushEst(e);enqueue("guardarInspeccion",insToServer(FORM));}
+  VIEW="certificado";render();window.scrollTo(0,0);
+}
+
+/* -------- Certificado -------- */
+function vCertificado(v){
+  if(!FORM){navTo("dashboard");return}
+  var r=FORM.concepto?{s100:FORM.score100,band:{favorable:FORM.concepto.favorable,riesgo:FORM.concepto.riesgo,texto:FORM.concepto.texto||""},X:FORM.X,Y:FORM.Y,recs:FORM.recs||[]}:compute(FORM);
+  var est=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId})||{};
+  var fav=r.band.favorable;
+  var card=el("div","cert");
+  card.innerHTML='<div class="top"><div class="logo-chip"><img src="logo.png" alt="CBVI"></div><div><small>CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA</small><h3>Concepto técnico de seguridad humana y PCI</h3></div></div>'+
+    '<div class="bd"><div class="verdict '+(fav?"fav":"no")+'"><div class="big">'+r.s100+'<span style="font-size:14px">/100</span></div>'+
+    '<div><b style="font-family:var(--ff-h);font-size:17px">'+(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE")+'</b> · Riesgo '+esc(r.band.riesgo)+
+    '<p>'+esc(r.band.texto||"")+'</p></div></div>'+
+    '<div class="kv">'+kv("Establecimiento",est.nombre)+kv("Código",'<span class="mono">'+esc(FORM.codigo)+'</span>')+kv("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""))+
+      kv("Ocupación NSR-10",FORM.ocupacion)+kv("Modo",FORM.modo==="intermedia"?"Intermedia (Inírida)":"Completa (DNBC)")+
+      kv("Inspector",FORM.inspector)+kv("Fecha",fmt(FORM.fecha))+kv("Vigencia",fmt(FORM.vigenciaHasta))+'</div>'+
+    '<div class="sech"><h3>Recomendaciones y hallazgos</h3><div class="ln"></div></div>'+
+    (r.recs&&r.recs.length?('<ul class="reclist">'+r.recs.slice(0,30).map(function(x){return '<li><span class="ex">!</span><span>'+esc(x.q)+' — <b>'+esc(x.r)+'</b></span></li>'}).join("")+'</ul>'):'<p class="note">Sin hallazgos: todo cumple.</p>')+
+    '<div class="sech"><h3>Firmas</h3><div class="ln"></div></div>'+
+    '<div class="signrow"><div><label class="lbl">Inspector</label><canvas class="pad-c" id="padI"></canvas></div>'+
+    '<div><label class="lbl">Quien recibe</label><canvas class="pad-c" id="padR"></canvas></div></div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><button class="mini" id="clrI">Limpiar</button><button class="mini" id="clrR">Limpiar</button></div>'+
+    '<div class="qrbox"><div class="qr" id="qr"></div><div><b style="font-family:var(--ff-h)">Verificación anti-falsificación</b>'+
+    '<p class="note">Escanea para validar vigencia y autenticidad.<br>Código: <span class="mono">'+esc(FORM.codigo)+'</span> · Distintivo: <span class="mono">'+esc(FORM.sig||sign(FORM.codigo))+'</span></p></div></div></div>';
+  v.appendChild(card);
+  var act=el("div");act.style.cssText="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px";
+  act.innerHTML='<button class="btn btn-p" id="pdf">Descargar certificado (PDF)</button>'+
+    '<button class="btn btn-g" id="edit">← Editar</button>'+
+    '<button class="btn btn-g btn-sm" id="done" style="margin-left:auto">Listo</button>';
+  v.appendChild(act);
+  v.insertAdjacentHTML("beforeend",'<p class="note" style="margin-top:10px">El PDF se descarga en la app desplegada; dentro del visor de Claude la descarga puede estar bloqueada por seguridad.</p>');
+  setTimeout(function(){
+    if(window.SignaturePad){padI=mkPad("padI",FORM.firmaInsp,function(d){FORM.firmaInsp=d;saveInsp()});padR=mkPad("padR",FORM.firmaRecibe,function(d){FORM.firmaRecibe=d;saveInsp()});
+      $("#clrI").addEventListener("click",function(){padI.clear();FORM.firmaInsp=null;saveInsp()});$("#clrR").addEventListener("click",function(){padR.clear();FORM.firmaRecibe=null;saveInsp()})}
+    try{if(window.QRCode){$("#qr").innerHTML="";new QRCode($("#qr"),{text:VERIFY+"?c="+FORM.codigo+"&d="+(FORM.sig||sign(FORM.codigo)),width:110,height:110,correctLevel:QRCode.CorrectLevel.M})}}catch(e){}
+  },30);
+  $("#pdf",act).addEventListener("click",function(){makePDF(r,est)});
+  $("#edit",act).addEventListener("click",function(){VIEW="inspeccion";render()});
+  $("#done",act).addEventListener("click",function(){navTo("establecimientos")});
+}
+function mkPad(id,data,onEnd){var cv=$("#"+id);var ratio=Math.max(window.devicePixelRatio||1,1);cv.width=cv.offsetWidth*ratio;cv.height=cv.offsetHeight*ratio;cv.getContext("2d").scale(ratio,ratio);
+  var sp=new SignaturePad(cv,{penColor:getComputedStyle(document.body).getPropertyValue("--ink"),backgroundColor:"rgba(0,0,0,0)"});
+  sp.addEventListener("endStroke",function(){onEnd(sp.toDataURL())});if(data){try{sp.fromDataURL(data)}catch(e){}}return sp}
+function qrDataURL(){var q=$("#qr");if(!q)return null;var c=q.querySelector("canvas");if(c)return c.toDataURL("image/png");var im=q.querySelector("img");if(im&&im.src)return im.src;return null}
+function makePDF(r,est){
+  if(!(window.jspdf&&window.jspdf.jsPDF)){toast("PDF no disponible");return}
+  var d=new window.jspdf.jsPDF({unit:"pt",format:"letter"}),W=d.internal.pageSize.getWidth(),m=42,y=0,fav=r.band.favorable;
+  d.setFillColor(25,29,35);d.rect(0,0,W,56,"F");if(LOGO_DATA){d.setFillColor(255,255,255);d.roundedRect(m,9,40,40,5,5,"F");try{d.addImage(LOGO_DATA,"PNG",m+3,12,34,34)}catch(e){}}
+  d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(12.5);d.text("CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA",m+52,26);
+  d.setFont("helvetica","normal");d.setFontSize(9);d.text("Concepto técnico de seguridad humana y protección contra incendios",m+52,40);
+  y=74;d.setFillColor(fav?228:247,fav?241:228,fav?232:226);d.roundedRect(m,y,W-2*m,50,6,6,"F");
+  d.setTextColor(fav?23:192,fav?134:39,fav?75:31);d.setFont("helvetica","bold");d.setFontSize(20);d.text(r.s100+"/100",m+14,y+32);
+  d.setFontSize(12);d.text(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE",m+96,y+22);
+  d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(40);d.text(d.splitTextToSize("Riesgo "+r.band.riesgo+". "+(r.band.texto||""),W-2*m-104),m+96,y+34);
+  y+=66;function row(k,val){d.setFont("helvetica","bold");d.setFontSize(8.5);d.setTextColor(90);d.text(k.toUpperCase(),m,y);d.setFont("helvetica","normal");d.setTextColor(20);d.setFontSize(10);d.text(d.splitTextToSize(String(val||"—"),W-2*m-150),m+150,y);y+=17}
+  row("Establecimiento",est.nombre);row("Código / distintivo",FORM.codigo+"  ·  "+(FORM.sig||sign(FORM.codigo)));
+  row("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""));row("Ocupación NSR-10",FORM.ocupacion);
+  row("Modo",FORM.modo==="intermedia"?"Intermedia (Inírida)":"Completa (DNBC)");row("Inspector",FORM.inspector);
+  row("Fecha / vigencia",fmt(FORM.fecha)+"  ·  "+fmt(FORM.vigenciaHasta));
+  y+=6;d.setFont("helvetica","bold");d.setFontSize(11);d.setTextColor(20);d.text("Recomendaciones y hallazgos",m,y);y+=15;d.setFont("helvetica","normal");d.setFontSize(9.5);
+  if(r.recs&&r.recs.length)r.recs.slice(0,22).forEach(function(x){var ln=d.splitTextToSize("• "+x.q+" — "+x.r,W-2*m);if(y>690){d.addPage();y=54}d.text(ln,m,y);y+=ln.length*12+2});
+  else {d.text("Sin hallazgos: todo cumple.",m,y);y+=14}
+  if(y>560){d.addPage();y=54}y+=18;
+  try{if(FORM.firmaInsp)d.addImage(FORM.firmaInsp,"PNG",m,y,150,52)}catch(e){}
+  try{if(FORM.firmaRecibe)d.addImage(FORM.firmaRecibe,"PNG",W-m-150,y,150,52)}catch(e){}
+  y+=56;d.setDrawColor(150);d.line(m,y,m+150,y);d.line(W-m-150,y,W-m,y);d.setFontSize(8);d.setTextColor(90);
+  d.text("Firma del inspector — "+(FORM.inspector||""),m,y+12);d.text("Firma de quien recibe",W-m-150,y+12);
+  var qr=qrDataURL();if(qr){try{d.addImage(qr,"PNG",W-m-96,74,96,96)}catch(e){}}
+  d.setFontSize(7);d.setTextColor(120);d.text("Verifica en "+VERIFY+"?c="+FORM.codigo+"  ·  distintivo "+(FORM.sig||sign(FORM.codigo)),m,752);
+  try{d.save("Concepto_"+FORM.codigo+".pdf");toast("PDF generado")}catch(e){toast("Descarga bloqueada en la vista previa")}
+}
+
+/* -------- Metas -------- */
+function vMetas(v){
+  var cfg=DB.config, mes=mesInsp().length, barr=DB.establecimientos.length;
+  var card=el("div","card pad");card.style.marginBottom="16px";
+  var metaTotal=cfg.metaRevisiones+cfg.metaRenovaciones, pct=Math.min(100,Math.round(mes/Math.max(1,metaTotal)*100));
+  card.innerHTML='<div class="metacard"><div class="ring" style="--p:'+pct+'"><div class="in"><b>'+pct+'%</b><small>del mes</small></div></div>'+
+    '<div class="metalist">'+metaRow("Revisiones + renovaciones",mes,metaTotal)+metaRow("Establecimientos censados",barr,cfg.metaBarrido)+
+    '<p class="note">Objetivo por defecto; ajústalo abajo. En producción se mide contra lo que registre el inspector cada mes.</p></div></div>';
+  v.appendChild(card);
+  if(isAdmin()){
+    v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Configurar metas mensuales</h3><div class="ln"></div></div>');
+    var f=el("div","card pad");
+    f.innerHTML='<div class="ff"><div><label class="lbl">Revisiones nuevas / mes</label><input id="mR" type="number" value="'+cfg.metaRevisiones+'"></div>'+
+      '<div><label class="lbl">Renovaciones / mes</label><input id="mN" type="number" value="'+cfg.metaRenovaciones+'"></div>'+
+      '<div><label class="lbl">Establecimientos censados (barrido)</label><input id="mB" type="number" value="'+cfg.metaBarrido+'"></div>'+
+      '<div><label class="lbl">Vigencia del concepto (meses)</label><input id="mV" type="number" value="'+cfg.vigenciaMeses+'"></div></div>'+
+      '<div style="margin-top:14px"><button class="btn btn-p btn-sm" id="saveMeta">Guardar metas</button></div>';
+    v.appendChild(f);
+    $("#saveMeta").addEventListener("click",function(){cfg.metaRevisiones=+$("#mR").value||0;cfg.metaRenovaciones=+$("#mN").value||0;cfg.metaBarrido=+$("#mB").value||0;cfg.vigenciaMeses=+$("#mV").value||12;persist();if(esOnline())enqueue("setConfig",{config:{metaRevisiones:cfg.metaRevisiones,metaRenovaciones:cfg.metaRenovaciones,metaBarrido:cfg.metaBarrido,vigenciaMeses:cfg.vigenciaMeses}});toast("Metas actualizadas");render()});
+  } else {
+    v.insertAdjacentHTML("beforeend",'<div class="card pad"><p class="note">🔒 Solo el administrador (comandante) puede cambiar las metas. Así nadie las baja a su conveniencia.</p></div>');
+  }
+  if(SES&&SES.role==="comandante"){
+    v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Tablero del comandante</h3><div class="ln"></div></div>');
+    var c=counts();
+    var t=el("div","tiles");t.appendChild(tile(mes,"Revisiones este mes","var(--ink)"));t.appendChild(tile(c.vigente,"Al día","var(--verde)"));t.appendChild(tile(c.vencido+c.porvencer,"Requieren gestión","var(--ambar)"));t.appendChild(tile(c.sinrev,"Por censar","var(--gris)"));
+    v.appendChild(t);
+  }
+}
+
+/* -------- Vencimientos -------- */
+function vVencimientos(v){
+  var rows=DB.establecimientos.map(function(e){return{e:e,s:estadoEst(e)}}).filter(function(o){return o.s.k==="vencido"||o.s.k==="porvencer"})
+    .sort(function(a,b){return (a.s.dias||0)-(b.s.dias||0)});
+  if(!rows.length){v.innerHTML='<div class="empty">Nada por vencer 🎉</div>';return}
+  v.insertAdjacentHTML("beforeend",'<p class="note" style="margin-bottom:12px">En producción esto dispara recordatorios automáticos al inspector (y opcional al cliente) antes de vencer.</p>');
+  var lg=el("div","listgrid");
+  rows.forEach(function(o){var b=el("button","row-item");var d=o.s.dias;
+    b.innerHTML='<div class="ava">'+tipoIcon(o.e.tipo)+'</div><div class="meta"><b>'+esc(o.e.nombre)+'</b><small><span class="mono">'+esc(o.e.codigo)+'</span> · '+(d<0?("venció hace "+(-d)+" días"):("vence en "+d+" días"))+'</small></div>'+chip(o.s.k,o.s.t);
+    b.addEventListener("click",function(){openFicha(o.e.id)});lg.appendChild(b)});
+  v.appendChild(lg);
+}
+
+/* -------- Verificar (pública) -------- */
+function vVerificar(v){
+  v.insertAdjacentHTML("beforeend",'<div class="card pad" style="max-width:520px;margin:0 auto">'+
+    '<h3 style="font-size:18px">Verificar un concepto</h3>'+
+    '<p class="note" style="margin:6px 0 14px">Escanea el QR del certificado o ingresa el código y el distintivo. Esta vista simula la página pública donde el cliente también puede descargar su certificado.</p>'+
+    '<div class="ff"><div><label class="lbl">Código</label><input id="vC" type="text" placeholder="RT-2026-0001"></div>'+
+    '<div><label class="lbl">Distintivo</label><input id="vD" type="text" placeholder="6 caracteres"></div></div>'+
+    '<div style="margin-top:14px"><button class="btn btn-p" id="vGo">Verificar</button></div>'+
+    '<div id="vRes" style="margin-top:16px"></div></div>');
+  $("#vGo").addEventListener("click",function(){
+    var c=($("#vC").value||"").trim().toUpperCase(), dd=($("#vD").value||"").trim().toUpperCase();
+    var insp=DB.inspecciones.find(function(x){return x.codigo===c&&x.estado==="finalizada"});
+    var box=$("#vRes");
+    if(!insp||sign(insp.codigo)!==dd){box.innerHTML='<div class="verdict no"><div class="big">✖</div><div><b style="font-family:var(--ff-h)">No verificado</b><p>El código o el distintivo no coinciden. Posible falsificación.</p></div></div>';return}
+    var est=DB.establecimientos.find(function(x){return x.id===insp.establecimientoId})||{};
+    var dias=Math.round((new Date(insp.vigenciaHasta)-NOW)/86400000), vig=dias>=0&&insp.concepto.favorable;
+    box.innerHTML='<div class="verdict '+(vig?"fav":"no")+'"><div class="big">'+(vig?"✔":"!")+'</div><div><b style="font-family:var(--ff-h)">'+(vig?"Concepto vigente y auténtico":(insp.concepto.favorable?"Concepto vencido":"Concepto no favorable"))+'</b>'+
+      '<p>'+esc(est.nombre||"")+' · '+(insp.concepto.favorable?"Favorable":"No favorable")+' · vence '+fmt(insp.vigenciaHasta)+(dias<0?(" (hace "+(-dias)+" días)"):"")+'</p></div></div>'+
+      '<button class="btn btn-g btn-sm" id="vVer">Ver certificado</button>';
+    $("#vVer").addEventListener("click",function(){FORM=insp;VIEW="certificado";render()});
+  });
+  v.insertAdjacentHTML("beforeend",'<p class="note" style="text-align:center;margin-top:12px">Prueba con <span class="mono">RT-2026-0001</span> y su distintivo del certificado.</p>');
+}
+
+/* -------- Configuración: importar / exportar -------- */
+function csv(s){s=String(s==null?"":s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+function toIso(s){var d=new Date((s||"").trim());return isNaN(d)?NOW.toISOString():d.toISOString()}
+function vConfig(v){
+  if(!isAdmin()){v.innerHTML='<div class="empty">🔒 Solo el administrador puede ver Configuración.</div>';return}
+  v.insertAdjacentHTML("beforeend",'<div class="sech" style="margin-top:0"><h3>Exportar</h3><div class="ln"></div></div>');
+  var exp=el("div","card pad");exp.style.marginBottom="16px";
+  exp.innerHTML='<p class="note">Respalda la base (establecimientos + inspecciones). Copia el cuadro; en la app desplegada se descargará como archivo.</p>'+
+    '<div style="display:flex;gap:10px;margin:12px 0;flex-wrap:wrap"><button class="btn btn-g btn-sm" id="expJson">Generar JSON</button><button class="btn btn-g btn-sm" id="expCsv">Generar CSV de vigencias</button></div>'+
+    '<textarea id="expOut" readonly style="min-height:120px;font-family:var(--ff-m);font-size:12px" placeholder="Aquí aparece lo exportado para copiar…"></textarea>';
+  v.appendChild(exp);
+  $("#expJson",exp).addEventListener("click",function(){$("#expOut").value=JSON.stringify({establecimientos:DB.establecimientos,inspecciones:DB.inspecciones},null,2);$("#expOut").focus();$("#expOut").select()});
+  $("#expCsv",exp).addEventListener("click",function(){
+    var rows=["codigo,establecimiento,barrio,fecha,vigencia,concepto,estado"];
+    DB.inspecciones.filter(function(x){return x.estado==="finalizada"}).forEach(function(x){var e=DB.establecimientos.find(function(z){return z.id===x.establecimientoId})||{};
+      rows.push([x.codigo,csv(e.nombre),csv(e.barrio),fmt(x.fecha),fmt(x.vigenciaHasta),(x.concepto&&x.concepto.favorable?"Favorable":"No favorable"),estadoEst(e).t].join(","))});
+    $("#expOut").value=rows.join("\n");$("#expOut").focus();$("#expOut").select();
+  });
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Importar inspecciones existentes</h3><div class="ln"></div></div>');
+  var imp=el("div","card pad");
+  imp.innerHTML='<p class="note">Carga las revisiones de este año (las de papel/Excel). Solo necesitas nombre, barrio, fecha y vigencia; la app calculará vigentes / por vencer. Los demás ítems quedan vacíos.</p>'+
+    '<p class="note" style="margin-top:8px">CSV, una por línea: <span class="mono">nombre,barrio,fecha,vigencia,favorable</span> · fechas <span class="mono">AAAA-MM-DD</span>.<br>Ej.: <span class="mono">Tienda Doña Rosa,Centro,2026-03-10,2027-03-10,si</span></p>'+
+    '<textarea id="impIn" style="min-height:110px;font-family:var(--ff-m);font-size:12px;margin-top:10px" placeholder="Pega aquí tus filas CSV…"></textarea>'+
+    '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><label class="btn btn-g btn-sm">Subir archivo CSV<input type="file" id="impFile" accept=".csv,text/csv,text/plain" hidden></label>'+
+    '<button class="btn btn-p btn-sm" id="impGo">Importar</button></div><p class="note" id="impMsg" style="margin-top:8px"></p>';
+  v.appendChild(imp);
+  $("#impFile",imp).addEventListener("change",function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$("#impIn").value=r.result};r.readAsText(f)});
+  $("#impGo",imp).addEventListener("click",function(){importCsv($("#impIn").value)});
+  v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Mantenimiento</h3><div class="ln"></div></div>');
+  var mt=el("div","card pad");mt.innerHTML='<p class="note">Borra los datos de ejemplo y empieza limpio en este dispositivo.</p><button class="btn btn-g btn-sm" id="wipe" style="margin-top:10px;color:var(--rojo)">Borrar todos los datos</button>';
+  v.appendChild(mt);
+  $("#wipe",mt).addEventListener("click",function(){modal("Borrar todos los datos","<p class=\"note\">Elimina establecimientos e inspecciones de este dispositivo. No se puede deshacer.</p>","Borrar",function(){DB={establecimientos:[],inspecciones:[],config:DB.config};persist();toast("Datos borrados");navTo("dashboard");return true})});
+}
+function importCsv(txt){
+  var lines=(txt||"").split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
+  if(!lines.length){toast("Pega algunas filas primero");return}
+  var n=0;
+  lines.forEach(function(l){
+    if(/^nombre\s*,/i.test(l))return;
+    var p=l.split(",");if(p.length<4)return;
+    var nombre=p[0].trim();if(!nombre)return;
+    var barrio=(p[1]||"").trim(),fecha=(p[2]||"").trim(),vig=(p[3]||"").trim(),fav=/^(s|1|t|f)/i.test((p[4]||"si").trim());
+    var e={id:"e"+Date.now()+"_"+n,codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),nombre:nombre,tipo:"Comercio",barrio:barrio||"—",dir:"—",ocup:"",act:"",nit:"",rep:"",tel:"",x:.2+Math.random()*.6,y:.2+Math.random()*.55,creado:NOW.toISOString()};
+    DB.establecimientos.push(e);
+    var cod="RT-IMP-"+String(DB.inspecciones.length+1).padStart(4,"0");
+    var imp={id:"i"+Date.now()+"_"+n,codigo:cod,establecimientoId:e.id,modo:"completa",estado:"finalizada",inspector:"Importado",
+      fecha:toIso(fecha),vigenciaHasta:toIso(vig),ocupacion:"",clasifRiesgo:"",ans:{},fuentes:{},fotos:{},obs:{},score100:fav?90:40,X:0,Y:0,
+      concepto:{favorable:fav,riesgo:fav?"BAJO":"ALTO"},sig:sign(cod),importado:true};
+    DB.inspecciones.push(imp);
+    if(esOnline()){pushEst(e);enqueue("guardarInspeccion",{inspeccion:{idCliente:imp.id,codigo:imp.codigo,establecimientoId:e.id,fecha:imp.fecha,vigenciaHasta:imp.vigenciaHasta,score100:imp.score100,favorable:fav,riesgo:imp.concepto.riesgo,estado:"finalizada",respuestas:"{}",recomendaciones:"[]"}})}
+    n++;
+  });
+  DB._ejemplo=false;persist();var msg=$("#impMsg");if(msg)msg.textContent=n+" inspecciones importadas.";toast(n+" importadas");setTimeout(function(){navTo("establecimientos")},700);
+}
+
+/* -------- Usuarios (admin): aprobar inspectores y asignar PIN -------- */
+function vUsuarios(v){
+  if(!isAdmin()){v.innerHTML='<div class="empty">🔒 Solo el administrador.</div>';return}
+  if(!esOnline()){v.innerHTML='<div class="empty">Conéctate en línea (correo + PIN) para administrar usuarios e inspectores.</div>';return}
+  v.insertAdjacentHTML("beforeend",'<div class="toolbar"><button class="btn btn-p btn-sm" id="addU">+ Agregar inspector</button><span class="note">Aprueba quién puede usar la app y asígnale un PIN.</span></div>');
+  var cont=el("div");cont.innerHTML='<div class="empty">Cargando usuarios…</div>';v.appendChild(cont);
+  function cargar(){
+    api("listarInspectores").then(function(res){
+      cont.innerHTML="";
+      var list=(res&&res.ok&&res.inspectores)||[];
+      var pend=list.filter(function(u){return !u.aprobado}), act=list.filter(function(u){return u.aprobado});
+      if(pend.length){
+        cont.insertAdjacentHTML("beforeend",'<div class="sech" style="margin-top:0"><h3>Solicitudes por aprobar</h3><div class="ln"></div><span class="count">'+pend.length+'</span></div>');
+        var lgp=el("div","listgrid");pend.forEach(function(u){lgp.appendChild(filaUsuario(u,true,cargar))});cont.appendChild(lgp);
+      }
+      cont.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Inspectores</h3><div class="ln"></div></div>');
+      var lga=el("div","listgrid");
+      if(!act.length)lga.innerHTML='<div class="empty">Aún no hay inspectores aprobados.</div>';
+      act.forEach(function(u){lga.appendChild(filaUsuario(u,false,cargar))});cont.appendChild(lga);
+    }).catch(function(){cont.innerHTML='<div class="empty">No se pudo cargar. Revisa tu conexión.</div>'});
+  }
+  cargar();
+  $("#addU").addEventListener("click",function(){modalUsuario(null,cargar)});
+}
+function filaUsuario(u,pendiente,done){
+  var b=el("button","row-item");
+  b.innerHTML='<div class="ava">'+(u.rol==="comandante"?"★":"🧭")+'</div><div class="meta"><b>'+esc(u.nombre||u.email)+'</b><small>'+esc(u.email)+' · '+esc(u.rol||"inspector")+'</small></div>'+
+    (pendiente?'<span class="chip st-porvencer"><span class="dotc"></span>Por aprobar</span>':'<span class="chip '+(u.activo?"st-vigente":"st-sinrev")+'"><span class="dotc"></span>'+(u.activo?"Activo":"Inactivo")+'</span>');
+  b.addEventListener("click",function(){modalUsuario(u,done)});
+  return b;
+}
+function modalUsuario(u,done){
+  var nuevo=!u, aprobar=(u&&!u.aprobado);
+  var body='<div class="ff"><div class="wide"><label class="lbl">Correo</label><input id="uEmail" type="email" value="'+esc(u?u.email:"")+'"'+(u?" readonly":"")+'></div>'+
+    '<div class="wide"><label class="lbl">Nombre</label><input id="uNom" type="text" value="'+esc(u?(u.nombre||""):"")+'"></div>'+
+    '<div><label class="lbl">PIN '+((u&&u.aprobado)?"(vacío = no cambiar)":"(4 a 6 dígitos)")+'</label><input id="uPin" type="text" inputmode="numeric" maxlength="6" placeholder="••••"></div>'+
+    '<div><label class="lbl">Rol</label><select id="uRol"><option value="inspector"'+((u&&u.rol==="inspector")?" selected":"")+'>Inspector</option><option value="comandante"'+((u&&u.rol==="comandante")?" selected":"")+'>Comandante (admin)</option></select></div></div>'+
+    (u&&u.aprobado?'<label class="fchk" style="margin-top:10px;max-width:240px"><input type="checkbox" id="uAct"'+(u.activo?" checked":"")+'><span>Activo (puede entrar)</span></label>':'<p class="note" style="margin-top:8px">Al aprobar, dile al inspector su PIN para que inicie sesión con su correo.</p>');
+  modal(nuevo?"Agregar inspector":(aprobar?"Aprobar acceso":"Editar inspector"), body, nuevo?"Crear":(aprobar?"Aprobar":"Guardar"),
+    function(){
+      var email=($("#uEmail").value||"").trim().toLowerCase(); if(!email){toast("Falta el correo");return false}
+      var pin=($("#uPin").value||"").trim();
+      if((nuevo||aprobar)&&pin.length<4){toast("Asigna un PIN de 4 a 6 dígitos");return false}
+      var ins={email:email,nombre:($("#uNom").value||"").trim(),rol:$("#uRol").value};
+      if(pin)ins.pin=pin;
+      ins.activo=(u&&u.aprobado)?$("#uAct").checked:true;
+      api("guardarInspector",{inspector:ins}).then(function(res){ if(res&&res.ok){toast("Guardado");if(done)done();} else toast((res&&res.error)||"Error al guardar"); }).catch(function(){toast("Sin conexión")});
+      return true;
+    });
+}
+
+/* -------- modal / theme / auth -------- */
+function modal(title,body,okTxt,onOk){
+  var root=$("#modalRoot");
+  root.innerHTML='<div class="modal"><div class="box"><header>'+esc(title)+'</header><div class="c">'+body+'</div>'+
+    '<footer><button class="btn btn-g btn-sm" id="mCancel">Cancelar</button><button class="btn btn-p btn-sm" id="mOk">'+esc(okTxt)+'</button></footer></div></div>';
+  var close=function(){root.innerHTML=""};
+  $("#mCancel").addEventListener("click",close);
+  $("#mOk").addEventListener("click",function(){if(onOk()!==false)close()});
+  root.querySelector(".modal").addEventListener("click",function(e){if(e.target===this)close()});
+}
+function initTheme(){try{var t=localStorage.getItem(THEME);if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}}
+$("#btnConfig").addEventListener("click",function(){if(!SES)return;if(isAdmin())navTo("config");else toast("Solo el administrador puede entrar a Configuración")});
+$("#btnSync").addEventListener("click",function(){if(esOnline()){toast("Sincronizando…");pullAll().then(flush)}else toast("Entra en línea (correo + PIN) para sincronizar con el servidor")});
+$("#btnTheme").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");var n=c==="dark"?"light":(c==="light"?"dark":(matchMedia("(prefers-color-scheme: dark)").matches?"light":"dark"));document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(THEME,n)}catch(e){}});
+
+// login
+var pickRole=null;
+$$("#userpick button").forEach(function(b){b.addEventListener("click",function(){pickRole=b.dataset.role;$$("#userpick button").forEach(function(x){x.classList.remove("sel")});b.classList.add("sel")})});
+$$("#pin input").forEach(function(inp,i,arr){inp.addEventListener("input",function(){this.value=this.value.replace(/\D/g,"");if(this.value&&arr[i+1])arr[i+1].focus()});inp.addEventListener("keydown",function(e){if(e.key==="Backspace"&&!this.value&&arr[i-1])arr[i-1].focus()})});
+function afterLogin(){try{sessionStorage.setItem(SESK,JSON.stringify(SES))}catch(e){}$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync()}
+function demoLogin(){var role=pickRole||"inspector";SES={role:role,name:role==="comandante"?"Jeferson Rangel":"Inspector CBVI"};if(!DB.establecimientos.length){DB=seed();persist()}afterLogin()}
+$("#btnLogin").addEventListener("click",function(){
+  var pin=$$("#pin input").map(function(x){return x.value}).join("");
+  if(pin.length<4){toast("Escribe el PIN de 4 dígitos");return}
+  var email=($("#loginEmail").value||"").trim().toLowerCase();
+  if(email){
+    var btn=$("#btnLogin");btn.disabled=true;toast("Conectando…");
+    api("login",{email:email,pin:pin}).then(function(res){btn.disabled=false;
+      if(res&&res.ok){SES={role:res.usuario.rol,name:res.usuario.nombre||email,email:email,pase:res.pase};afterLogin();pullAll().then(flush)}
+      else toast((res&&res.error)||"No se pudo entrar");
+    }).catch(function(){btn.disabled=false;toast("Sin conexión al servidor: modo demo");demoLogin()});
+    return;
+  }
+  if(!pickRole){toast("Escribe tu correo y PIN, o elige un rol para el demo");return}
+  demoLogin();
+});
+$("#solicitar").addEventListener("click",function(ev){ev.preventDefault();
+  modal("Solicitar acceso",
+    '<div class="ff"><div class="wide"><label class="lbl">Correo</label><input id="sEmail" type="email" placeholder="tu correo"></div><div class="wide"><label class="lbl">Tu nombre</label><input id="sNom" type="text"></div></div><p class="note">El administrador debe aprobarte y darte un PIN antes de que puedas entrar.</p>',
+    "Enviar solicitud",
+    function(){ var em=($("#sEmail").value||"").trim().toLowerCase(); if(!em){toast("Escribe tu correo");return false}
+      api("solicitarAcceso",{email:em,nombre:($("#sNom").value||"").trim()}).then(function(res){ toast(res&&res.ok?"Solicitud enviada. Espera la aprobación del administrador.":((res&&res.error)||"No se pudo enviar")); }).catch(function(){toast("Sin conexión al servidor")});
+      return true;
+    });
+});
+function logout(){SES=null;try{sessionStorage.removeItem(SESK)}catch(e){}$("#app").hidden=true;$("#login").hidden=false;$$("#pin input").forEach(function(x){x.value=""});pickRole=null;$$("#userpick button").forEach(function(x){x.classList.remove("sel")});updateSync()}
+
+initTheme();
+try{var s=JSON.parse(sessionStorage.getItem(SESK));if(s&&s.role){SES=s;$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync();if(esOnline()){pullAll().then(flush)}}}catch(e){}
+window.addEventListener("online",function(){updateSync();flush()});
+window.addEventListener("offline",function(){updateSync()});
+})();
+</script>
