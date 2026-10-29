@@ -249,6 +249,12 @@
   .row-item .meta b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--ff-h);font-weight:600}
   .row-item .meta small{color:var(--muted);font-size:12.5px}
   .listgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}   /* filas que recortan el nombre con "…" en vez de ensanchar */
+  /* fila con papelera al lado: el nombre sigue siendo el botón que abre */
+  .rowpar{display:flex;gap:8px;align-items:stretch;min-width:0}
+  .rowpar .row-item{flex:1;min-width:0}
+  .rowdel{flex:0 0 auto;width:46px;border:1px solid var(--line);background:var(--surface);border-radius:14px;
+    color:var(--rojo);font-size:17px;display:grid;place-items:center;cursor:pointer}
+  .rowdel:hover{border-color:var(--rojo);background:var(--surface-2)}
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .search{flex:1;min-width:180px;position:relative}
   .search input{width:100%}
@@ -296,10 +302,11 @@
   .mini{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:9px;min-height:38px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
   .mini:hover{border-color:var(--ember);color:var(--ink)}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  /* visor del lector de QR */
-  .qrbox{position:relative;width:100%;max-width:340px;margin:10px auto 0;aspect-ratio:1/1;
+  /* visor del lector de QR. OJO: NO usar .qrbox, que ya es la tarjeta del
+     certificado; pisarla dejaba ese bloque con fondo negro e ilegible. */
+  .qrscan{position:relative;width:100%;max-width:340px;margin:10px auto 0;aspect-ratio:1/1;
     background:#000;border-radius:14px;overflow:hidden;isolation:isolate}
-  .qrbox video{width:100%;height:100%;object-fit:cover;display:block}
+  .qrscan video{width:100%;height:100%;object-fit:cover;display:block}
   .qrmira{position:absolute;inset:16%;border:3px solid rgba(255,255,255,.9);border-radius:12px;
     box-shadow:0 0 0 2000px rgba(0,0,0,.28);pointer-events:none}
   .buscaest{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
@@ -542,9 +549,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.8"></script>
-<script src="form-inspeccion.js?v=1.8"></script>
-<script src="guias.js?v=1.8"></script>
+<script src="logos.js?v=1.9"></script>
+<script src="form-inspeccion.js?v=1.9"></script>
+<script src="guias.js?v=1.9"></script>
 <script>
 (function(){
 "use strict";
@@ -556,8 +563,12 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.8";
+var APP_VERSION="1.9";
 var APP_VERSION_NOTAS=[
+  "v1.9: Cada concepto y cada ficha se pueden eliminar desde la lista, con la papelera (sirve para los borradores y los repetidos).",
+  "v1.9: Corregido el recuadro del QR del certificado, que habia quedado con fondo negro y letras ilegibles.",
+  "v1.9: Al crear una inspeccion se puede escanear el QR o buscar el establecimiento: queda en la misma ficha y no se duplica.",
+  "v1.9: Si el establecimiento ya tenia concepto, el tramite se marca solo como Renovacion.",
   "v1.8: Lector de QR en Verificar: apunta la camara al certificado y se llena solo.",
   "v1.8: En Censar ya se puede escanear el QR o buscar por nombre o documento: trae los datos y el estado del certificado.",
   "v1.8: Cada item de la inspeccion tiene boton de Tomar foto, aparte del de Galeria.",
@@ -1503,20 +1514,28 @@ function vEstablecimientos(v){
       return true});
     lg.innerHTML="";
     if(!list.length){lg.innerHTML='<div class="empty">Sin resultados.</div>';return}
-    list.forEach(function(e){lg.appendChild(estRow(e))});
+    list.forEach(function(e){lg.appendChild(estRow(e,isAdmin()?rebuild:null))});
   }
   rebuild();
   $("#qEst").addEventListener("input",function(){estQuery=this.value;rebuild()});
   $$("#fpills button").forEach(function(b){b.addEventListener("click",function(){estFilter=b.dataset.k;render()})});
   $("#nuevoEst").addEventListener("click",altaExpres);
 }
-function estRow(e){
+function estRow(e,alBorrar){
   var s=estadoEst(e);
   var b=el("button","row-item");
-  b.innerHTML='<div class="ava">'+tipoIcon(e.tipo)+'</div><div class="meta"><b>'+esc(e.nombre)+'</b>'+
+  b.innerHTML='<div class="ava">'+tipoIcon(e.tipo)+'</div><div class="meta"><b>'+esc(e.nombre||"(sin nombre)")+'</b>'+
     '<small><span class="mono">'+esc(e.codigo)+'</span> · '+esc(e.barrio)+(s.u?' · vence '+fmt(s.u.vigenciaHasta):'')+'</small></div>'+chip(s.k,s.t);
   b.addEventListener("click",function(){openFicha(e.id)});
-  return b;
+  if(!alBorrar) return b;
+  /* el administrador puede quitar fichas repetidas desde la misma lista */
+  var par=el("div","rowpar");
+  var del=el("button","rowdel","🗑");
+  del.title="Eliminar esta ficha";
+  del.setAttribute("aria-label","Eliminar la ficha de "+(e.nombre||"este establecimiento"));
+  del.addEventListener("click",function(ev){ ev.stopPropagation(); eliminarEstablecimiento(e,alBorrar) });
+  par.appendChild(b); par.appendChild(del);
+  return par;
 }
 function tipoIcon(t){t=(t||"").toLowerCase();if(t.indexOf("hotel")>=0)return"🏨";if(t.indexOf("rest")>=0)return"🍽";if(t.indexOf("bar")>=0)return"🍸";if(t.indexOf("educ")>=0||t.indexOf("coleg")>=0)return"🏫";if(t.indexOf("gas")>=0||t.indexOf("pelig")>=0)return"⚠️";if(t.indexOf("bodeg")>=0||t.indexOf("ferr")>=0)return"🔧";return"🏪"}
 function fmt(iso){if(!iso)return"—";var d=new Date(iso);return d.toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"})}
@@ -1536,9 +1555,13 @@ function vFicha(v){
     '<div class="kv" style="margin-top:16px">'+kv("Dirección",e.dir+", "+e.barrio)+kv("Actividad",e.act)+kv("NIT",e.nit)+
     kv("Representante",e.rep)+kv("Teléfono",e.tel)+(s.u?kv("Vigencia",fmt(s.u.vigenciaHasta)):"")+'</div>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><button class="btn btn-p" id="fInsp">+ Nueva inspección</button>'+
-    '<button class="btn btn-g btn-sm" id="fBack">← Volver</button></div>';
+    '<button class="btn btn-g btn-sm" id="fCenso">📋 Censar</button>'+
+    (isAdmin()?'<button class="btn btn-g btn-sm" id="fDel" style="color:var(--rojo)">🗑 Eliminar ficha</button>':'')+
+    '<button class="btn btn-g btn-sm" id="fBack" style="margin-left:auto">← Volver</button></div>';
   v.appendChild(head);
   $("#fInsp",head).addEventListener("click",function(){nuevaInspeccion(e.id)});
+  $("#fCenso",head).addEventListener("click",function(){modalCenso(e)});
+  if($("#fDel",head))$("#fDel",head).addEventListener("click",function(){eliminarEstablecimiento(e)});
   $("#fBack",head).addEventListener("click",function(){navTo("establecimientos")});
   v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Historial de revisiones</h3><div class="ln"></div></div>');
   var hs=DB.inspecciones.filter(function(x){return x.establecimientoId===e.id}).sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)});
@@ -1610,10 +1633,20 @@ function vInspeccion(v){
   if(step.k==="datos")renderDatos(body,est);
   else if(step.k==="resumen")renderResumen(body,est);
   else renderModuleStep(body,step.mod);
-  var nav=el("div");nav.style.cssText="display:flex;gap:10px;margin-top:16px";
+  var nav=el("div");nav.style.cssText="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap";
   nav.innerHTML=(FORM._step>0?'<button class="btn btn-g" id="pv">← Anterior</button>':'')+
+    '<button class="btn btn-g btn-sm" id="borrarI" style="color:var(--rojo)">🗑 Eliminar</button>'+
     (FORM._step<steps.length-1?'<button class="btn btn-p" id="nx" style="margin-left:auto">Siguiente →</button>':'<button class="btn btn-p" id="gen" style="margin-left:auto">Generar concepto</button>');
   v.appendChild(nav);
+  $("#borrarI",nav).addEventListener("click",function(){
+    /* un borrador que aún no se guardó en la lista simplemente se descarta */
+    if(!DB.inspecciones.some(function(x){return x.id===FORM.id})){
+      modal("Descartar inspección","<p class=\"note\">Se pierde lo que lleves de esta inspección. No queda guardada.</p>","Descartar",
+        function(){FORM=null;navTo("conceptos");return true});
+      return;
+    }
+    eliminarConcepto(FORM);
+  });
   if($("#pv",nav))$("#pv",nav).addEventListener("click",function(){FORM._step--;render();window.scrollTo(0,0)});
   if($("#nx",nav))$("#nx",nav).addEventListener("click",function(){FORM._step++;render();window.scrollTo(0,0)});
   if($("#gen",nav))$("#gen",nav).addEventListener("click",function(){var r=compute(FORM);if(r.got<3){toast("Diligencia la inspección primero");return}finalizar()});
@@ -1628,7 +1661,15 @@ function renderDatos(body,est){
     '<div class="modeseg" id="tramiteSeg" style="margin-bottom:6px;flex-wrap:wrap">'+
       [["primera","Primera vez"],["renovacion","Renovación"],["cambio","Cambio (razón social / dueño)"]].map(function(p){return '<button data-t="'+p[0]+'" class="'+(FORM.tramite===p[0]?"on":"")+'">'+p[1]+'</button>'}).join("")+'</div>'+
     '<div class="guia" id="tramiteGuia"></div><div id="docsBox"></div>'+
-    '<div class="ff" style="margin-top:14px">'+
+    /* Mismo atajo del censo y de Verificar: si el negocio ya está en la base
+       (censado antes, o con revisión de años anteriores), se engancha a ESA
+       ficha y no nace una repetida. */
+    '<div class="buscaest" style="margin-top:14px">'+
+      '<button type="button" class="btn btn-g btn-sm" id="iScan">📷 Escanear QR</button>'+
+      '<input id="iBuscaTxt" type="text" placeholder="…o busca por nombre o documento">'+
+      '<button type="button" class="btn btn-g btn-sm" id="iBuscar">Buscar</button>'+
+    '</div><div id="iHallado"></div>'+
+    '<div class="ff" style="margin-top:4px">'+
     '<div class="wide"><label class="lbl">Establecimiento</label><input id="iNom" type="text" value="'+esc(est?est.nombre:"")+'" placeholder="Nombre del local"></div>'+
     '<div><label class="lbl">Dirección / barrio</label><input id="iDir" type="text" value="'+esc(est?((est.dir||"")+", "+(est.barrio||"")):"")+'"></div>'+
     '<div><label class="lbl">Representante / responsable</label><input id="iRep" type="text" value="'+esc(est?est.rep:"")+'"></div>'+
@@ -1662,6 +1703,58 @@ function renderDatos(body,est){
   $$("#ocupQuick button",top).forEach(function(b){b.addEventListener("click",function(){var q=OCUP_QUICK[+b.dataset.i];FORM.ocupacion=q.ocup;FORM.clasifRiesgo=q.riesgo;$("#iOcup",top).value=q.ocup;$("#iRiesgo",top).value=q.riesgo;scheduleSave();toast(q.label+" → "+q.ocup+" ("+q.riesgo+")")})});
   var bindTxt=function(id,set){$(id,top).addEventListener("input",function(){set(this.value);scheduleSave()})};
   bindTxt("#iNom",function(x){FORM._nom=x});bindTxt("#iDir",function(x){FORM._dir=x});bindTxt("#iRep",function(x){FORM._rep=x});bindTxt("#iInsp",function(x){FORM.inspector=x});
+
+  /* --- enganchar la inspección a una ficha que ya existe --- */
+  function usarFicha(e){
+    FORM.establecimientoId=e.id;
+    FORM._nom=e.nombre||""; $("#iNom",top).value=FORM._nom;
+    var dir=(e.dir&&e.dir!=="—"?e.dir:"")+(e.barrio&&e.barrio!=="—"?(", "+e.barrio):"");
+    FORM._dir=dir; $("#iDir",top).value=dir;
+    if(e.rep){FORM._rep=e.rep; $("#iRep",top).value=e.rep}
+    if(e.ocup){FORM.ocupacion=e.ocup; var so=$("#iOcup",top); if(so)so.value=e.ocup}
+    scheduleSave();
+    var s=estadoEst(e), u=s.u, ult=ultimoBarrido&&ultimoBarrido(e.id);
+    $("#iHallado",top).innerHTML='<div class="hallazgoest"><b>'+esc(e.nombre||"")+'</b>'+chip(s.k,s.t)+
+      (u?('<p class="note" style="margin-top:6px">Última revisión: <span class="mono">'+esc(u.codigo||"")+'</span> · vence '+fmt(u.vigenciaHasta)+'</p>'):'')+
+      (ult?('<p class="note">Censado el '+fmt(ult.fecha)+' por '+esc(ult.inspectorNombre||"")+'</p>'):'')+
+      '<p class="note">Esta inspección queda en esa misma ficha, no en una nueva.</p></div>';
+    if(FORM.tramite==="primera"&&u){            // ya tenía concepto: es renovación
+      FORM.tramite="renovacion";
+      $$("#tramiteSeg button",top).forEach(function(x){x.classList.toggle("on",x.dataset.t==="renovacion")});
+      paintTramite();
+    }
+  }
+  function buscarFicha(txt){
+    var cont=$("#iHallado",top); txt=String(txt||"").trim();
+    if(!txt){cont.innerHTML="";return}
+    var n=normNombre(txt), d=normDoc(txt);
+    var res=DB.establecimientos.filter(function(x){
+      if(d&&normDoc(x.nit)&&normDoc(x.nit)===d)return true;
+      return normNombre(x.nombre).indexOf(n)>=0;
+    }).slice(0,8);
+    if(!res.length){cont.innerHTML='<p class="note">No está en la base: se creará como establecimiento nuevo.</p>';return}
+    if(res.length===1){usarFicha(res[0]);return}
+    cont.innerHTML='<p class="note">Varios coinciden; elige cuál:</p>';
+    var lg=el("div","listgrid");
+    res.forEach(function(x){
+      var s=estadoEst(x), bb=el("button","row-item");
+      bb.innerHTML='<div class="meta"><b>'+esc(x.nombre)+'</b><small>'+esc(x.barrio||"")+(x.nit?(' · '+esc(x.nit)):'')+'</small></div>'+chip(s.k,s.t);
+      bb.addEventListener("click",function(){usarFicha(x)});
+      lg.appendChild(bb);
+    });
+    cont.appendChild(lg);
+  }
+  $("#iBuscar",top).addEventListener("click",function(){buscarFicha($("#iBuscaTxt",top).value)});
+  $("#iBuscaTxt",top).addEventListener("keydown",function(ev){if(ev.key==="Enter"){ev.preventDefault();buscarFicha(this.value)}});
+  $("#iScan",top).addEventListener("click",function(){
+    escanearQR(function(r){
+      var ins=DB.inspecciones.filter(function(x){return String(x.codigo||"").toUpperCase()===r.c})[0];
+      var e=ins&&DB.establecimientos.filter(function(x){return x.id===ins.establecimientoId})[0];
+      if(e){usarFicha(e);toast("Es una renovación de "+(e.nombre||""))}
+      else{ $("#iBuscaTxt",top).value=r.c;
+            $("#iHallado",top).innerHTML='<p class="note">Leí el concepto <b class="mono">'+esc(r.c)+'</b>, pero no está en esta tablet.</p>' }
+    });
+  });
   $("#iOcup",top).addEventListener("change",function(){FORM.ocupacion=this.value;scheduleSave()});
   $("#iRiesgo",top).addEventListener("change",function(){FORM.clasifRiesgo=this.value;scheduleSave()});
 }
@@ -1850,7 +1943,19 @@ function aplicarGpsInsp(){
 }
 function syncEst(){ // crea/actualiza el establecimiento desde el encabezado
   var e=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});
-  if(!e&&FORM._nom){e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),lat:"",lng:"",creado:NOW.toISOString()};DB.establecimientos.push(e);FORM.establecimientoId=e.id}
+  if(!e&&FORM._nom){
+    /* ANTES se creaba una ficha nueva sin mirar si ese negocio ya estaba.
+       Resultado: lo censado en el barrido y lo inspeccionado después
+       quedaban como dos establecimientos distintos. Ahora, si el nombre (o
+       el documento) ya existe, la inspección se cuelga de ESA ficha y el
+       historial queda junto. */
+    var ya=buscarEstablecimiento(FORM._nom,"");
+    if(ya){ e=ya; FORM.establecimientoId=e.id; FORM._asociado=e.nombre; }
+    else {
+      e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),lat:"",lng:"",creado:NOW.toISOString()};
+      DB.establecimientos.push(e);FORM.establecimientoId=e.id;
+    }
+  }
   if(e){if(FORM._nom!==undefined)e.nombre=FORM._nom;if(FORM._rep!==undefined)e.rep=FORM._rep;if(FORM.ocupacion)e.ocup=FORM.ocupacion;
     if(FORM._dir!==undefined){var p=FORM._dir.split(",");e.dir=p[0]||e.dir;e.barrio=(p[1]||e.barrio||"").trim()}}
 }
@@ -1963,6 +2068,7 @@ function vCertificado(v){
   var act=el("div");act.style.cssText="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px";
   act.innerHTML='<button class="btn btn-p" id="pdf">⤓ Descargar certificado (PDF)</button>'+
     '<button class="btn btn-g" id="edit">← Editar la inspección</button>'+
+    '<button class="btn btn-g btn-sm" id="borrarC" style="color:var(--rojo)">🗑 Eliminar</button>'+
     '<button class="btn btn-g btn-sm" id="done" style="margin-left:auto">Listo</button>';
   v.appendChild(act);
 
@@ -1984,6 +2090,7 @@ function vCertificado(v){
   });
   $("#pdf",act).addEventListener("click",function(){makePDF(r,est)});
   $("#edit",act).addEventListener("click",function(){VIEW="inspeccion";render()});
+  $("#borrarC",act).addEventListener("click",function(){eliminarConcepto(FORM)});
   $("#done",act).addEventListener("click",function(){navTo("conceptos")});
 }
 function hallHTML(h,i){
@@ -2188,6 +2295,63 @@ function makePDF(r,est){
   }
 }
 
+/* ===================== ELIMINAR UN CONCEPTO =====================
+   Hacía falta: un borrador a medias, o una fila repetida de la importación,
+   se quedaban para siempre ocupando la lista.
+   Un borrador se borra sin más (nunca salió de la tablet). Uno ya emitido es
+   un documento entregado al ciudadano, así que se avisa con claridad, solo lo
+   hace el administrador y se borra también del servidor. */
+function eliminarConcepto(insp,alTerminar){
+  if(!insp) return;
+  var emitido=estaValidado(insp);
+  if(emitido&&!isAdmin()){ toast("Solo el administrador puede eliminar un concepto ya emitido"); return }
+  var est=DB.establecimientos.filter(function(x){return x.id===insp.establecimientoId})[0]||{};
+  var aviso=emitido
+    ? '<p class="note" style="color:var(--rojo)"><b>Este concepto ya fue emitido</b> con el número <span class="mono">'+esc(insp.codigo)+'</span>. '+
+      'Si el ciudadano tiene el certificado impreso, su QR dejará de validar.</p>'+
+      '<p class="note">Se borra también del servidor y de las demás tablets.</p>'
+    : '<p class="note">Es un borrador que nunca se emitió. Se borra solo de esta tablet.</p>';
+  modal("Eliminar concepto",
+    aviso+'<p class="note" style="margin-top:8px">Establecimiento: <b>'+esc(est.nombre||"(sin establecimiento)")+'</b> · '+fmt(insp.fecha)+'</p>',
+    "Eliminar", function(){
+      DB.inspecciones=DB.inspecciones.filter(function(x){return x.id!==insp.id});
+      /* si estaba en la cola sin subir, se saca para que no reviva */
+      try{ QUEUE=QUEUE.filter(function(op){ return !(op.a==="guardarInspeccion"&&op.p&&op.p.inspeccion&&op.p.inspeccion.idCliente===insp.id) }); saveQ(); }catch(e){}
+      persist(); updateSync();
+      if(emitido&&esOnline()){
+        api("eliminarInspeccion",{idCliente:insp.id,codigo:insp.codigo}).then(function(res){
+          toast(res&&res.ok?"Concepto eliminado":mensajeServidor((res&&res.error)||"Se borró aquí, pero no en el servidor"));
+        }).catch(function(){ toast("Se borró aquí; el servidor no respondió") });
+      } else toast("Concepto eliminado");
+      if(FORM&&FORM.id===insp.id)FORM=null;
+      if(alTerminar)alTerminar(); else navTo("conceptos");
+      return true;
+    });
+}
+function eliminarEstablecimiento(e,alTerminar){
+  if(!e) return;
+  if(!isAdmin()){ toast("Solo el administrador puede eliminar un establecimiento"); return }
+  var ins=DB.inspecciones.filter(function(x){return x.establecimientoId===e.id});
+  var bar=DB.barridos.filter(function(x){return x.establecimientoId===e.id});
+  modal("Eliminar establecimiento",
+    '<p class="note" style="color:var(--rojo)"><b>Se borra la ficha completa</b> de <b>'+esc(e.nombre||"")+'</b>, '+
+    'con sus '+ins.length+' concepto(s) y '+bar.length+' censo(s).</p>'+
+    '<p class="note">Úsalo para fichas repetidas. Si solo sobra un concepto, elimínalo desde su propia pantalla.</p>',
+    "Eliminar todo", function(){
+      DB.inspecciones=DB.inspecciones.filter(function(x){return x.establecimientoId!==e.id});
+      DB.barridos=DB.barridos.filter(function(x){return x.establecimientoId!==e.id});
+      DB.establecimientos=DB.establecimientos.filter(function(x){return x.id!==e.id});
+      persist();
+      if(esOnline()){
+        api("eliminarEstablecimiento",{id:e.id}).then(function(res){
+          toast(res&&res.ok?"Establecimiento eliminado":mensajeServidor((res&&res.error)||"Se borró aquí, pero no en el servidor"));
+        }).catch(function(){ toast("Se borró aquí; el servidor no respondió") });
+      } else toast("Establecimiento eliminado");
+      if(alTerminar)alTerminar(); else navTo("establecimientos");
+      return true;
+    });
+}
+
 /* ===================== LECTOR DE QR =====================
    En terreno, escribir el código y el distintivo a mano es lento y se presta
    para errores. Esto lee el QR del certificado.
@@ -2297,7 +2461,7 @@ function escanearQR(onLeido){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ modoFoto("Este equipo no deja abrir la cámara en vivo."); return }
   modal("Leer el QR",
     '<p class="note">Apunta al código QR del certificado.</p>'+
-    '<div class="qrbox"><video id="qrVid" playsinline muted></video><div class="qrmira"></div></div>'+
+    '<div class="qrscan"><video id="qrVid" playsinline muted></video><div class="qrmira"></div></div>'+
     '<p class="note" id="qrMsg" style="margin-top:8px">Abriendo la cámara…</p>',
     "Cerrar", function(){ cerrar(); return true });
   video=$("#qrVid");
@@ -2449,7 +2613,16 @@ function vConceptos(v){
         NAVHIST.push({v:"conceptos",ficha:fichaId,form:null});
         FORM=x; VIEW=(x.estado==="finalizada")?"certificado":"inspeccion"; render(); window.scrollTo(0,0);
       });
-      lg.appendChild(b);
+      /* papelera en la misma fila: los borradores y los repetidos se quitan
+         desde aquí, sin tener que abrirlos (abrir uno sin establecimiento
+         además dejaba al inspector atrapado en una pantalla vacía) */
+      var par=el("div","rowpar");
+      var del=el("button","rowdel","🗑");
+      del.title="Eliminar este concepto";
+      del.setAttribute("aria-label","Eliminar el concepto de "+(e.nombre||"este establecimiento"));
+      del.addEventListener("click",function(ev){ ev.stopPropagation(); eliminarConcepto(x,function(){rebuild()}) });
+      par.appendChild(b); par.appendChild(del);
+      lg.appendChild(par);
     });
     cont.appendChild(lg);
   }
@@ -2527,9 +2700,13 @@ function vVencimientos(v){
 function vVerificar(v){
   v.insertAdjacentHTML("beforeend",'<div class="card pad" style="max-width:520px;margin:0 auto">'+
     '<h3 style="font-size:18px">Verificar un concepto</h3>'+
-    '<p class="note" style="margin:6px 0 14px">Escanea el QR del certificado, o escribe el código y el distintivo.</p>'+
+    '<p class="note" style="margin:6px 0 14px">Escanea el QR del certificado, búscalo por nombre o documento, o escribe el código.</p>'+
     '<button class="btn btn-p" id="vScan" style="width:100%">📷 Escanear el QR</button>'+
-    '<p class="note" style="text-align:center;margin:10px 0 4px">o escríbelo</p>'+
+    '<div class="buscaest" style="margin-top:12px">'+
+      '<input id="vBuscaTxt" type="text" placeholder="Buscar por nombre o documento">'+
+      '<button class="btn btn-g btn-sm" id="vBuscar">Buscar</button></div>'+
+    '<div id="vHallado"></div>'+
+    '<p class="note" style="text-align:center;margin:10px 0 4px">o escribe el código</p>'+
     '<div class="ff"><div><label class="lbl">Código</label><input id="vC" type="text" placeholder="RT-2026-0001"></div>'+
     '<div><label class="lbl">Distintivo</label><input id="vD" type="text" placeholder="6 caracteres"></div></div>'+
     '<div style="margin-top:14px"><button class="btn btn-g" id="vGo">Verificar</button></div>'+
@@ -2540,6 +2717,50 @@ function vVerificar(v){
       $("#vGo").click();                         // leído: se verifica solo
     });
   });
+  /* Buscar por nombre o documento, igual que en el censo: en terreno casi
+     nunca traen el número del concepto, pero el nombre del negocio sí. */
+  function buscarEnVerificar(txt){
+    var cont=$("#vHallado"); txt=String(txt||"").trim();
+    if(!txt){cont.innerHTML="";return}
+    var n=normNombre(txt), d=normDoc(txt);
+    var res=DB.establecimientos.filter(function(e){
+      if(d&&normDoc(e.nit)&&normDoc(e.nit)===d)return true;
+      return normNombre(e.nombre).indexOf(n)>=0;
+    }).slice(0,8);
+    if(!res.length){cont.innerHTML='<p class="note">No hay ningún establecimiento con ese nombre o documento en la base.</p>';return}
+    cont.innerHTML="";
+    var lg=el("div","listgrid");
+    res.forEach(function(e){
+      var s=estadoEst(e), u=s.u;
+      var b=el("button","row-item");
+      b.innerHTML='<div class="ava">'+tipoIcon(e.tipo)+'</div>'+
+        '<div class="meta"><b>'+esc(e.nombre)+'</b><small>'+esc(e.barrio||"")+
+        (u&&u.vigenciaHasta?(' · vence '+fmt(u.vigenciaHasta)):'')+(e.nit?(' · '+esc(e.nit)):'')+'</small></div>'+
+        chip(s.k,s.t);
+      b.addEventListener("click",function(){
+        var cont2=$("#vHallado");
+        cont2.innerHTML='<div class="hallazgoest"><b>'+esc(e.nombre)+'</b>'+
+          chip(s.k,s.t)+
+          (u?('<p class="note" style="margin-top:6px">Concepto <span class="mono">'+esc(u.codigo||"")+'</span> · '+
+              ((u.concepto&&u.concepto.favorable)?"Favorable":"No favorable")+' · vence '+fmt(u.vigenciaHasta)+'</p>'):
+             '<p class="note" style="margin-top:6px">Este establecimiento no tiene conceptos registrados.</p>')+
+          (e.dir&&e.dir!=="—"?('<p class="note">'+esc(e.dir)+(e.barrio?(", "+esc(e.barrio)):"")+'</p>'):'')+
+          (e.rep?('<p class="note">'+esc(e.rep)+(e.tel?(" · "+esc(e.tel)):"")+'</p>'):'')+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+            (u?'<button class="btn btn-g btn-sm" id="vVerCert">Ver certificado</button>':'')+
+            '<button class="btn btn-g btn-sm" id="vCensar">📋 Censar aquí</button>'+
+            '<button class="btn btn-g btn-sm" id="vFicha">Abrir ficha</button>'+
+          '</div></div>';
+        if($("#vVerCert"))$("#vVerCert").addEventListener("click",function(){FORM=u;VIEW="certificado";render();window.scrollTo(0,0)});
+        $("#vCensar").addEventListener("click",function(){modalCenso(e)});
+        $("#vFicha").addEventListener("click",function(){openFicha(e.id)});
+      });
+      lg.appendChild(b);
+    });
+    cont.appendChild(lg);
+  }
+  $("#vBuscar").addEventListener("click",function(){buscarEnVerificar($("#vBuscaTxt").value)});
+  $("#vBuscaTxt").addEventListener("keydown",function(ev){if(ev.key==="Enter"){ev.preventDefault();buscarEnVerificar(this.value)}});
   $("#vGo").addEventListener("click",function(){
     var c=($("#vC").value||"").trim().toUpperCase(), dd=($("#vD").value||"").trim().toUpperCase();
     var insp=DB.inspecciones.find(function(x){return x.codigo===c&&x.estado==="finalizada"});

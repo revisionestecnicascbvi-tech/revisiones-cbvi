@@ -1,14 +1,14 @@
-/* sw.js — CBVI Revisiones Técnicas · caché v1-8
+/* sw.js — CBVI Revisiones Técnicas · caché v1-9
    ESTRATEGIA: network-first para los archivos propios (siempre la versión más
    nueva cuando hay señal) y caché como respaldo cuando no hay red — Inírida
    tiene cobertura parcial y zonas rurales sin señal por días.
    index.html solo se usa como respaldo en NAVEGACIONES (req.mode==='navigate'),
    nunca para JS/CSS: devolver HTML donde se espera un script rompe la app.
    REGLA: subir la versión del CACHE en cada cambio del front (v1-0, v1-1, …). */
-var CACHE = "cbvi-revisiones-v1-8";
+var CACHE = "cbvi-revisiones-v1-9";
 var ASSETS = [
   "./", "./index.html", "./verificar.html", "./manifest.json",
-  "./form-inspeccion.js?v=1.8", "./guias.js?v=1.8", "./logos.js?v=1.8",
+  "./form-inspeccion.js?v=1.9", "./guias.js?v=1.9", "./logos.js?v=1.9",
   "./form-inspeccion.js", "./guias.js", "./logos.js",
   "./icon192.png", "./icon512.png", "./iconmaskable192.png", "./iconmaskable512.png"
 ];
