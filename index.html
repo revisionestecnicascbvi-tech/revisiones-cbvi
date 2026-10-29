@@ -549,7 +549,7 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
 var APP_VERSION="1.7";
 var APP_VERSION_NOTAS=[
   "v1.7: Boton Emitir todos: los conceptos importados reciben su numero oficial en grupos, en vez de uno por uno.",
-  "v1.7: La importacion acepta el documento (NIT o cedula) y ya no duplica un establecimiento que ya existe.",
+  "v1.7: La importacion acepta documento, direccion, telefono, propietario y actividad, y ya no duplica un establecimiento que ya existe.",
   "v1.7: Si el nombre viene escrito distinto (tildes, mayusculas), igual se reconoce como el mismo establecimiento.",
   "v1.6: El numero del concepto ya se ve bien en el resumen (antes salia con etiquetas de codigo a la vista).",
   "v1.6: Mantenimiento ahora distingue borrar solo en la tablet y borrar toda la base en el servidor; antes los datos volvian a aparecer al sincronizar.",
@@ -2329,8 +2329,9 @@ function vConfig(v){
   v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Importar inspecciones existentes</h3><div class="ln"></div></div>');
   var imp=el("div","card pad");
   imp.innerHTML='<p class="note">Carga las revisiones de este año (las de papel/Excel). Solo necesitas nombre, barrio, fecha y vigencia; la app calculará vigentes / por vencer. Los demás ítems quedan vacíos.</p>'+
-    '<p class="note" style="margin-top:8px">CSV, una por línea: <span class="mono">nombre,barrio,fecha,vigencia,favorable,documento</span> · fechas <span class="mono">AAAA-MM-DD</span>.<br>Ej.: <span class="mono">Tienda Doña Rosa,Centro,2026-03-10,2027-03-10,si,40374566</span></p>'+
-    '<p class="note" style="margin-top:6px">El <b>documento</b> (NIT o cédula) es opcional pero conviene: con él, cuando llegue la renovación la app reconoce que es el mismo establecimiento aunque el nombre venga escrito distinto, y no lo duplica.</p>'+
+    '<p class="note" style="margin-top:8px">CSV, una por línea. Las cuatro primeras son obligatorias; de ahí en adelante, lo que tengas:<br>'+
+    '<span class="mono">nombre,barrio,fecha,vigencia,favorable,documento,dirección,teléfono,propietario,actividad</span> · fechas <span class="mono">AAAA-MM-DD</span>.</p>'+
+    '<p class="note" style="margin-top:6px">El <b>documento</b> (NIT o cédula) conviene ponerlo: con él, cuando llegue la renovación la app reconoce que es el mismo establecimiento aunque el nombre venga escrito distinto, y no lo duplica.</p>'+
     '<textarea id="impIn" style="min-height:110px;font-family:var(--ff-m);font-size:12px;margin-top:10px" placeholder="Pega aquí tus filas CSV…"></textarea>'+
     '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><label class="btn btn-g btn-sm">Subir archivo CSV<input type="file" id="impFile" accept=".csv,text/csv,text/plain" hidden></label>'+
     '<button class="btn btn-p btn-sm" id="impGo">Importar</button></div><p class="note" id="impMsg" style="margin-top:8px"></p>';
@@ -2476,17 +2477,23 @@ function importCsv(txt){
     var p=parseCsvLine(l).map(function(x){return x.trim()});if(p.length<4)return;
     var nombre=p[0].trim();if(!nombre)return;
     var barrio=(p[1]||"").trim(),fecha=(p[2]||"").trim(),vig=(p[3]||"").trim(),
-        fav=/^(s|1|t|f)/i.test((p[4]||"si").trim()), doc=(p[5]||"").trim();
+        fav=/^(s|1|t|f)/i.test((p[4]||"si").trim()), doc=(p[5]||"").trim(),
+        dir=(p[6]||"").trim(), tel=(p[7]||"").trim(), prop=(p[8]||"").trim(), act=(p[9]||"").trim();
     /* si ese establecimiento ya está, se le agrega la revisión en vez de
        duplicarlo: así la renovación queda sobre la misma ficha */
     var e=buscarEstablecimiento(nombre,doc);
     if(e){
       reusados++;
-      if(!e.nit && doc) e.nit=doc;                       // completa lo que faltaba
+      /* se completa lo que faltaba, sin pisar lo que ya tenía */
+      if(!e.nit && doc) e.nit=doc;
       if((!e.barrio||e.barrio==="—") && barrio) e.barrio=barrio;
+      if((!e.dir||e.dir==="—") && dir) e.dir=dir;
+      if(!e.tel && tel) e.tel=tel;
+      if(!e.rep && prop) e.rep=prop;
+      if(!e.act && act) e.act=act;
     } else {
       e={id:"e"+Date.now()+"_"+n,codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),nombre:nombre,
-         tipo:"Comercio",barrio:barrio||"—",dir:"—",ocup:"",act:"",nit:doc,rep:"",tel:"",lat:"",lng:"",creado:NOW.toISOString()};
+         tipo:"Comercio",barrio:barrio||"—",dir:dir||"—",ocup:"",act:act,nit:doc,rep:prop,tel:tel,lat:"",lng:"",creado:NOW.toISOString()};
       DB.establecimientos.push(e);
     }
     var cod="RT-IMP-"+String(DB.inspecciones.length+1).padStart(4,"0");
