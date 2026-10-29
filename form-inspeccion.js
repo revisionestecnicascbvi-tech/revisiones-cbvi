@@ -124,7 +124,11 @@ window.MODULOS = [
     items: [
       { id:"m6_deter", label:"Cuenta con equipos y/o componentes eléctricos deteriorados.", tipo:"sino", opts:SINO(0,1) },
       { id:"m6_estado",label:"Se observa que el estado de las instalaciones eléctricas es bueno.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m6_uso",   label:"Se observa un uso adecuado de las instalaciones eléctricas.", tipo:"sino", opts:SINO(0,1), nota:"Puntaje según formato oficial (revisar posible inversión SI/NO)." },
+      /* CORREGIDO v1.1: el formato oficial DNBC V1-2022 (fila 124) puntúa
+         "uso adecuado" con SI=0 y NO=1, al revés de lo que dice la pregunta:
+         un buen uso restaba. Se corrige a SI=1 / NO=0. El máximo del ítem
+         sigue siendo 1, así que el total (148) y la escala no cambian. */
+      { id:"m6_uso",   label:"Se observa un uso adecuado de las instalaciones eléctricas.", tipo:"sino", opts:SINO(1,0) },
       { id:"m6_sobre", label:"Se cuenta con sistemas de protección de sobrecargas.", tipo:"sino", opts:SINO(1,0) },
       { id:"m6_retie", label:"El sistema eléctrico ha sido revisado con base en el RETIE en los últimos años.", tipo:"sino", opts:SINO(1,0) }
     ]
@@ -225,6 +229,25 @@ window.MODULOS = [
    Ítems observables y esenciales que el inspector revisa rápido en un comercio.
    Ajustable: Jeferson marcará qué más incluir/quitar.
    En modo intermedio el puntaje se calcula sobre estos ítems (normalizado a 100). */
+/* ITEMS DE CARACTERIZACIÓN — describen el establecimiento y SUMAN al
+   puntaje, pero NO son un "no cumple" que el propietario pueda corregir:
+   no salen como hallazgo en el certificado (una edificación vieja o un
+   área grande no se "arreglan" con un plan de mejoramiento).
+   Todo lo demás que no tenga el puntaje máximo SÍ es hallazgo y lleva
+   su recomendación ("Qué hacer") y su foto si la hay. */
+window.ITEMS_CONTEXTO = [
+  "m2_num","m2_comp",
+  "m3_emerg","m3_reporte","m3_tipo","m3_detuvo","m3_sistemas",
+  "m4_nueva","m4_nsr","m4_remod","m4_tipo","m4_propv","m4_proph",
+  "m4_altura","m4_areapiso","m4_nsub","m4_areasub","m4_actsub","m4_ocup500","m4_ocup100",
+  "m5_fuentes",
+  "m7_requiere",
+  "m8_aforo","m8_anchocorr","m8_anchopuerta","m8_anchoesc","m8_anchoramp",
+  "m8_anchosalida","m8_anchopsalida","m8_cantdesc","m8_escext",
+  "m9_briclase",
+  "m10_aseg"
+];
+
 window.ITEMS_INTERMEDIO = [
   // Riesgo de incendio (M5)
   "m5_fuentes","m5_inflam",

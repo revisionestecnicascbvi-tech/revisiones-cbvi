@@ -272,7 +272,13 @@ window.ACCIONES = {
   /* --- M10 · Seguros --- */
   m10_seguro:  "Contrate una póliza de incendio que ampare el inmueble y su contenido.",
   m10_poliza:  "Mantenga la póliza vigente y a disposición en el establecimiento.",
-  m10_aseg:    "Ajuste el valor asegurado al valor real del inmueble y su contenido."
+  m10_aseg:    "Ajuste el valor asegurado al valor real del inmueble y su contenido.",
+  m8_procaño:  "Realice la inspección, prueba y mantenimiento anual de salidas, señalización e iluminación de emergencia y deje el registro firmado.",
+  m9_r_inc:    "Incluya el riesgo de incendio en el plan de emergencias, con su procedimiento de respuesta y responsables.",
+  m9_r_fugas:  "Incluya en el plan de emergencias el procedimiento ante fugas de gas u otras sustancias: corte, ventilación y evacuación.",
+  m9_r_derr:   "Incluya en el plan de emergencias el procedimiento ante derrames: contención, material absorbente y disposición segura.",
+  m9_r_expl:   "Incluya en el plan de emergencias el riesgo de explosión, con las zonas de exclusión y la ruta de evacuación.",
+  m9_r_bleve:  "Incluya en el plan el riesgo BLEVE (cilindros de gas a presión): ubicación ventilada, lejos de calor, y distancia de evacuación."
 };
 
 /* Acción por defecto según el módulo, cuando el ítem no tiene una específica. */

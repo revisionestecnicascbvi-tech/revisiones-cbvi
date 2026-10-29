@@ -136,7 +136,7 @@
   </p>
 </main>
 
-<script src="logos.js"></script>
+<script src="logos.js?v=1.2"></script>
 <script>
 (function(){
 "use strict";
@@ -232,8 +232,9 @@ function consultar(c, d){
 
   var url = BACKEND_URL + "?api=1&c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
   fetch(url, { method:"GET" })
-    .then(function(r){ return r.json(); })
+    .then(function(r){ return r.text().then(function(t){ try{ return JSON.parse(t); }catch(e){ return { _noJson:true }; } }); })
     .then(function(res){
+      if(res && res._noJson){ servidorNoResponde(); return; }
       if(!res || !res.ok || !res.cert){
         pintarEstado("invalido", (res && res.error) || null);
         $("#manual").hidden = false;
@@ -244,11 +245,21 @@ function consultar(c, d){
       $("#manual").hidden = true;
     })
     .catch(function(){
-      $("#estado").className = "state s-cargando";
-      $("#estado").innerHTML = '<div class="ic">⚠</div><div><h2>Sin conexión</h2>'+
-        '<p>No se pudo consultar el servidor. Revisa tus datos o tu red e inténtalo de nuevo.</p></div>';
-      $("#manual").hidden = false;
+      /* Con señal, una falla aquí es del servidor (p. ej. en mantenimiento),
+         no del teléfono: decir "Sin conexión" confunde a quien verifica. */
+      if(navigator.onLine === false){
+        $("#estado").className = "state s-cargando";
+        $("#estado").innerHTML = '<div class="ic">⚠</div><div><h2>Sin conexión</h2>'+
+          '<p>Tu teléfono no tiene internet. Conéctate e inténtalo de nuevo.</p></div>';
+        $("#manual").hidden = false;
+      } else servidorNoResponde();
     });
+}
+function servidorNoResponde(){
+  $("#estado").className = "state s-cargando";
+  $("#estado").innerHTML = '<div class="ic">⏳</div><div><h2>Servicio no disponible</h2>'+
+    '<p>El servidor de verificación del CBVI no respondió correctamente. Puede estar en mantenimiento: inténtalo en unos minutos o comunícate con la estación.</p></div>';
+  $("#manual").hidden = false;
 }
 
 /* ====== Arranque ====== */

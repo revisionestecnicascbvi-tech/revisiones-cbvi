@@ -92,8 +92,22 @@
   .userpick button b{font-size:13.5px;font-family:var(--ff-h)}
   .userpick button small{font-size:11px;color:var(--muted)}
   .userpick button.sel{border-color:var(--ember);background:color-mix(in srgb,var(--ember) 8%,var(--surface))}
-  .pin{display:flex;gap:10px;justify-content:center}
-  .pin input{width:52px;height:60px;text-align:center;font-size:24px;font-family:var(--ff-m);border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink)}
+  /* 6 columnas iguales que SIEMPRE caben en la tarjeta (antes: 6x52px + gaps
+     = 362px en un cuerpo de 352px -> la 6a casilla se salia del borde). */
+  .pin{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+  .pin input{width:100%;min-width:0;height:58px;padding:0;text-align:center;font-size:24px;font-family:var(--ff-m);border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink)}
+  /* Login con dos modos: Entrar (correo + PIN) / Solicitar acceso (nombre + correo, SIN PIN) */
+  .lmodes{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+  .lmodes button{border:0;background:transparent;padding:10px 6px;border-radius:9px;font:600 14px var(--ff);color:var(--muted);cursor:pointer}
+  .lmodes button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .lmode{display:flex;flex-direction:column;gap:14px}
+  .lmode[hidden]{display:none}
+  .lexp{font-size:13.5px;line-height:1.5;color:var(--muted);margin:0}
+  .lmsg{font-size:13.5px;line-height:1.5;border-radius:12px;padding:12px 14px;margin:0}
+  .lmsg.ok{background:color-mix(in srgb,var(--verde) 12%,var(--surface));border:1px solid var(--verde);color:var(--ink)}
+  .lmsg.err{background:color-mix(in srgb,var(--rojo) 10%,var(--surface));border:1px solid var(--rojo);color:var(--ink)}
+  .lmsg b{font-family:var(--ff-h)}
+  .login-hint a{color:var(--ember);font-weight:600}
   .pin input:focus{outline:2px solid var(--ember);border-color:var(--ember)}
   .login-hint{font-size:12px;color:var(--faint);text-align:center}
 
@@ -408,23 +422,40 @@
       <div><h1>Revisiones Técnicas</h1><p>CUERPO DE BOMBEROS · INÍRIDA</p></div>
     </div>
     <div class="login-body">
-      <h2>Inicia sesión para continuar</h2>
-      <div><label class="lbl" for="loginEmail">Correo institucional</label><input id="loginEmail" type="email" placeholder="tu correo" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></div>
-      <div>
-        <label class="lbl">PIN de acceso</label>
-        <div class="pin" id="pin">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 1" autocomplete="off">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 2" autocomplete="off">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 3" autocomplete="off">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 4" autocomplete="off">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 5 (opcional)" autocomplete="off">
-          <input inputmode="numeric" maxlength="1" aria-label="dígito 6 (opcional)" autocomplete="off">
-        </div>
+      <div class="lmodes" role="tablist" aria-label="Acceso">
+        <button type="button" id="tabEntrar" class="on" role="tab" aria-selected="true">Entrar</button>
+        <button type="button" id="tabSolicitar" role="tab" aria-selected="false">Solicitar acceso</button>
       </div>
-      <button class="btn btn-p" id="btnLogin" style="width:100%">Entrar</button>
-      <button class="btn btn-g" id="btnSolicitar" style="width:100%;margin-top:9px">Solicitar acceso</button>
-      <p class="login-hint">El administrador aprueba tu solicitud y te asigna el PIN. Mientras no te apruebe, no podrás entrar.</p>
-      <p class="login-hint" style="margin-top:8px"><a href="#" id="verDemo" style="color:var(--muted);text-decoration:underline">Ver una demostración sin conexión</a></p>
+
+      <!-- Modo ENTRAR: para quien ya fue aprobado y tiene PIN -->
+      <div class="lmode" id="modoEntrar" role="tabpanel">
+        <div><label class="lbl" for="loginEmail">Correo</label><input id="loginEmail" type="email" placeholder="tu correo" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></div>
+        <div>
+          <label class="lbl">PIN de acceso</label>
+          <div class="pin" id="pin">
+            <input inputmode="numeric" maxlength="1" aria-label="dígito 1" autocomplete="off">
+            <input inputmode="numeric" maxlength="1" aria-label="dígito 2" autocomplete="off">
+            <input inputmode="numeric" maxlength="1" aria-label="dígito 3" autocomplete="off">
+            <input inputmode="numeric" maxlength="1" aria-label="dígito 4" autocomplete="off">
+            <input inputmode="numeric" maxlength="1" aria-label="dígito 5 (opcional)" autocomplete="off">
+            <input inputmode="numeric" maxlength="1" aria-label="dígito 6 (opcional)" autocomplete="off">
+          </div>
+        </div>
+        <button class="btn btn-p" id="btnLogin" style="width:100%">Entrar</button>
+        <p class="login-hint">¿Aún no tienes PIN? <a href="#" id="irSolicitar">Solicita acceso aquí</a></p>
+      </div>
+
+      <!-- Modo SOLICITAR: para quien es nuevo. NO lleva PIN. -->
+      <div class="lmode" id="modoSolicitar" role="tabpanel" hidden>
+        <p class="lexp">Escribe tu nombre y tu correo. El administrador revisa tu solicitud y, si la aprueba, <b>te entrega tu PIN</b>. Para pedir acceso no necesitas PIN.</p>
+        <div><label class="lbl" for="sNom">Nombre completo</label><input id="sNom" type="text" placeholder="Nombre y apellidos" autocomplete="name" maxlength="80"></div>
+        <div><label class="lbl" for="sEmail">Correo</label><input id="sEmail" type="email" placeholder="correo@ejemplo.com" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120"></div>
+        <button class="btn btn-p" id="btnEnviarSol" style="width:100%">Enviar solicitud</button>
+        <p class="lmsg" id="solMsg" hidden></p>
+        <p class="login-hint">¿Ya te dieron tu PIN? <a href="#" id="irEntrar">Entrar</a></p>
+      </div>
+
+      <p class="login-hint" style="margin-top:4px"><a href="#" id="verDemo" style="color:var(--muted);font-weight:500;text-decoration:underline">Ver una demostración sin conexión</a></p>
     </div>
   </div>
 </section>
@@ -460,9 +491,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.0"></script>
-<script src="form-inspeccion.js?v=1.0"></script>
-<script src="guias.js?v=1.0"></script>
+<script src="logos.js?v=1.1"></script>
+<script src="form-inspeccion.js?v=1.1"></script>
+<script src="guias.js?v=1.1"></script>
 <script>
 (function(){
 "use strict";
@@ -474,8 +505,15 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.0";
+var APP_VERSION="1.1";
 var APP_VERSION_NOTAS=[
+  "v1.1: Inicio de sesion con dos pestanas: Entrar (correo y PIN) y Solicitar acceso (nombre y correo, sin PIN).",
+  "v1.1: Las casillas del PIN ya caben completas en la pantalla.",
+  "v1.1: Si el servidor esta desactualizado, la app lo explica y dice como publicarlo.",
+  "v1.1: El certificado solo muestra como hallazgo lo que se puede corregir, y cada uno trae su recomendacion.",
+  "v1.1: Corregida la pregunta de uso adecuado de las instalaciones electricas, que puntuaba al reves.",
+  "v1.1: Al sincronizar ya no se pierden las fotos, las firmas ni el nombre del inspector.",
+  "v1.1: El pie del certificado muestra la direccion de verificacion con el codigo y el distintivo.",
   "v1.0: Primera version en servicio de Revisiones Tecnicas.",
   "v1.0: El inspector solicita acceso con nombre y correo; el administrador aprueba y le asigna el PIN.",
   "v1.0: Mapa real de la ciudad con el estado de cada establecimiento y el censo del barrido.",
@@ -489,6 +527,7 @@ var VERK="cbvi_rt_ver_vista";
 var LS="cbvi_rt_eco_v1", THEME="cbvi_rt_theme", SESK="cbvi_rt_ses_v2";
 var MOD=window.MODULOS||[], META=window.FORM_META||{}, OCUP=window.OCUPACIONES_NSR10||[], INTER=new Set(window.ITEMS_INTERMEDIO||[]), INTERT=new Set(window.TOGGLES_INTERMEDIO||[]);
 var GUIAS=window.GUIAS||{}, DIAGRAMS=window.DIAGRAMS||{}, ITEM_TOPIC=window.ITEM_TOPIC||{}, OCUP_QUICK=window.OCUP_QUICK||[], EJEMPLOS=window.EJEMPLOS||{};
+var CONTEXTO=new Set(window.ITEMS_CONTEXTO||[]);
 var GATES=new Set();MOD.forEach(function(m){m.items.forEach(function(it){if(it.dependsOn)GATES.add(it.dependsOn.item)})});
 function applyDeps(root){if(!root)return;Array.prototype.slice.call(root.querySelectorAll('[data-dep-item]')).forEach(function(w){w.hidden=(FORM&&FORM.ans[w.dataset.depItem]!==w.dataset.depVal)})}
 /* Logos: vienen embebidos en logos.js, no dependen de una ruta ni de la red. */
@@ -530,6 +569,30 @@ function loadQ(){try{return JSON.parse(localStorage.getItem(QK))||[]}catch(e){re
 function saveQ(){try{localStorage.setItem(QK,JSON.stringify(QUEUE))}catch(e){}}
 var QUEUE=loadQ(), _flushing=false;
 function esOnline(){return !!(SES&&SES.pase)}
+/* El servidor responde "Acción desconocida: X" cuando la versión PUBLICADA
+   del backend es más vieja que esta app (guardar el código en Apps Script NO
+   lo publica). En vez de un mensaje críptico, se explica qué hacer. */
+var SERVIDOR_VIEJO=false;
+var BACKEND_MIN="1.2";
+function mensajeServidor(err){
+  var e=String(err||"");
+  if(/Acci[oó]n desconocida/i.test(e)){
+    SERVIDOR_VIEJO=true;
+    return "El servidor tiene una versión vieja y no reconoce esta función. El administrador debe publicarla: en Apps Script, Implementar → Administrar implementaciones → ✏️ Editar → Versión: Nueva versión → Implementar.";
+  }
+  return e||"No se pudo completar la operación.";
+}
+function cmpVer(a,b){a=String(a||"0").split(".");b=String(b||"0").split(".");
+  for(var i=0;i<Math.max(a.length,b.length);i++){var x=+a[i]||0,y=+b[i]||0;if(x!==y)return x<y?-1:1}return 0}
+/* Tras entrar: ¿el backend publicado es el que esta app necesita? */
+function chequearServidor(){
+  if(!esOnline())return;
+  api("version").then(function(r){
+    var viejo=!(r&&r.ok)||cmpVer(r.version,BACKEND_MIN)<0;
+    if(viejo!==SERVIDOR_VIEJO){SERVIDOR_VIEJO=viejo;if(VIEW==="dashboard")render()}
+    else SERVIDOR_VIEJO=viejo;
+  }).catch(function(){});
+}
 function api(accion,payload){var body=JSON.stringify(Object.assign({accion:accion,pase:(SES&&SES.pase)||""},payload||{}));return fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:body}).then(function(r){return r.json()})}
 function setSync(t,c){var b=$("#syncBadge");if(b){b.textContent=t;b.className="syncbadge "+(c||"")}}
 function updateSync(){
@@ -553,7 +616,54 @@ function pullAll(){if(!esOnline())return Promise.resolve();setSync("Sincronizand
     if(r[2]&&r[2].ok&&r[2].config)DB.config=Object.assign(defcfg(),r[2].config);
     DB._ejemplo=false;persist();updateSync();if(!$("#app").hidden)render()}).catch(function(){updateSync()})}
 function mergeBy(local,server,key){var m={};server.forEach(function(s){m[String(s[key])]=s});local.forEach(function(l){var k=String(l[key]);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
-function mergeInsp(local,server){var m={};server.forEach(function(s){var rj=typeof s.respuestas==="string"?tryj(s.respuestas):(s.respuestas||{});s.ans=rj.ans||{};s.fuentes=rj.fuentes||{};s.fotos=s.fotos||{};s.obs=s.obs||{};s.recs=typeof s.recomendaciones==="string"?tryj(s.recomendaciones):(s.recomendaciones||[]);s.score100=+s.score100||0;s.concepto={favorable:String(s.favorable)==="true",riesgo:s.riesgo||"",texto:""};s.id=String(s.idCliente||s.id);s._sync=true;m[s.id]=s});local.forEach(function(l){var k=String(l.idCliente||l.id);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
+/* Fusion por campo. ANTES la copia del servidor reemplazaba entera a la local
+   y se perdian las fotos, las observaciones, las firmas y el inspector (el
+   servidor no guarda esas imagenes en la fila). Ahora:
+   - el SERVIDOR manda en lo oficial: codigo, distintivo, estado, puntaje,
+     concepto, fechas;
+   - la TABLET conserva lo que solo ella tiene: fotos, observaciones, firmas,
+     hallazgos con foto, y el nombre del inspector si el servidor no lo trae. */
+function insDeServidor(s){
+  var rj=typeof s.respuestas==="string"?tryj(s.respuestas):(s.respuestas||{});
+  var o=Object.assign({},s);
+  o.ans=rj.ans||{}; o.fuentes=rj.fuentes||{};
+  o.fotos={}; o.obs={};
+  o.recs=typeof s.recomendaciones==="string"?tryj(s.recomendaciones):(s.recomendaciones||[]);
+  if(!Array.isArray(o.recs))o.recs=[];
+  o.score100=+s.score100||0;
+  o.concepto={favorable:String(s.favorable)==="true",riesgo:s.riesgo||"",texto:""};
+  o.inspector=s.inspectorNombre||s.inspector||"";
+  o.id=String(s.idCliente||s.id);
+  o._sync=true;
+  return o;
+}
+function lleno(v){return v!=null&&v!==""}
+function fusionInsp(l,srv){
+  var r=Object.assign({},l);
+  ["codigo","sig","estado","fecha","vigenciaHasta","tramite","nivel","ocupacion","clasifRiesgo","radicado"].forEach(function(k){
+    if(lleno(srv[k]))r[k]=srv[k];
+  });
+  if(lleno(srv.score100)&&srv.score100!==0)r.score100=srv.score100;
+  if(srv.concepto&&(lleno(srv.riesgo)||lleno(srv.favorable))){
+    r.concepto={favorable:srv.concepto.favorable,riesgo:srv.concepto.riesgo||((l.concepto||{}).riesgo)||"",
+                texto:((l.concepto||{}).texto)||""};
+  }
+  if(!lleno(r.inspector))r.inspector=srv.inspector;
+  if(!r.ans||!Object.keys(r.ans).length)r.ans=srv.ans;
+  if(!r.fuentes||!Object.keys(r.fuentes).length)r.fuentes=srv.fuentes;
+  if(!(r.recs&&r.recs.length))r.recs=srv.recs;
+  ["fotos","obs"].forEach(function(k){if(!r[k])r[k]={}});
+  r.conceptoUrl=srv.conceptoUrl||l.conceptoUrl||"";
+  r._sync=true;
+  return r;
+}
+function mergeInsp(local,server){
+  var loc={}; local.forEach(function(l){loc[String(l.idCliente||l.id)]=l});
+  var out={};
+  server.forEach(function(s){var srv=insDeServidor(s), l=loc[srv.id]; out[srv.id]=l?fusionInsp(l,srv):srv});
+  local.forEach(function(l){var k=String(l.idCliente||l.id); if(!out[k])out[k]=l});
+  return Object.keys(out).map(function(k){return out[k]});
+}
 function tryj(s){try{return JSON.parse(s)}catch(e){return (typeof s==="object"&&s)?s:{}}}
 function estFromServer(s){return {id:s.id,codigo:s.codigo,nombre:s.nombre,nit:s.nit,tipo:s.tipo,ocup:s.ocup,act:s.actividad,dir:s.direccion,barrio:s.barrio,lat:s.lat||"",lng:s.lng||"",razonSocial:s.razonSocial||"",rep:s.repLegal,correo:s.correo,tel:s.tel,estado:s.estado,creado:s.creado}}
 function estToServer(e){return {establecimiento:{id:e.id,codigo:e.codigo,nombre:e.nombre,nit:e.nit||"",tipo:e.tipo||"",ocup:e.ocup||"",actividad:e.act||"",direccion:e.dir||"",barrio:e.barrio||"",lat:e.lat||"",lng:e.lng||"",razonSocial:e.razonSocial||"",repLegal:e.rep||"",correo:e.correo||"",tel:e.tel||""}}}
@@ -748,6 +858,24 @@ function mkHallazgo(f,m,it,resp,etiqueta){
            obs:(f.obs&&f.obs[it.id])||"",
            fotos:((f.fotos&&f.fotos[it.id])||[]).map(fotoSrc).filter(Boolean) };
 }
+/* Hallazgos para MOSTRAR e IMPRIMIR. Se reconstruyen desde las respuestas
+   con las reglas vigentes: una copia guardada con una version anterior
+   (sin recomendacion, o con items que no son hallazgo) no debe llegar al
+   PDF. Si no hay respuestas (importadas), se usa la copia guardada y se
+   completa el "Que hacer" que le falte. Puntaje y concepto NO se tocan:
+   quedan como se emitieron. */
+function hallazgosDe(f){
+  if(!f)return [];
+  var tieneRespuestas=f.ans&&Object.keys(f.ans).length>0;
+  if(tieneRespuestas)return compute(f).recs;
+  var ACC=window.ACCIONES||{}, ACM=window.ACCION_MODULO||{};
+  return (f.recs||[]).filter(function(h){return h&&!CONTEXTO.has(h.id)}).map(function(h){
+    var c=Object.assign({},h);
+    if(!c.accion)c.accion=ACC[c.id]||ACM[String(c.id||"").split("_")[0]]||"Corrija lo observado.";
+    if(!c.fotos)c.fotos=[];
+    return c;
+  });
+}
 function compute(f){
   var intermedia=f.modo==="intermedia";
   var X=0,Y=0,got=0,tot=0,recs=[],sumMax=0,sumVal=0;
@@ -766,8 +894,10 @@ function compute(f){
       var p=scoreVal(f,it);
       var ans=(it.tipo==="fuentes")?(f.fuentes[it.id]!==undefined):(f.ans[it.id]!=null);
       if(ans){got++; modVal+=(p||0);
-        if(it.tipo!=="fuentes"&&p!=null&&p<mx)recs.push(mkHallazgo(f,m,it,f.ans[it.id]));
-        if(it.tipo==="fuentes"){var pr=f.fuentes[it.id]||[];if(pr.length)recs.push(mkHallazgo(f,m,it,pr.join(", "),"Fuentes de ignición observadas"))}
+        /* Hallazgo = item CORREGIBLE sin el puntaje maximo. Los de
+           caracterizacion (edificacion nueva, area, fuentes de ignicion...)
+           suman al puntaje pero no son un "no cumple" para el propietario. */
+        if(it.tipo!=="fuentes"&&p!=null&&p<mx&&!CONTEXTO.has(it.id))recs.push(mkHallazgo(f,m,it,f.ans[it.id]));
       }
     });}
     if(m.clase==="agravante")X+=modVal; else if(m.clase==="reductor")Y+=modVal;
@@ -850,6 +980,18 @@ function vDashboard(v){
   var mes=mesInsp().length, barr=censoMes();
   var metaTotal=cfg.metaRevisiones+cfg.metaRenovaciones, pct=Math.min(100,Math.round(mes/Math.max(1,metaTotal)*100));
   if(DB._ejemplo)v.insertAdjacentHTML("beforeend",'<div style="margin-bottom:14px"><span class="seedtag">● Datos de ejemplo — bórralos cuando cargues los reales</span></div>');
+  /* Servidor desactualizado: guardar el código en Apps Script no lo publica. */
+  if(SERVIDOR_VIEJO&&esOnline()){
+    v.insertAdjacentHTML("beforeend",'<div class="pendbanner" style="margin-bottom:16px"><b>⚠ El servidor tiene una versión vieja</b>'+
+      (isAdmin()
+        ? '<p>Algunas funciones (solicitudes de acceso, aprobación, verificación del QR) no responderán hasta que publiques la versión nueva del backend:</p>'+
+          '<ol style="margin:0 0 4px 18px;line-height:1.7;font-size:13.5px"><li>Apps Script → <b>Implementar</b> → <b>Administrar implementaciones</b></li>'+
+          '<li>Pulsa el lápiz <b>✏️ Editar</b> de la implementación que ya existe</li>'+
+          '<li>En <b>Versión</b> elige <b>Nueva versión</b> → <b>Implementar</b></li></ol>'+
+          '<p class="note" style="margin:6px 0 0">No crees una implementación nueva: cambiaría la dirección y la app quedaría desconectada.</p>'
+        : '<p>Avísale al administrador: debe publicar la versión nueva del servidor. Mientras tanto puedes seguir trabajando; lo que hagas se guarda en la tablet.</p>')+
+      '</div>');
+  }
   // Meta hero
   var hero=el("div","card pad");hero.style.marginBottom="16px";
   hero.innerHTML='<div class="sech" style="margin-top:0"><h3>Meta del mes</h3><div class="ln"></div>'+
@@ -1214,7 +1356,7 @@ function nuevaInspeccion(estId){
      así nunca hay dos conceptos con el mismo número aunque dos inspectores
      trabajen sin señal al mismo tiempo. Hasta entonces va uno provisional. */
   FORM={id:"i"+Date.now(),codigo:"LOCAL-"+String(Date.now()).slice(-6),
-    establecimientoId:estId||null,modo:"completa",_step:0,estado:"borrador",inspector:SES?SES.name:"",
+    establecimientoId:estId||null,modo:"completa",_step:0,estado:"borrador",inspector:SES?(SES.name||SES.email||""):"",
     fecha:NOW.toISOString(),ocupacion:"",clasifRiesgo:"",ans:{},fuentes:{},fotos:{},obs:{}};
   VIEW="inspeccion";render();window.scrollTo(0,0);
 }
@@ -1441,6 +1583,7 @@ function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
 function finalizar(){
   saveInsp();var r=compute(FORM);
   FORM.estado="finalizada";FORM.score100=r.s100;FORM.X=r.X;FORM.Y=r.Y;
+  if(!FORM.inspector)FORM.inspector=SES?(SES.name||SES.email||""):"";   // el certificado nunca sale sin inspector
   FORM.concepto={favorable:r.band.favorable,riesgo:r.band.riesgo,texto:r.band.texto};
   FORM.recs=r.recs;
   var vig=new Date();vig.setMonth(vig.getMonth()+(DB.config.vigenciaMeses||12));FORM.vigenciaHasta=vig.toISOString();
@@ -1470,7 +1613,7 @@ function emitirConcepto(f){
       if(VIEW==="certificado")render();
       return true;
     }
-    toast((res&&res.error)||"El servidor no emitió el número");
+    toast(mensajeServidor((res&&res.error)||"El servidor no emitió el número"));
     return false;
   }).catch(function(){
     enqueue("guardarInspeccion",insToServer(destino));   // sin red: a la cola
@@ -1481,7 +1624,7 @@ function emitirConcepto(f){
 /* ===================== CERTIFICADO ===================== */
 function vCertificado(v){
   if(!FORM){navTo("dashboard");return}
-  var r=FORM.concepto?{s100:FORM.score100,band:{favorable:FORM.concepto.favorable,riesgo:FORM.concepto.riesgo,texto:FORM.concepto.texto||""},X:FORM.X,Y:FORM.Y,recs:FORM.recs||[]}:compute(FORM);
+  var r=FORM.concepto?{s100:FORM.score100,band:{favorable:FORM.concepto.favorable,riesgo:FORM.concepto.riesgo,texto:FORM.concepto.texto||""},X:FORM.X,Y:FORM.Y,recs:hallazgosDe(FORM)}:compute(FORM);
   var est=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0]||{};
   var fav=r.band.favorable, validado=estaValidado(FORM);
   var hall=(r.recs||[]);
@@ -1668,7 +1811,7 @@ function makePDF(r,est){
   fila("Inspector",FORM.inspector);
 
   /* --- Hallazgos con su foto y su recomendación --- */
-  var hall=(r.recs||[]);
+  var hall=hallazgosDe(FORM);
   y+=12; espacio(40);
   d.setDrawColor(215);d.setLineWidth(.8);d.line(m,y,W-m,y); y+=18;
   d.setFont("helvetica","bold");d.setFontSize(12);d.setTextColor(25);
@@ -1727,7 +1870,17 @@ function makePDF(r,est){
     d.setDrawColor(225);d.setLineWidth(.6);d.line(m,H-44,W-m,H-44);
     d.setFont("helvetica","normal");d.setFontSize(6.8);d.setTextColor(130);
     d.text("Cuerpo de Bomberos Voluntarios de Inírida — Guainía, Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m,H-32);
-    if(validado)d.text("Verifique este certificado en: "+urlVerificacion(FORM),m,H-22);
+    if(validado){
+      /* Legible y tecleable: la direccion base + codigo + distintivo, que es
+         justo lo que pide la pagina de verificacion. Toda la linea es un
+         enlace a la verificacion directa (en el PDF digital se puede tocar). */
+      var base=urlVerificacion(FORM).split("?")[0].replace(/^https?:\/\//,"");
+      var pie="Verifique en "+base+"  \u00b7  C\u00f3digo "+FORM.codigo+"  \u00b7  Distintivo "+FORM.sig;
+      var maxW=W-2*m-62, fs=6.8;
+      while(d.getTextWidth(pie)>maxW&&fs>5){fs-=.3;d.setFontSize(fs)}
+      try{ d.textWithLink(pie,m,H-22,{url:urlVerificacion(FORM)}) }catch(e){ d.text(pie,m,H-22) }
+      d.setFontSize(6.8);
+    }
     else d.text("DOCUMENTO PROVISIONAL — sin número oficial ni código de verificación.",m,H-22);
     d.text("Página "+p+" de "+tot,W-m-54,H-22);
   }
@@ -1973,7 +2126,7 @@ function vUsuarios(v){
   function cargar(){
     api("listarInspectores").then(function(res){
       cont.innerHTML="";
-      if(!res||!res.ok){cont.innerHTML='<div class="empty">'+esc((res&&res.error)||"No se pudo cargar")+'</div>';return}
+      if(!res||!res.ok){cont.innerHTML='<div class="empty">'+esc(mensajeServidor((res&&res.error)||"No se pudo cargar"))+'</div>';return}
       var list=res.inspectores||[];
       var pend=list.filter(function(u){return !u.aprobado}), act=list.filter(function(u){return u.aprobado});
       if(pend.length){
@@ -2034,13 +2187,13 @@ function modalUsuario(u,done){
           if(pin)modalPinListo(ins.nombre||email,email,pin);
           else toast("Guardado");
           if(done)done();
-        } else toast((res&&res.error)||"Error al guardar");
+        } else toast(mensajeServidor((res&&res.error)||"Error al guardar"));
       }).catch(function(){toast("Sin conexión al servidor")});
       return true;
     },
     aprobar?{texto:"Rechazar",clase:"btn-danger",accion:function(){
       api("rechazarInspector",{email:u.email}).then(function(res){
-        toast(res&&res.ok?"Solicitud rechazada":((res&&res.error)||"No se pudo"));
+        toast(res&&res.ok?"Solicitud rechazada":(mensajeServidor((res&&res.error)||"No se pudo")));
         if(done)done();
       }).catch(function(){toast("Sin conexión")});
       return true;
@@ -2155,6 +2308,7 @@ function afterLogin(){
   $("#login").hidden=true;$("#app").hidden=false;
   VIEW="dashboard";NAVHIST=[];render();updateSync();
   setTimeout(avisoVersion,450);          // aviso de actualizacion (regla: siempre avisar el cambio)
+  chequearServidor();                    // ¿el backend publicado esta al dia?
 }
 function demoLogin(){
   SES={role:"admin",name:"Modo demostración",email:"",demo:true};
@@ -2174,7 +2328,7 @@ $("#btnLogin").addEventListener("click",function(){
     if(res&&res.ok){
       SES={role:res.usuario.rol,name:res.usuario.nombre||email,email:email,pase:res.pase};
       limpiarPin();afterLogin();pullAll().then(function(){flush();flushFotos()});
-    } else { toast((res&&res.error)||"No se pudo entrar"); limpiarPin(); }
+    } else { toast(mensajeServidor((res&&res.error)||"No se pudo entrar")); limpiarPin(); }
   }).catch(function(){
     btn.disabled=false;btn.textContent="Entrar";
     toast("No hay conexión con el servidor. Revisa tu red e inténtalo otra vez.");
@@ -2183,32 +2337,50 @@ $("#btnLogin").addEventListener("click",function(){
 $("#loginEmail").addEventListener("keydown",function(e){if(e.key==="Enter")$$("#pin input")[0].focus()});
 try{var ue=localStorage.getItem("cbvi_rt_ultimo_correo");if(ue)$("#loginEmail").value=ue}catch(e){}
 
-$("#btnSolicitar").addEventListener("click",function(){
-  modal("Solicitar acceso",
-    '<div class="ff"><div class="wide"><label class="lbl" for="sNom">Tu nombre completo</label>'+
-      '<input id="sNom" type="text" placeholder="Nombre y apellidos"></div>'+
-    '<div class="wide"><label class="lbl" for="sEmail">Tu correo</label>'+
-      '<input id="sEmail" type="email" placeholder="correo@ejemplo.com" value="'+esc(($("#loginEmail").value||"").trim())+'" inputmode="email" autocapitalize="off" spellcheck="false"></div></div>'+
-    '<p class="note">No escribas ningún PIN: el administrador revisa tu solicitud, la aprueba y te asigna uno. Él te lo entregará para que puedas entrar.</p>',
-    "Enviar solicitud",
-    function(){
-      var nom=($("#sNom").value||"").trim();
-      var em=($("#sEmail").value||"").trim().toLowerCase();
-      if(!nom){toast("Escribe tu nombre");return false}
-      if(!em||em.indexOf("@")<0){toast("Escribe un correo válido");return false}
-      api("solicitarAcceso",{email:em,nombre:nom}).then(function(res){
-        if(res&&res.ok){
-          $("#loginEmail").value=em;
-          try{localStorage.setItem("cbvi_rt_ultimo_correo",em)}catch(e){}
-          modal("Solicitud enviada",
-            '<p>'+(res.yaExiste
-              ? 'Tu correo <b>'+esc(em)+'</b> ya tiene acceso. Si no recuerdas el PIN, pídeselo al administrador.'
-              : 'Listo. El administrador recibirá tu solicitud y te asignará un PIN.<br><br>Cuando te lo entregue, entra con tu correo <b>'+esc(em)+'</b> y ese PIN.')+'</p>',
-            "Entendido",function(){return true});
-        } else toast((res&&res.error)||"No se pudo enviar la solicitud");
-      }).catch(function(){toast("No hay conexión con el servidor")});
-      return true;
-    });
+/* ---------- Login: dos modos ----------
+   Entrar   = correo + PIN (ya aprobado).
+   Solicitar = nombre + correo, SIN PIN: el administrador aprueba y asigna el PIN. */
+function modoLogin(m){
+  var ent=(m!=="solicitar");
+  $("#modoEntrar").hidden=!ent; $("#modoSolicitar").hidden=ent;
+  $("#tabEntrar").classList.toggle("on",ent); $("#tabSolicitar").classList.toggle("on",!ent);
+  $("#tabEntrar").setAttribute("aria-selected",ent?"true":"false");
+  $("#tabSolicitar").setAttribute("aria-selected",ent?"false":"true");
+  if(!ent){
+    var se=$("#sEmail"); if(se&&!se.value)se.value=($("#loginEmail").value||"").trim();
+    var sm=$("#solMsg"); if(sm){sm.hidden=true;sm.textContent=""}
+  }
+  if(!("ontouchstart" in window)){try{(ent?$("#loginEmail"):$("#sNom")).focus()}catch(e){}}
+}
+$("#tabEntrar").addEventListener("click",function(){modoLogin("entrar")});
+$("#tabSolicitar").addEventListener("click",function(){modoLogin("solicitar")});
+$("#irSolicitar").addEventListener("click",function(ev){ev.preventDefault();modoLogin("solicitar")});
+$("#irEntrar").addEventListener("click",function(ev){ev.preventDefault();modoLogin("entrar")});
+function msgSol(tipo,html){var m=$("#solMsg");m.className="lmsg "+tipo;m.innerHTML=html;m.hidden=false}
+$("#btnEnviarSol").addEventListener("click",function(){
+  var btn=this;
+  if(btn.dataset.ocupado==="1")return;                     // anti doble clic
+  var nom=($("#sNom").value||"").trim();
+  var em=($("#sEmail").value||"").trim().toLowerCase();
+  if(!nom){msgSol("err","Escribe tu <b>nombre completo</b>.");$("#sNom").focus();return}
+  if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(em)){msgSol("err","Ese <b>correo</b> no parece válido.");$("#sEmail").focus();return}
+  btn.dataset.ocupado="1";btn.disabled=true;btn.textContent="Enviando…";
+  var fin=function(){btn.dataset.ocupado="";btn.disabled=false;btn.textContent="Enviar solicitud"};
+  api("solicitarAcceso",{email:em,nombre:nom}).then(function(res){
+    fin();
+    if(res&&res.ok){
+      $("#loginEmail").value=em;
+      try{localStorage.setItem("cbvi_rt_ultimo_correo",em)}catch(e){}
+      if(res.yaExiste){
+        msgSol("ok","<b>Tu correo ya tiene acceso.</b><br>Entra con tu PIN. Si no lo recuerdas, pídeselo al administrador.");
+      } else {
+        $("#sNom").value="";
+        msgSol("ok","<b>Solicitud enviada.</b><br>El administrador la verá en su panel. Cuando te apruebe te entregará tu PIN; entonces pulsa <b>Entrar</b> y usa tu correo <b>"+esc(em)+"</b> con ese PIN.");
+      }
+    } else {
+      msgSol("err",esc(mensajeServidor(res&&res.error)));
+    }
+  }).catch(function(){fin();msgSol("err","No hay conexión con el servidor. Revisa tu señal e inténtalo otra vez.")});
 });
 $("#verDemo").addEventListener("click",function(ev){
   ev.preventDefault();
@@ -2270,7 +2442,7 @@ try{
   if(ses&&ses.role){
     SES=ses;$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync();
     setTimeout(avisoVersion,450);
-    if(esOnline()){pullAll().then(function(){flush();flushFotos()})}
+    if(esOnline()){chequearServidor();pullAll().then(function(){flush();flushFotos()})}
   }
 }catch(e){}
 window.addEventListener("online",function(){updateSync();flush();flushFotos()});
