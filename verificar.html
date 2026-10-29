@@ -136,7 +136,7 @@
   </p>
 </main>
 
-<script src="logos.js?v=1.4"></script>
+<script src="logos.js?v=1.6"></script>
 <script>
 (function(){
 "use strict";
@@ -234,7 +234,7 @@ function consultar(c, d){
   fetch(url, { method:"GET" })
     .then(function(r){ return r.text().then(function(t){ try{ return JSON.parse(t); }catch(e){ return { _noJson:true }; } }); })
     .then(function(res){
-      if(res && res._noJson){ servidorNoResponde(); return; }
+      if(res && res._noJson){ reintentarEnElServidor(c,d); return; }
       if(!res || !res.ok || !res.cert){
         pintarEstado("invalido", (res && res.error) || null);
         $("#manual").hidden = false;
@@ -252,8 +252,26 @@ function consultar(c, d){
         $("#estado").innerHTML = '<div class="ic">⚠</div><div><h2>Sin conexión</h2>'+
           '<p>Tu teléfono no tiene internet. Conéctate e inténtalo de nuevo.</p></div>';
         $("#manual").hidden = false;
-      } else servidorNoResponde();
+      } else reintentarEnElServidor(c,d);
     });
+}
+/* Plan B del QR.
+   Si el fetch no devuelve JSON (el navegador bloqueó la consulta entre
+   dominios, o Google respondió su página de permisos porque la implementación
+   no está publicada para "cualquier persona"), NO dejamos al cliente con un
+   aviso de mantenimiento: lo llevamos a la página de verificación del propio
+   servidor. Eso es una navegación normal, no una consulta entre dominios, así
+   que funciona donde el fetch falla. Un solo reintento: si eso también falla,
+   se muestra el aviso y la verificación manual. */
+var _planB = false;
+function reintentarEnElServidor(c,d){
+  if(_planB || !c){ servidorNoResponde(); return; }
+  _planB = true;
+  $("#estado").className = "state s-cargando";
+  $("#estado").innerHTML = '<div class="ic"><span class="spin"></span></div>'+
+    '<div><h2>Consultando…</h2><p>Abriendo la verificación oficial del CBVI.</p></div>';
+  var destino = BACKEND_URL + "?c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
+  setTimeout(function(){ location.replace(destino); }, 350);
 }
 function servidorNoResponde(){
   $("#estado").className = "state s-cargando";

@@ -532,9 +532,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.4"></script>
-<script src="form-inspeccion.js?v=1.4"></script>
-<script src="guias.js?v=1.4"></script>
+<script src="logos.js?v=1.6"></script>
+<script src="form-inspeccion.js?v=1.6"></script>
+<script src="guias.js?v=1.6"></script>
 <script>
 (function(){
 "use strict";
@@ -546,8 +546,13 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.4";
+var APP_VERSION="1.6";
 var APP_VERSION_NOTAS=[
+  "v1.6: El numero del concepto ya se ve bien en el resumen (antes salia con etiquetas de codigo a la vista).",
+  "v1.6: Mantenimiento ahora distingue borrar solo en la tablet y borrar toda la base en el servidor; antes los datos volvian a aparecer al sincronizar.",
+  "v1.6: El borrado de la base pide tu PIN, exige escribir BORRAR y respalda la hoja antes de borrar.",
+  "v1.6: Si el QR no puede consultar el servidor, la pagina de verificacion abre sola la verificacion oficial en vez de quedarse en mantenimiento.",
+  "v1.5: Corregida la importacion de inspecciones: los nombres con comas (ej. negocios con varios locales) ya no danaban las filas siguientes del CSV.",
   "v1.4: El mapa del barrido ya no tapa el formulario de censo.",
   "v1.4: El mapa solo muestra ubicaciones reales; los establecimientos sin GPS se listan aparte para ubicarlos.",
   "v1.4: La inspeccion toma sola la ubicacion del establecimiento para que aparezca en el mapa.",
@@ -621,7 +626,7 @@ function esOnline(){return !!(SES&&SES.pase)}
    del backend es más vieja que esta app (guardar el código en Apps Script NO
    lo publica). En vez de un mensaje críptico, se explica qué hacer. */
 var SERVIDOR_VIEJO=false;
-var BACKEND_MIN="1.2";
+var BACKEND_MIN="1.3";
 function mensajeServidor(err){
   var e=String(err||"");
   if(/Acci[oó]n desconocida/i.test(e)){
@@ -1449,7 +1454,10 @@ function vFicha(v){
   });
   v.appendChild(lg);
 }
-function kv(k,val){return '<div><div class="k">'+esc(k)+'</div><div class="v">'+esc(val||"—")+'</div></div>'}
+/* El valor SIEMPRE se escapa (nombres, direcciones y demás texto libre van a
+   innerHTML). Si se necesita el estilo monoespaciado se pide con mono=true;
+   nunca se le pasa HTML armado a mano, porque saldría impreso tal cual. */
+function kv(k,val,mono){return '<div><div class="k">'+esc(k)+'</div><div class="v'+(mono?" mono":"")+'">'+esc(val||"—")+'</div></div>'}
 
 /* -------- alta exprés (ahora es el censo) -------- */
 function altaExpres(){ modalCenso(); }
@@ -1816,7 +1824,7 @@ function vCertificado(v){
       '<p>'+esc(r.band.texto||"")+'</p></div></div>'+
     '<div class="kv">'+
       kv("Establecimiento",est.nombre)+
-      kv("Número del concepto",'<span class="mono">'+esc(validado?FORM.codigo:"por asignar")+'</span>')+
+      kv("Número del concepto",(validado?FORM.codigo:"por asignar"),true)+
       kv("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""))+
       kv("Propietario / encargado",est.rep)+
       kv("Tipo de trámite",tramiteLegible(FORM.tramite))+
@@ -2243,9 +2251,76 @@ function vConfig(v){
   $("#impFile",imp).addEventListener("change",function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$("#impIn").value=r.result};r.readAsText(f)});
   $("#impGo",imp).addEventListener("click",function(){importCsv($("#impIn").value)});
   v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Mantenimiento</h3><div class="ln"></div></div>');
-  var mt=el("div","card pad");mt.innerHTML='<p class="note">Borra los datos de ejemplo y empieza limpio en este dispositivo.</p><button class="btn btn-g btn-sm" id="wipe" style="margin-top:10px;color:var(--rojo)">Borrar todos los datos</button>';
+  var mt=el("div","card pad");
+  mt.innerHTML='<p class="note"><b>Importante:</b> los datos viven en el servidor (la hoja de cálculo), no en la tablet. '+
+    'Si solo los borras aquí, la siguiente sincronización los vuelve a bajar y parecen "reaparecer". '+
+    'Para que desaparezcan de verdad hay que borrarlos también en el servidor.</p>'+
+    '<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">'+
+      '<button class="btn btn-g btn-sm" id="wipe">Borrar solo en esta tablet</button>'+
+      '<button class="btn btn-g btn-sm" id="wipeAll" style="color:var(--rojo)">Borrar toda la base (servidor)</button>'+
+    '</div>'+
+    '<p class="note" style="margin-top:10px">El borrado del servidor hace un <b>respaldo automático</b> de la hoja antes de borrar, '+
+    'y no toca los usuarios ni las metas.</p>';
   v.appendChild(mt);
-  $("#wipe",mt).addEventListener("click",function(){modal("Borrar todos los datos","<p class=\"note\">Elimina establecimientos e inspecciones de este dispositivo. No se puede deshacer.</p>","Borrar",function(){DB={establecimientos:[],inspecciones:[],barridos:[],config:DB.config};persist();toast("Datos borrados");navTo("dashboard");return true})});
+
+  /* Borrado local: honesto sobre lo que hace y lo que NO hace. */
+  $("#wipe",mt).addEventListener("click",function(){
+    modal("Borrar solo en esta tablet",
+      '<p class="note">Vacía establecimientos, inspecciones y barridos <b>de este dispositivo</b>. '+
+      'Si estás en línea, lo que esté en el servidor volverá a bajar en la siguiente sincronización.</p>',
+      "Borrar aquí",function(){
+        DB={establecimientos:[],inspecciones:[],barridos:[],config:DB.config};persist();
+        toast("Datos borrados en esta tablet");navTo("dashboard");return true});
+  });
+
+  /* Borrado real (servidor). Candados: PIN del admin + palabra BORRAR.
+     El PIN se pide DENTRO de este flujo: Configuración se abre con la sesión
+     ya iniciada, y un pase de 30 días no debe por sí solo autorizar un
+     borrado irreversible. */
+  $("#wipeAll",mt).addEventListener("click",function(){
+    if(!esOnline()){toast("Entra en línea para borrar en el servidor");return}
+    modal("Borrar TODA la base",
+      '<p class="note" style="color:var(--rojo)"><b>Esto no se puede deshacer.</b> Borra establecimientos, inspecciones, '+
+      'evidencias, barridos y verificaciones <b>en el servidor y en todas las tablets</b>. '+
+      'Antes de borrar se guarda un respaldo de la hoja en Drive.</p>'+
+      '<p class="note">No se borran los usuarios ni la configuración.</p>'+
+      '<div class="ff" style="margin-top:12px">'+
+      '<div><label class="lbl" for="wPin">Tu PIN</label><input id="wPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off"></div>'+
+      '<div><label class="lbl" for="wOk">Escribe BORRAR</label><input id="wOk" type="text" placeholder="BORRAR" autocapitalize="characters" spellcheck="false"></div>'+
+      '</div><p class="note" id="wMsg" style="margin-top:8px"></p>',
+      "Borrar todo",function(){
+        var pin=($("#wPin").value||"").trim(), conf=($("#wOk").value||"").trim().toUpperCase();
+        var msg=$("#wMsg");
+        if(!pin){if(msg)msg.textContent="Escribe tu PIN.";return false}
+        if(conf!=="BORRAR"){if(msg)msg.textContent="Debes escribir la palabra BORRAR.";return false}
+        var btn=$("#mOk");if(btn){btn.disabled=true;btn.textContent="Borrando…"}
+        if(msg)msg.textContent="Respaldando y borrando…";
+        api("borrarDatos",{pin:pin,confirmar:"BORRAR"}).then(function(res){
+          if(!res||!res.ok){
+            if(btn){btn.disabled=false;btn.textContent="Borrar todo"}
+            if(msg)msg.textContent=mensajeServidor((res&&res.error)||"No se pudo borrar");
+            return;
+          }
+          /* el servidor ya quedó limpio: limpiamos la tablet y la cola para que
+             no se vuelva a subir nada de lo borrado */
+          DB={establecimientos:[],inspecciones:[],barridos:[],config:DB.config};persist();
+          try{QUEUE=[];saveQ();}catch(e){}
+          try{FOTOQ=[];saveFQ();}catch(e){}
+          updateSync();
+          $("#modalRoot").innerHTML="";
+          var r=res.respaldo||{};
+          modal("Base borrada",
+            '<p class="note">Listo. La base quedó vacía en el servidor y en esta tablet.</p>'+
+            (r.nombre?'<p class="note">Respaldo guardado como <b>'+esc(r.nombre)+'</b> en Drive, por si necesitas recuperar algo.</p>':'')+
+            '<p class="note">Las otras tablets quedarán vacías en su siguiente sincronización.</p>',
+            "Entendido",function(){navTo("dashboard");return true});
+        }).catch(function(){
+          if(btn){btn.disabled=false;btn.textContent="Borrar todo"}
+          if(msg)msg.textContent="No se pudo conectar. Revisa tu señal e inténtalo otra vez.";
+        });
+        return false;   // el modal lo cerramos nosotros al terminar
+      });
+  });
 
   /* --- Version de la app --- */
   v.insertAdjacentHTML("beforeend",'<div class="sech"><h3>Versi\u00f3n y novedades</h3><div class="ln"></div></div>');
@@ -2266,13 +2341,29 @@ function vConfig(v){
   $("#btnInstalar2",vv).addEventListener("click",pedirInstalacion);
   if(enAPK())$("#btnInstalar2",vv).hidden=true;
 }
+function parseCsvLine(l){ // soporta campos con comas/comillas, ej. "Tienda A, B"
+  var out=[],cur="",inQ=false;
+  for(var i=0;i<l.length;i++){
+    var c=l[i];
+    if(inQ){
+      if(c==='"'){ if(l[i+1]==='"'){cur+='"';i++} else inQ=false }
+      else cur+=c;
+    } else {
+      if(c==='"') inQ=true;
+      else if(c===','){out.push(cur);cur=""}
+      else cur+=c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
 function importCsv(txt){
   var lines=(txt||"").split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
   if(!lines.length){toast("Pega algunas filas primero");return}
   var n=0;
   lines.forEach(function(l){
     if(/^nombre\s*,/i.test(l))return;
-    var p=l.split(",");if(p.length<4)return;
+    var p=parseCsvLine(l).map(function(x){return x.trim()});if(p.length<4)return;
     var nombre=p[0].trim();if(!nombre)return;
     var barrio=(p[1]||"").trim(),fecha=(p[2]||"").trim(),vig=(p[3]||"").trim(),fav=/^(s|1|t|f)/i.test((p[4]||"si").trim());
     var e={id:"e"+Date.now()+"_"+n,codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),nombre:nombre,tipo:"Comercio",barrio:barrio||"—",dir:"—",ocup:"",act:"",nit:"",rep:"",tel:"",lat:"",lng:"",creado:NOW.toISOString()};
