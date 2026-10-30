@@ -14,11 +14,11 @@
   :root{
     --ink:#14181d; --paper:#eceef1; --surface:#fff; --surface-2:#f6f7f9;
     --muted:#626b76; --faint:#8b94a0; --line:#d9dde3; --line-2:#e8ebef;
-    --rail:#191d23; --ember:#dc3b2c;
-    --verde:#17864b; --verde-bg:#e4f1e8; --ambar:#c9790c; --ambar-bg:#f8eed8;
+    --rail:#191d23; --ember:#c0271f; --azul:#2563a8; --line-strong:#9aa3ae;
+    --verde:#17864b; --verde-bg:#e4f1e8; --ambar:#a8650a; --ambar-bg:#f8eed8;
     --rojo:#c0271f; --rojo-bg:#f7e4e2; --gris:#737c87; --gris-bg:#e9ecef;
-    --radius:16px;
-    --shadow:0 1px 2px rgba(16,20,26,.05),0 12px 30px -14px rgba(16,20,26,.22);
+    --radius:8px; --r-sm:4px;
+    --shadow:none;
     --ff-h:"Saira",system-ui,sans-serif; --ff:"Public Sans",system-ui,-apple-system,sans-serif;
     --ff-m:"IBM Plex Mono",ui-monospace,monospace;
   }
@@ -27,8 +27,8 @@
     --muted:#9aa3ae; --faint:#6b747f; --line:#2b313a; --line-2:#232931;
     --verde:#49b97d; --verde-bg:#15271d; --ambar:#e0a23f; --ambar-bg:#2a2214;
     --rojo:#ef5a50; --rojo-bg:#2b1715; --gris:#8a93a0; --gris-bg:#20262e;
-    --ember:#f05545;
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 34px -16px rgba(0,0,0,.65);
+    --ember:#ef5a50; --azul:#5a9be0; --line-strong:#4a525d;
+    --shadow:none;
     color-scheme:dark;
   }}
   :root[data-theme="dark"]{
@@ -36,7 +36,7 @@
     --muted:#9aa3ae; --faint:#6b747f; --line:#2b313a; --line-2:#232931;
     --verde:#49b97d; --verde-bg:#15271d; --ambar:#e0a23f; --ambar-bg:#2a2214;
     --rojo:#ef5a50; --rojo-bg:#2b1715; --gris:#8a93a0; --gris-bg:#20262e;
-    --ember:#f05545; color-scheme:dark;
+    --ember:#ef5a50; --azul:#5a9be0; --line-strong:#4a525d; color-scheme:dark;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff);line-height:1.5;
@@ -45,16 +45,16 @@
   .mono{font-family:var(--ff-m);font-variant-numeric:tabular-nums}
   [hidden]{display:none!important}
 
-  .masthead{background:var(--rail);color:#cdd3db;padding:18px max(16px,env(safe-area-inset-left)) 18px max(16px,env(safe-area-inset-right))}
+  .masthead{background:var(--rail);color:#cdd3db;border-bottom:3px solid var(--ember);padding:18px max(16px,env(safe-area-inset-left)) 18px max(16px,env(safe-area-inset-right))}
   .mh{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:14px}
-  .mh .chip{width:56px;height:56px;flex:0 0 auto;border-radius:14px;background:#fff;display:grid;place-items:center;padding:5px;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+  .mh .chip{width:56px;height:56px;flex:0 0 auto;border-radius:var(--r-sm);background:#fff;display:grid;place-items:center;padding:5px;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
   .mh .chip img{width:100%;height:100%;object-fit:contain}
   .mh small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#79818c;font-weight:600}
   .mh h1{font-size:18px;color:#fff;line-height:1.25;margin-top:2px}
 
   .wrap{max-width:720px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-left)) 44px max(16px,env(safe-area-inset-right))}
 
-  .state{border-radius:var(--radius);padding:20px;display:flex;gap:16px;align-items:center;margin-bottom:18px;border:1px solid transparent}
+  .state{border-radius:var(--radius);padding:20px;display:flex;gap:16px;align-items:center;margin-bottom:18px;border:2px solid transparent}
   .state .ic{width:60px;height:60px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:30px;background:rgba(255,255,255,.55)}
   .state h2{font-size:23px;letter-spacing:.4px}
   .state p{margin:3px 0 0;font-size:13.5px;opacity:.9}
@@ -64,7 +64,7 @@
   .s-cargando{background:var(--surface-2);border-color:var(--line);color:var(--muted)}
   @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .state .ic{background:rgba(0,0,0,.3)}}
 
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:inset 0 0 0 4px var(--surface),inset 0 0 0 5px var(--line-strong);overflow:hidden;margin-bottom:16px}
   .card > h3{padding:13px 18px;border-bottom:1px solid var(--line-2);font-size:13px;letter-spacing:.1em;
     text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
   .kv{padding:6px 18px 16px}
@@ -80,22 +80,22 @@
   .riesgo{font-size:13px;color:var(--muted)}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;
-    border-radius:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);color:var(--ink);
     font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;text-decoration:none;width:100%}
-  .btn-p{background:var(--ember);border-color:var(--ember);color:#fff}
+  .btn-p{background:var(--ink);border-color:var(--ink);color:var(--surface)}
   .btn + .btn{margin-top:10px}
 
   .foot{font-size:12px;color:var(--faint);text-align:center;margin-top:26px;line-height:1.6}
   .foot b{color:var(--muted)}
-  .spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--ember);border-radius:50%;animation:sp .8s linear infinite;display:inline-block;vertical-align:-5px}
+  .spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:sp .8s linear infinite;display:inline-block;vertical-align:-5px}
   @keyframes sp{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 
   .manual{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px}
   .manual label{display:block;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:5px}
-  .manual input{width:100%;min-height:50px;padding:0 14px;border-radius:11px;border:1px solid var(--line);
+  .manual input{width:100%;min-height:50px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line);
     background:var(--surface-2);color:var(--ink);font-family:var(--ff-m);font-size:15px;margin-bottom:12px}
-  .manual input:focus{outline:2px solid var(--ember);outline-offset:1px}
+  .manual input:focus{outline:2px solid var(--azul);outline-offset:1px}
   .ff2{display:grid;grid-template-columns:1fr 150px;gap:12px}
   @media (max-width:430px){.ff2{grid-template-columns:1fr}.kv .k{flex-basis:100%}}
 </style>
@@ -136,7 +136,7 @@
   </p>
 </main>
 
-<script src="logos.js?v=1.12"></script>
+<script src="logos.js?v=1.13"></script>
 <script>
 (function(){
 "use strict";

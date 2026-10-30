@@ -66,6 +66,26 @@
     --shadow-pop:0 10px 28px -10px rgba(0,0,0,.7);
     color-scheme:dark;
   }
+  /* Modo sol: máximo contraste para trabajar a pleno sol (DESIGN.md).
+     Sin fondos tintados; los estados se leen por borde grueso + icono + palabra. */
+  :root[data-theme="sol"]{
+    --ink:#000000; --ink-2:#000000; --paper:#ffffff; --paper-2:#e3e6ea;
+    --surface:#ffffff; --surface-2:#ffffff; --muted:#2a3139; --faint:#4a525d;
+    --line:#000000; --line-2:#4a525d; --line-strong:#000000;
+    --rail:#000000; --rail-2:#22272f; --rail-ink:#ffffff; --rail-faint:#cdd3db;
+    --ember:#b00f0f; --ember-2:#8a0c0c; --ember-ink:#ffffff;
+    --verde:#0b6b37; --verde-bg:#ffffff; --ambar:#8a5200; --ambar-bg:#ffffff;
+    --rojo:#b00f0f; --rojo-bg:#ffffff; --gris:#2a3139; --gris-bg:#ffffff;
+    --azul:#0b4d94; --shadow:none; --shadow-pop:0 0 0 2px #000;
+    color-scheme:light;
+  }
+  :root[data-theme="sol"] body{font-size:112%}
+  :root[data-theme="sol"] .chip,:root[data-theme="sol"] .syncbadge,:root[data-theme="sol"] .verdict{border:2px solid currentColor}
+  :root[data-theme="sol"] .card,:root[data-theme="sol"] .tile,:root[data-theme="sol"] .row-item,
+  :root[data-theme="sol"] input,:root[data-theme="sol"] select,:root[data-theme="sol"] textarea,
+  :root[data-theme="sol"] .opt,:root[data-theme="sol"] .btn-g{border-width:1.5px}
+  :root[data-theme="sol"] .tile .k,:root[data-theme="sol"] .row-item .meta small,:root[data-theme="sol"] .note,
+  :root[data-theme="sol"] .guia,:root[data-theme="sol"] label.lbl{font-weight:600}
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff);line-height:1.45;-webkit-text-size-adjust:100%}
@@ -292,8 +312,9 @@
   .modeseg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:4px;gap:4px}
   .modeseg button{border:0;background:none;padding:9px 16px;border-radius:var(--r-sm);font-size:13.5px;font-weight:600;color:var(--muted)}
   .modeseg button.on{background:var(--ink);color:var(--surface)}
-  .modhead{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-2);background:var(--surface-2);border-radius:var(--r-md) var(--r-md) 0 0}
-  .modhead .n{width:34px;height:34px;border-radius:var(--r-sm);background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--ff-h);font-weight:700}
+  /* Cabecera de módulo tipo acta: número de sección en mono + filete fuerte, como el formato DNBC en papel */
+  .modhead{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-strong);background:var(--surface-2);border-radius:var(--r-md) var(--r-md) 0 0}
+  .modhead .n{min-width:38px;height:30px;padding:0 6px;border-radius:var(--r-xs);border:1.5px solid var(--ink);background:transparent;color:var(--ink);display:grid;place-items:center;font-family:var(--ff-m);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
   .modhead h4{font-size:15.5px;font-family:var(--ff-h)}
   .modhead .mx{margin-left:auto;font-family:var(--ff-m);font-size:12px;color:var(--muted);background:var(--paper-2);border-radius:var(--r-xs);padding:3px 8px}
   .item{padding:14px 16px;border-bottom:1px solid var(--line-2)}
@@ -342,7 +363,10 @@
 
   /* Certificado */
   .cert{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
-  .cert .top{background:var(--rail);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:14px}
+  /* marco de doble línea tipo documento de seguridad + filete rojo de marca bajo la cabecera */
+  .cert{box-shadow:inset 0 0 0 5px var(--surface),inset 0 0 0 6px var(--line-strong)}
+  .cert .top{background:var(--rail);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--ember)}
+  .cert .kv .v.mono,.cert .mono{font-family:var(--ff-m)}
   .cert .top h3{font-size:18px}
   .cert .top small{font-size:10px;letter-spacing:2px;color:var(--rail-faint);display:block}
   .cert .bd{padding:20px}
@@ -555,9 +579,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.12"></script>
-<script src="form-inspeccion.js?v=1.12"></script>
-<script src="guias.js?v=1.12"></script>
+<script src="logos.js?v=1.13"></script>
+<script src="form-inspeccion.js?v=1.13"></script>
+<script src="guias.js?v=1.13"></script>
 <script>
 (function(){
 "use strict";
@@ -569,8 +593,12 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.12";
+var APP_VERSION="1.13";
 var APP_VERSION_NOTAS=[
+  "v1.13: Nuevo modo sol: en el boton de tema ahora hay claro, oscuro y sol, con maximo contraste para trabajar a pleno sol.",
+  "v1.13: Los modulos de la inspeccion van numerados como el formato en papel (00 a 10).",
+  "v1.13: El certificado (en pantalla y en PDF) tiene marco de doble linea y filete rojo institucional; el numero del concepto y el NIT salen en letra de codigo para leerlos sin error.",
+  "v1.13: La pagina de verificacion del QR tiene la misma imagen oficial del certificado.",
   "v1.12: Nueva imagen mas sobria y oficial: botones principales en color oscuro, esquinas mas rectas y menos sombras, para que se lea mejor al sol.",
   "v1.12: En el inicio, el estado de la ciudad muestra icono y palabra (vigente, por vencer, vencido) ademas del color, y las secciones van numeradas como el formato en papel.",
   "v1.11: En la inspeccion ya se escriben el documento (NIT o cedula), la razon social, el telefono y la actividad; antes el certificado podia salir sin NIT.",
@@ -1069,7 +1097,7 @@ function abrirMas(venc){
     items.map(function(n){
       return '<button type="button" data-v="'+n.id+'" class="'+(n.id===VIEW?"on":"")+'"><span class="ic">'+(ICMAP[n.id]||n.ic)+'</span><span class="tx">'+esc(n.t)+'</span>'+
         (n.id==="vencimientos"&&venc?'<span class="badge">'+venc+'</span>':'')+'<span class="ch">›</span></button>'}).join("")+
-    '<button type="button" id="shTema"><span class="ic">◐</span><span class="tx">Tema claro / oscuro</span></button>'+
+    '<button type="button" id="shTema"><span class="ic">◐</span><span class="tx">Tema: claro / oscuro / sol</span></button>'+
     '</div><button type="button" class="btn btn-g" id="shSalir" style="width:100%;margin-top:6px">⎋ Cerrar sesión</button></div></div>';
   var cerrar=function(){root.innerHTML=""};
   root.querySelector(".sheetwrap").addEventListener("click",function(e){if(e.target===this)cerrar()});
@@ -1674,7 +1702,7 @@ function renderDatos(body,est){
   if(!FORM.tramite)FORM.tramite="primera";
   if(!FORM.docs)FORM.docs={};
   var top=el("div","card");
-  top.innerHTML='<div class="modhead"><div class="n">i</div><h4>Solicitud y datos del establecimiento</h4></div><div class="pad">'+
+  top.innerHTML='<div class="modhead"><div class="n">00</div><h4>Solicitud y datos del establecimiento</h4></div><div class="pad">'+
     '<label class="lbl">Tipo de trámite</label>'+
     '<div class="modeseg" id="tramiteSeg" style="margin-bottom:6px;flex-wrap:wrap">'+
       [["primera","Primera vez"],["renovacion","Renovación"],["cambio","Cambio (razón social / dueño)"]].map(function(p){return '<button data-t="'+p[0]+'" class="'+(FORM.tramite===p[0]?"on":"")+'">'+p[1]+'</button>'}).join("")+'</div>'+
@@ -1825,7 +1853,7 @@ function renderDatos(body,est){
 }
 function renderModuleStep(body,m){
   var card=el("div","card");
-  card.innerHTML='<div class="modhead"><div class="n">'+m.id.replace("m","")+'</div><h4>'+esc(m.titulo.replace(/^Módulo\s*\d+\.\s*/,""))+'</h4><span class="mx">'+(m.clase==="agravante"?"agravante":"reductor")+'</span></div>';
+  card.innerHTML='<div class="modhead"><div class="n">'+("0"+m.id.replace("m","")).slice(-2)+'</div><h4>'+esc(m.titulo.replace(/^Módulo\s*\d+\.\s*/,""))+'</h4><span class="mx">'+(m.clase==="agravante"?"agravante":"reductor")+'</span></div>';
   var bd=el("div");bd.style.cssText="padding:2px 0";
   if(m.toggle)bd.appendChild(renderToggle(m));
   var wrap=el("div");wrap.dataset.items=m.id;
@@ -2242,6 +2270,7 @@ function makePDF(r,est){
     d.setFont("helvetica","normal");d.setFontSize(8.6);d.setTextColor(205,211,219);
     d.text("Concepto técnico de seguridad humana y protección contra incendios",m+60,43);
     d.text("Inírida, Guainía — Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m+60,56);
+    d.setFillColor(192,39,31);d.rect(0,72,W,3,"F");   /* filete rojo de marca */
   }
   function encabezadoCorto(){
     d.setFillColor(25,29,35);d.rect(0,0,W,46,"F");
@@ -2249,6 +2278,7 @@ function makePDF(r,est){
       try{ d.addImage(LOGO_DATA,"JPEG",m+2,10,26,26) }catch(e){} }
     d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(9.5);
     d.text("CBVI — Concepto técnico "+(validado?FORM.codigo:"(provisional)"),m+40,27);
+    d.setFillColor(192,39,31);d.rect(0,46,W,2,"F");
   }
 
   encabezado();
@@ -2256,7 +2286,8 @@ function makePDF(r,est){
   /* --- Veredicto --- */
   y=92;
   d.setFillColor(fav?228:247, fav?241:228, fav?232:226);
-  d.roundedRect(m,y,W-2*m-120,56,7,7,"F");
+  d.rect(m,y,W-2*m-120,56,"F");
+  d.setDrawColor(fav?23:192, fav?134:39, fav?75:31);d.setLineWidth(1.2);d.rect(m,y,W-2*m-120,56,"S");
   d.setTextColor(fav?23:192, fav?134:39, fav?75:31);
   d.setFont("helvetica","bold");d.setFontSize(22);d.text(String(r.s100)+"/100",m+16,y+36);
   d.setFontSize(12);d.text(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE",m+112,y+25);
@@ -2271,27 +2302,27 @@ function makePDF(r,est){
     d.text("Escanea para verificar",W-m-104,y+112);
   }catch(e){} }
   else {
-    d.setDrawColor(200);d.setLineWidth(.8);d.roundedRect(W-m-104,y-4,104,104,6,6,"S");
+    d.setDrawColor(200);d.setLineWidth(.8);d.rect(W-m-104,y-4,104,104,"S");
     d.setFontSize(7.5);d.setTextColor(150);
     d.text(d.splitTextToSize("Certificado sin validar. Sincronice la app para emitir el QR.",92),W-m-99,y+40);
   }
 
   /* --- Datos --- */
   y+=124;
-  function fila(k,val){
+  function fila(k,val,mono){
     espacio(20);
     d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(110);d.text(String(k).toUpperCase(),m,y);
-    d.setFont("helvetica","normal");d.setTextColor(25);d.setFontSize(10);
+    d.setFont(mono?"courier":"helvetica",mono?"bold":"normal");d.setTextColor(25);d.setFontSize(10);
     var ln=d.splitTextToSize(String(val==null||val===""?"—":val),W-2*m-160);
     d.text(ln,m+160,y); y+=Math.max(16,ln.length*12+4);
   }
   fila("Establecimiento",est.nombre);
   fila("Razón social",est.razonSocial||est.nombre);
   fila("Propietario / encargado",est.rep);
-  fila("NIT",est.nit);
+  fila("NIT",est.nit,true);
   fila("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""));
   fila("Actividad",est.act||est.tipo);
-  fila("Número del concepto",(validado?FORM.codigo:"POR ASIGNAR")+(validado?("   ·   distintivo "+FORM.sig):""));
+  fila("Número del concepto",(validado?FORM.codigo:"POR ASIGNAR")+(validado?("  ·  distintivo "+FORM.sig):""),true);
   fila("Tipo de trámite",tramiteLegible(FORM.tramite));
   fila("Ocupación NSR-10",FORM.ocupacion);
   fila("Clasificación del riesgo",FORM.clasifRiesgo);
@@ -2356,6 +2387,10 @@ function makePDF(r,est){
   var tot=d.internal.getNumberOfPages();
   for(var p=1;p<=tot;p++){
     d.setPage(p);
+    /* marco de doble línea tipo documento de seguridad (no tapa la cabecera) */
+    var top0=(p===1?75:48)+6;
+    d.setDrawColor(150);d.setLineWidth(.9);d.rect(12,top0,W-24,H-top0-12,"S");
+    d.setDrawColor(190);d.setLineWidth(.35);d.rect(16,top0+4,W-32,H-top0-20,"S");
     d.setDrawColor(225);d.setLineWidth(.6);d.line(m,H-44,W-m,H-44);
     d.setFont("helvetica","normal");d.setFontSize(6.8);d.setTextColor(130);
     d.text("Cuerpo de Bomberos Voluntarios de Inírida — Guainía, Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m,H-32);
@@ -3266,7 +3301,12 @@ $("#btnSync").addEventListener("click",function(){
   });
 });
 $("#btnInstalar").addEventListener("click",pedirInstalacion);
-$("#btnTheme").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");var n=c==="dark"?"light":(c==="light"?"dark":(matchMedia("(prefers-color-scheme: dark)").matches?"light":"dark"));document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(THEME,n)}catch(e){}});
+/* Tema: claro -> oscuro -> sol (máximo contraste) -> claro. */
+$("#btnTheme").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");
+  if(!c)c=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+  var n=c==="light"?"dark":(c==="dark"?"sol":"light");
+  document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(THEME,n)}catch(e){}
+  toast(n==="sol"?"Modo sol: máximo contraste para trabajar a pleno sol":(n==="dark"?"Tema oscuro":"Tema claro"))});
 
 /* ===================== INICIO DE SESIÓN =====================
    El inspector NO se crea su propio acceso: pide acceso con nombre y correo,
