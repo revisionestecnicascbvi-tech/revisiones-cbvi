@@ -79,7 +79,34 @@
     --azul:#0b4d94; --shadow:none; --shadow-pop:0 0 0 2px #000;
     color-scheme:light;
   }
+  /* Letra más grande en modo sol. La app usa tamaños en px, así que se suben
+     uno a uno los textos que se leen en campo (≈ +12 %). Sin zoom: el zoom
+     descuadra los toques sobre el mapa de Leaflet. */
   :root[data-theme="sol"] body{font-size:112%}
+  :root[data-theme="sol"] .item .q{font-size:16.5px}
+  :root[data-theme="sol"] .opt{font-size:15.5px;min-height:48px}
+  :root[data-theme="sol"] .btn{font-size:16.5px}
+  :root[data-theme="sol"] .btn-sm{font-size:15px}
+  :root[data-theme="sol"] .mini,:root[data-theme="sol"] .guidebtn,:root[data-theme="sol"] .ejbtn{font-size:14px}
+  :root[data-theme="sol"] input[type=text],:root[data-theme="sol"] input[type=number],:root[data-theme="sol"] input[type=email],
+  :root[data-theme="sol"] input[type=tel],:root[data-theme="sol"] input[type=date],:root[data-theme="sol"] select,
+  :root[data-theme="sol"] textarea{font-size:17px}
+  :root[data-theme="sol"] label.lbl{font-size:13px}
+  :root[data-theme="sol"] .guia,:root[data-theme="sol"] .note{font-size:14px}
+  :root[data-theme="sol"] .row-item .meta b{font-size:17px}
+  :root[data-theme="sol"] .row-item .meta small{font-size:14px}
+  :root[data-theme="sol"] .tile .k{font-size:14.5px}
+  :root[data-theme="sol"] .chip{font-size:14px}
+  :root[data-theme="sol"] .sech h3{font-size:13.5px}
+  :root[data-theme="sol"] .kv .k{font-size:12.5px}
+  :root[data-theme="sol"] .kv .v{font-size:16.5px}
+  :root[data-theme="sol"] .modhead h4{font-size:17.5px}
+  :root[data-theme="sol"] .topbar h2{font-size:18.5px}
+  :root[data-theme="sol"] .stepchip{font-size:13.5px}
+  :root[data-theme="sol"] .scorebar .vd .d{font-size:13.5px}
+  :root[data-theme="sol"] .tabs button{font-size:11.5px}
+  :root[data-theme="sol"] .sheetlist button{font-size:17px}
+  :root[data-theme="sol"] .toast{font-size:16px}
   :root[data-theme="sol"] .chip,:root[data-theme="sol"] .syncbadge,:root[data-theme="sol"] .verdict{border:2px solid currentColor}
   :root[data-theme="sol"] .card,:root[data-theme="sol"] .tile,:root[data-theme="sol"] .row-item,
   :root[data-theme="sol"] input,:root[data-theme="sol"] select,:root[data-theme="sol"] textarea,
@@ -595,7 +622,8 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
 var APP_VERSION="1.13";
 var APP_VERSION_NOTAS=[
-  "v1.13: Nuevo modo sol: en el boton de tema ahora hay claro, oscuro y sol, con maximo contraste para trabajar a pleno sol.",
+  "v1.13: Nuevo modo sol: en el boton de tema ahora hay claro, oscuro y sol, con maximo contraste y letra mas grande para trabajar a pleno sol.",
+  "v1.13: En el PDF, el recuadro del concepto crece con el texto del nivel de riesgo; antes el texto largo se salia del recuadro.",
   "v1.13: Los modulos de la inspeccion van numerados como el formato en papel (00 a 10).",
   "v1.13: El certificado (en pantalla y en PDF) tiene marco de doble linea y filete rojo institucional; el numero del concepto y el NIT salen en letra de codigo para leerlos sin error.",
   "v1.13: La pagina de verificacion del QR tiene la misma imagen oficial del certificado.",
@@ -2285,14 +2313,19 @@ function makePDF(r,est){
 
   /* --- Veredicto --- */
   y=92;
+  /* el texto del riesgo puede ocupar varias líneas: el recuadro crece con él
+     (antes medía siempre 56 y el texto largo se salía por debajo) */
+  d.setFont("helvetica","normal");d.setFontSize(8.5);
+  var lRiesgo=d.splitTextToSize("Nivel de riesgo "+r.band.riesgo+". "+(r.band.texto||""),W-2*m-240);
+  var altoV=Math.min(112,Math.max(56,38+lRiesgo.length*10+8));
   d.setFillColor(fav?228:247, fav?241:228, fav?232:226);
-  d.rect(m,y,W-2*m-120,56,"F");
-  d.setDrawColor(fav?23:192, fav?134:39, fav?75:31);d.setLineWidth(1.2);d.rect(m,y,W-2*m-120,56,"S");
+  d.rect(m,y,W-2*m-120,altoV,"F");
+  d.setDrawColor(fav?23:192, fav?134:39, fav?75:31);d.setLineWidth(1.2);d.rect(m,y,W-2*m-120,altoV,"S");
   d.setTextColor(fav?23:192, fav?134:39, fav?75:31);
   d.setFont("helvetica","bold");d.setFontSize(22);d.text(String(r.s100)+"/100",m+16,y+36);
   d.setFontSize(12);d.text(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE",m+112,y+25);
   d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(60);
-  d.text(d.splitTextToSize("Nivel de riesgo "+r.band.riesgo+". "+(r.band.texto||""),W-2*m-240),m+112,y+38);
+  d.text(lRiesgo.slice(0,7),m+112,y+38);
 
   /* --- QR al lado del veredicto --- */
   var qr=validado?qrDataURL():null;
@@ -3303,8 +3336,8 @@ $("#btnSync").addEventListener("click",function(){
 $("#btnInstalar").addEventListener("click",pedirInstalacion);
 /* Tema: claro -> oscuro -> sol (máximo contraste) -> claro. */
 $("#btnTheme").addEventListener("click",function(){var c=document.documentElement.getAttribute("data-theme");
-  if(!c)c=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
-  var n=c==="light"?"dark":(c==="dark"?"sol":"light");
+  /* sin tema elegido: se comporta como antes (oscuro del sistema -> claro) */
+  var n=!c?(matchMedia("(prefers-color-scheme: dark)").matches?"light":"dark"):(c==="light"?"dark":(c==="dark"?"sol":"light"));
   document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem(THEME,n)}catch(e){}
   toast(n==="sol"?"Modo sol: máximo contraste para trabajar a pleno sol":(n==="dark"?"Tema oscuro":"Tema claro"))});
 
