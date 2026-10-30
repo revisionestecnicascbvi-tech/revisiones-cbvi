@@ -549,9 +549,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.10"></script>
-<script src="form-inspeccion.js?v=1.10"></script>
-<script src="guias.js?v=1.10"></script>
+<script src="logos.js?v=1.11"></script>
+<script src="form-inspeccion.js?v=1.11"></script>
+<script src="guias.js?v=1.11"></script>
 <script>
 (function(){
 "use strict";
@@ -563,8 +563,11 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.10";
+var APP_VERSION="1.11";
 var APP_VERSION_NOTAS=[
+  "v1.11: En la inspeccion ya se escriben el documento (NIT o cedula), la razon social, el telefono y la actividad; antes el certificado podia salir sin NIT.",
+  "v1.11: Al escribir el nombre del establecimiento, la app muestra los parecidos que ya existen para usar su ficha y no crear una repetida.",
+  "v1.11: En un cambio de razon social o de dueno, los certificados anteriores conservan los datos con que se expidieron.",
   "v1.10: Corregido el QR del certificado: al escanearlo salia una pantalla de error de Google en vez de la verificacion.",
   "v1.9: Cada concepto y cada ficha se pueden eliminar desde la lista, con la papelera (sirve para los borradores y los repetidos).",
   "v1.9: Corregido el recuadro del QR del certificado, que habia quedado con fondo negro y letras ilegibles.",
@@ -655,7 +658,7 @@ function esOnline(){return !!(SES&&SES.pase)}
    del backend es más vieja que esta app (guardar el código en Apps Script NO
    lo publica). En vez de un mensaje críptico, se explica qué hacer. */
 var SERVIDOR_VIEJO=false;
-var BACKEND_MIN="1.6";
+var BACKEND_MIN="1.7";
 function mensajeServidor(err){
   var e=String(err||"");
   if(/Acci[oó]n desconocida/i.test(e)){
@@ -715,6 +718,8 @@ function insDeServidor(s){
   o.score100=+s.score100||0;
   o.concepto={favorable:String(s.favorable)==="true",riesgo:s.riesgo||"",texto:""};
   o.inspector=s.inspectorNombre||s.inspector||"";
+  var dz=typeof s.datosEst==="string"?tryj(s.datosEst):s.datosEst;   // datos con que se expidió
+  o.snap=(dz&&dz.nombre)?dz:null; delete o.datosEst;
   o.id=String(s.idCliente||s.id);
   o._sync=true;
   return o;
@@ -731,6 +736,7 @@ function fusionInsp(l,srv){
                 texto:((l.concepto||{}).texto)||""};
   }
   if(!lleno(r.inspector))r.inspector=srv.inspector;
+  if(srv.snap)r.snap=srv.snap;              // el servidor manda: puede haberlos congelado él
   if(!r.ans||!Object.keys(r.ans).length)r.ans=srv.ans;
   if(!r.fuentes||!Object.keys(r.fuentes).length)r.fuentes=srv.fuentes;
   if(!(r.recs&&r.recs.length))r.recs=srv.recs;
@@ -749,7 +755,7 @@ function mergeInsp(local,server){
 function tryj(s){try{return JSON.parse(s)}catch(e){return (typeof s==="object"&&s)?s:{}}}
 function estFromServer(s){return {id:s.id,codigo:s.codigo,nombre:s.nombre,nit:s.nit,tipo:s.tipo,ocup:s.ocup,act:s.actividad,dir:s.direccion,barrio:s.barrio,lat:s.lat||"",lng:s.lng||"",razonSocial:s.razonSocial||"",rep:s.repLegal,correo:s.correo,tel:s.tel,estado:s.estado,creado:s.creado}}
 function estToServer(e){return {establecimiento:{id:e.id,codigo:e.codigo,nombre:e.nombre,nit:e.nit||"",tipo:e.tipo||"",ocup:e.ocup||"",actividad:e.act||"",direccion:e.dir||"",barrio:e.barrio||"",lat:e.lat||"",lng:e.lng||"",razonSocial:e.razonSocial||"",repLegal:e.rep||"",correo:e.correo||"",tel:e.tel||""}}}
-function insToServer(f){var r=compute(f);return {inspeccion:{idCliente:f.id,codigo:f.codigo,establecimientoId:f.establecimientoId,radicado:f.radicado||"",tramite:f.tramite||"",nivel:f.nivel||"",inspectorNombre:f.inspector||"",inspectorCodigo:"",fecha:f.fecha,ocupacion:f.ocupacion||"",clasifRiesgo:f.clasifRiesgo||"",X:r.X,Y:r.Y,total:r.raw,score100:f.score100,favorable:!!(f.concepto&&f.concepto.favorable),riesgo:(f.concepto&&f.concepto.riesgo)||"",estado:f.estado,vigenciaHasta:f.vigenciaHasta||"",recomendaciones:JSON.stringify(f.recs||[]),respuestas:JSON.stringify({ans:f.ans,fuentes:f.fuentes}),nCobro:""}}}
+function insToServer(f){var r=compute(f);return {inspeccion:{idCliente:f.id,codigo:f.codigo,establecimientoId:f.establecimientoId,radicado:f.radicado||"",tramite:f.tramite||"",nivel:f.nivel||"",inspectorNombre:f.inspector||"",inspectorCodigo:"",fecha:f.fecha,ocupacion:f.ocupacion||"",clasifRiesgo:f.clasifRiesgo||"",X:r.X,Y:r.Y,total:r.raw,score100:f.score100,favorable:!!(f.concepto&&f.concepto.favorable),riesgo:(f.concepto&&f.concepto.riesgo)||"",estado:f.estado,vigenciaHasta:f.vigenciaHasta||"",recomendaciones:JSON.stringify(f.recs||[]),respuestas:JSON.stringify({ans:f.ans,fuentes:f.fuentes}),nCobro:"",datosEst:f.snap?JSON.stringify(f.snap):""}}}
 function pushEst(e){enqueue("crearEstablecimiento",estToServer(e))}
 
 /* ===================== FOTOS → GOOGLE DRIVE =====================
@@ -1672,9 +1678,15 @@ function renderDatos(body,est){
       '<button type="button" class="btn btn-g btn-sm" id="iBuscar">Buscar</button>'+
     '</div><div id="iHallado"></div>'+
     '<div class="ff" style="margin-top:4px">'+
-    '<div class="wide"><label class="lbl">Establecimiento</label><input id="iNom" type="text" value="'+esc(est?est.nombre:"")+'" placeholder="Nombre del local"></div>'+
+    '<div class="wide"><label class="lbl">Establecimiento</label><input id="iNom" type="text" value="'+esc(est?est.nombre:"")+'" placeholder="Nombre del local" autocomplete="off"><div id="iSugeridos"></div></div>'+
+    /* Documento, razón social, teléfono y actividad: sin ellos el certificado
+       salía con NIT "—" (primera vez) o con el NIT del dueño anterior (cambio). */
+    '<div><label class="lbl">Documento (NIT o cédula)</label><input id="iNit" type="text" inputmode="numeric" autocomplete="off" value="'+esc(est&&est.nit!=null?est.nit:"")+'"></div>'+
+    '<div><label class="lbl">Razón social</label><input id="iRaz" type="text" placeholder="Si es distinta al nombre del local" value="'+esc(est?est.razonSocial||"":"")+'"></div>'+
     '<div><label class="lbl">Dirección / barrio</label><input id="iDir" type="text" value="'+esc(est?((est.dir||"")+", "+(est.barrio||"")):"")+'"></div>'+
-    '<div><label class="lbl">Representante / responsable</label><input id="iRep" type="text" value="'+esc(est?est.rep:"")+'"></div>'+
+    '<div><label class="lbl">Propietario / responsable</label><input id="iRep" type="text" value="'+esc(est?est.rep:"")+'"></div>'+
+    '<div><label class="lbl">Teléfono</label><input id="iTel" type="text" inputmode="tel" value="'+esc(est&&est.tel!=null?est.tel:"")+'"></div>'+
+    '<div><label class="lbl">Actividad</label><input id="iAct" type="text" placeholder="Ej. Venta de ropa y calzado" value="'+esc(est?est.act||"":"")+'"></div>'+
     '<div><label class="lbl">Inspector</label><input id="iInsp" type="text" value="'+esc(FORM.inspector)+'"></div>'+
     '</div>'+
     '<div class="gpsrow" id="gpsInsp" style="margin-top:12px"></div>'+
@@ -1690,7 +1702,7 @@ function renderDatos(body,est){
   if(!FORM.gps)tomarGpsInsp();               // primera vez: se toma sola
   function paintTramite(){
     var t=FORM.tramite;
-    $("#tramiteGuia",top).textContent=t==="renovacion"?"Renovación: basta el formato diligenciado y la consignación según el nivel.":(t==="cambio"?"Cambio de razón social o propietario: se vuelve a pedir la documentación como primera vez.":"Primera vez: se piden RUT, cámara de comercio y uso del suelo, y la consignación según el nivel.");
+    $("#tramiteGuia",top).textContent=t==="renovacion"?"Renovación: basta el formato diligenciado y la consignación según el nivel.":(t==="cambio"?"Cambio de razón social o propietario: se vuelve a pedir la documentación como primera vez. Busca o escanea el local para usar su misma ficha y actualiza abajo nombre, razón social, propietario y documento; los certificados anteriores conservan los datos con que se expidieron.":"Primera vez: se piden RUT, cámara de comercio y uso del suelo, y la consignación según el nivel.");
     var docs=t==="renovacion"?[["formato","Formato diligenciado"],["consignacion","Consignación (según nivel)"]]:[["rut","Copia del RUT"],["camara","Cámara de comercio"],["suelo","Uso del suelo"],["consignacion","Consignación (según nivel)"]];
     var html='<label class="lbl" style="margin-top:6px">Documentos para la solicitud</label><div class="fuentes">'+
       docs.map(function(d){return '<label class="fchk '+(FORM.docs[d[0]]?"on":"")+'"><input type="checkbox" data-d="'+d[0]+'"'+(FORM.docs[d[0]]?" checked":"")+'><span>'+d[1]+'</span></label>'}).join("")+'</div>'+
@@ -1704,15 +1716,56 @@ function renderDatos(body,est){
   $$("#tramiteSeg button",top).forEach(function(b){b.addEventListener("click",function(){FORM.tramite=b.dataset.t;$$("#tramiteSeg button",top).forEach(function(x){x.classList.remove("on")});b.classList.add("on");scheduleSave();paintTramite()})});
   $$("#ocupQuick button",top).forEach(function(b){b.addEventListener("click",function(){var q=OCUP_QUICK[+b.dataset.i];FORM.ocupacion=q.ocup;FORM.clasifRiesgo=q.riesgo;$("#iOcup",top).value=q.ocup;$("#iRiesgo",top).value=q.riesgo;scheduleSave();toast(q.label+" → "+q.ocup+" ("+q.riesgo+")")})});
   var bindTxt=function(id,set){$(id,top).addEventListener("input",function(){set(this.value);scheduleSave()})};
-  bindTxt("#iNom",function(x){FORM._nom=x});bindTxt("#iDir",function(x){FORM._dir=x});bindTxt("#iRep",function(x){FORM._rep=x});bindTxt("#iInsp",function(x){FORM.inspector=x});
+  bindTxt("#iNom",function(x){FORM._nom=x;sugerirFichas()});bindTxt("#iDir",function(x){FORM._dir=x});bindTxt("#iRep",function(x){FORM._rep=x});bindTxt("#iInsp",function(x){FORM.inspector=x});
+  bindTxt("#iNit",function(x){FORM._nit=x;sugerirFichas()});bindTxt("#iRaz",function(x){FORM._raz=x});
+  bindTxt("#iTel",function(x){FORM._tel=x});bindTxt("#iAct",function(x){FORM._act=x});
+
+  /* --- "¿Es alguno de estos?" mientras se escribe ---
+     Antes, un nombre escrito un poco distinto ("City Vegas" por "City Las
+     Vegas") creaba otra ficha sin avisar. Ahora, mientras la inspección no
+     esté enganchada a una ficha que ya existía, se muestran las parecidas. */
+  var _sugT;
+  function sugerirFichas(){
+    clearTimeout(_sugT);
+    _sugT=setTimeout(function(){
+      var cont=$("#iSugeridos",top); if(!cont)return;
+      var propia=FORM.establecimientoId&&FORM.establecimientoId!==FORM._estNuevo;
+      if(propia){cont.innerHTML="";return}             // ya está en una ficha existente
+      var res=fichasParecidas(FORM._nom,FORM._nit,FORM._estNuevo);
+      if(!res.length){cont.innerHTML="";return}
+      cont.innerHTML='<p class="note" style="margin-top:6px">¿Es alguno de estos? Tócalo para usar su ficha y no crear otra:</p>';
+      var lg=el("div","listgrid");
+      res.forEach(function(e){
+        var s=estadoEst(e), b=el("button","row-item"); b.type="button";
+        b.innerHTML='<div class="meta"><b>'+esc(e.nombre)+'</b><small>'+esc(e.barrio||"")+(e.nit?(' · '+esc(e.nit)):'')+'</small></div>'+chip(s.k,s.t);
+        b.addEventListener("click",function(){cont.innerHTML="";usarFicha(e)});
+        lg.appendChild(b);
+      });
+      cont.appendChild(lg);
+    },350);
+  }
 
   /* --- enganchar la inspección a una ficha que ya existe --- */
   function usarFicha(e){
+    /* Si mientras se escribía el nombre ya se había creado una ficha nueva
+       para esta inspección, y nadie más la usa, se descarta: si no, quedaba
+       una ficha "fantasma" repetida. */
+    if(FORM._estNuevo&&FORM._estNuevo!==e.id){
+      var huerf=FORM._estNuevo;
+      var laUsa=DB.inspecciones.some(function(x){return x.establecimientoId===huerf&&x.id!==FORM.id})||
+                (DB.barridos||[]).some(function(x){return x.establecimientoId===huerf});
+      if(!laUsa)DB.establecimientos=DB.establecimientos.filter(function(x){return x.id!==huerf});
+      FORM._estNuevo=null;
+    }
     FORM.establecimientoId=e.id;
     FORM._nom=e.nombre||""; $("#iNom",top).value=FORM._nom;
     var dir=(e.dir&&e.dir!=="—"?e.dir:"")+(e.barrio&&e.barrio!=="—"?(", "+e.barrio):"");
     FORM._dir=dir; $("#iDir",top).value=dir;
     if(e.rep){FORM._rep=e.rep; $("#iRep",top).value=e.rep}
+    [["#iNit","_nit","nit"],["#iRaz","_raz","razonSocial"],["#iTel","_tel","tel"],["#iAct","_act","act"]].forEach(function(c){
+      var val=e[c[2]]==null?"":String(e[c[2]]); FORM[c[1]]=val; var inp=$(c[0],top); if(inp)inp.value=val;
+    });
+    var sg=$("#iSugeridos",top); if(sg)sg.innerHTML="";
     if(e.ocup){FORM.ocupacion=e.ocup; var so=$("#iOcup",top); if(so)so.value=e.ocup}
     scheduleSave();
     var s=estadoEst(e), u=s.u, ult=ultimoBarrido&&ultimoBarrido(e.id);
@@ -1898,7 +1951,7 @@ function renderThumbs(id,c){
   });
 }
 var _sv;function scheduleSave(){clearTimeout(_sv);_sv=setTimeout(saveInsp,400)}
-function saveInsp(){if(!FORM)return;if(FORM._nom!==undefined||FORM._dir!==undefined||FORM._rep!==undefined)syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
+function saveInsp(){if(!FORM)return;if(["_nom","_dir","_rep","_nit","_raz","_tel","_act"].some(function(k){return FORM[k]!==undefined}))syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
 /* ===================== UBICACION DE LA INSPECCION =====================
    La inspeccion se hace EN el establecimiento: se toma la ubicacion sola al
    abrir el paso Datos y, al generar el concepto, se le asigna al
@@ -1951,15 +2004,47 @@ function syncEst(){ // crea/actualiza el establecimiento desde el encabezado
        quedaban como dos establecimientos distintos. Ahora, si el nombre (o
        el documento) ya existe, la inspección se cuelga de ESA ficha y el
        historial queda junto. */
-    var ya=buscarEstablecimiento(FORM._nom,"");
+    var ya=buscarEstablecimiento(FORM._nom,FORM._nit||"");
     if(ya){ e=ya; FORM.establecimientoId=e.id; FORM._asociado=e.nombre; }
     else {
       e={id:"e"+Date.now(),codigo:"EST-"+String(DB.establecimientos.length+1).padStart(3,"0"),lat:"",lng:"",creado:NOW.toISOString()};
       DB.establecimientos.push(e);FORM.establecimientoId=e.id;
+      FORM._estNuevo=e.id;              // nació en esta inspección: se puede descartar si eligen otra
     }
   }
-  if(e){if(FORM._nom!==undefined)e.nombre=FORM._nom;if(FORM._rep!==undefined)e.rep=FORM._rep;if(FORM.ocupacion)e.ocup=FORM.ocupacion;
+  if(e){
+    /* Cambio de razón social o de dueño: ANTES de reescribir la ficha, las
+       inspecciones anteriores que no tenían sus datos guardados se quedan con
+       los de ahora. Así su certificado no cambia de dueño. (El servidor hace
+       lo mismo con su copia.) */
+    var nuevos={nombre:FORM._nom,razonSocial:FORM._raz,rep:FORM._rep,nit:FORM._nit};
+    var cambia=Object.keys(nuevos).some(function(k){
+      var n=nuevos[k]; return n!==undefined&&String(n).trim()!==""&&normNombre(n)!==normNombre(e[k]==null?"":e[k]);
+    });
+    if(cambia&&e.id!==FORM._estNuevo){
+      var viejo=snapDeFicha(e);
+      DB.inspecciones.forEach(function(x){if(x.establecimientoId===e.id&&x.id!==FORM.id&&!x.snap)x.snap=viejo});
+    }
+    if(FORM._nom!==undefined)e.nombre=FORM._nom;if(FORM._rep!==undefined)e.rep=FORM._rep;if(FORM.ocupacion)e.ocup=FORM.ocupacion;
+    if(FORM._nit!==undefined)e.nit=String(FORM._nit).trim();
+    if(FORM._raz!==undefined)e.razonSocial=FORM._raz;
+    if(FORM._tel!==undefined)e.tel=FORM._tel;
+    if(FORM._act!==undefined)e.act=FORM._act;
     if(FORM._dir!==undefined){var p=FORM._dir.split(",");e.dir=p[0]||e.dir;e.barrio=(p[1]||e.barrio||"").trim()}}
+}
+/* Los datos del negocio tal como están ahora: se guardan en cada concepto. */
+function snapDeFicha(e){
+  e=e||{};
+  return {nombre:e.nombre||"",razonSocial:e.razonSocial||"",propietario:e.rep||"",nit:e.nit==null?"":String(e.nit),
+          direccion:(e.dir&&e.dir!=="—")?e.dir:"",barrio:(e.barrio&&e.barrio!=="—")?e.barrio:"",actividad:e.act||e.tipo||"",tel:e.tel==null?"":String(e.tel)};
+}
+/* Para el certificado: si el concepto guardó sus datos, mandan esos. */
+function datosCert(f,e){
+  e=e||{}; var s=f&&f.snap; if(!s||!s.nombre)return e;
+  var o=Object.assign({},e);
+  o.nombre=s.nombre; o.razonSocial=s.razonSocial||""; o.rep=s.propietario||""; o.nit=s.nit||"";
+  o.dir=s.direccion||""; o.barrio=s.barrio||""; o.act=s.actividad||""; o.tel=s.tel||"";
+  return o;
 }
 function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
   var col=r.got?(r.band.favorable?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):"var(--gris)";
@@ -1970,6 +2055,10 @@ function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
 }
 function finalizar(){
   saveInsp();aplicarGpsInsp();var r=compute(FORM);
+  /* "Foto" de los datos del negocio al expedir: el certificado y su QR
+     mostrarán SIEMPRE estos, aunque la ficha cambie después de dueño. */
+  var fe=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0];
+  if(fe)FORM.snap=snapDeFicha(fe);
   FORM.estado="finalizada";FORM.score100=r.s100;FORM.X=r.X;FORM.Y=r.Y;
   if(!FORM.inspector)FORM.inspector=SES?(SES.name||SES.email||""):"";   // el certificado nunca sale sin inspector
   FORM.concepto={favorable:r.band.favorable,riesgo:r.band.riesgo,texto:r.band.texto};
@@ -2013,7 +2102,7 @@ function emitirConcepto(f){
 function vCertificado(v){
   if(!FORM){navTo("dashboard");return}
   var r=FORM.concepto?{s100:FORM.score100,band:{favorable:FORM.concepto.favorable,riesgo:FORM.concepto.riesgo,texto:FORM.concepto.texto||""},X:FORM.X,Y:FORM.Y,recs:hallazgosDe(FORM)}:compute(FORM);
-  var est=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0]||{};
+  var est=datosCert(FORM,DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0]);
   var fav=r.band.favorable, validado=estaValidado(FORM);
   var hall=(r.recs||[]);
 
@@ -2307,7 +2396,7 @@ function eliminarConcepto(insp,alTerminar){
   if(!insp) return;
   var emitido=estaValidado(insp);
   if(emitido&&!isAdmin()){ toast("Solo el administrador puede eliminar un concepto ya emitido"); return }
-  var est=DB.establecimientos.filter(function(x){return x.id===insp.establecimientoId})[0]||{};
+  var est=datosCert(insp,DB.establecimientos.filter(function(x){return x.id===insp.establecimientoId})[0]);
   var aviso=emitido
     ? '<p class="note" style="color:var(--rojo)"><b>Este concepto ya fue emitido</b> con el número <span class="mono">'+esc(insp.codigo)+'</span>. '+
       'Si el ciudadano tiene el certificado impreso, su QR dejará de validar.</p>'+
@@ -2937,6 +3026,25 @@ function buscarEstablecimiento(nombre,doc){
     if(nd && ed) return ed===nd;    // ambos tienen documento: debe coincidir
     return true;                    // alguno sin documento: manda el nombre
   })[0]||null;
+}
+/* Fichas que PODRÍAN ser la misma que se está escribiendo (para sugerir,
+   nunca para juntar solas): mismo documento, un nombre contenido en el otro,
+   o la mayoría de las palabras en común. "excluir" = la ficha recién creada. */
+function fichasParecidas(nombre,doc,excluir){
+  var nn=normNombre(nombre), nd=normDoc(doc);
+  var pal=function(s){return s.split(" ").filter(function(w){return w.length>=3})};
+  var pn=pal(nn);
+  if(nn.length<3&&nd.length<5)return [];
+  return DB.establecimientos.filter(function(e){
+    if(e.id===excluir)return false;
+    var en=normNombre(e.nombre), ed=normDoc(e.nit);
+    if(nd.length>=5&&ed&&ed===nd)return true;
+    if(nn.length<3||!en)return false;
+    if(en===nn||(nn.length>=4&&en.indexOf(nn)>=0)||(en.length>=4&&nn.indexOf(en)>=0))return true;
+    var pe=pal(en); if(!pn.length||!pe.length)return false;
+    var comun=pn.filter(function(w){return pe.indexOf(w)>=0}).length;
+    return comun>=2&&comun/Math.max(pn.length,pe.length)>=0.6;
+  }).slice(0,5);
 }
 function importCsv(txt){
   var lines=(txt||"").split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
