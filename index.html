@@ -549,9 +549,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.9"></script>
-<script src="form-inspeccion.js?v=1.9"></script>
-<script src="guias.js?v=1.9"></script>
+<script src="logos.js?v=1.10"></script>
+<script src="form-inspeccion.js?v=1.10"></script>
+<script src="guias.js?v=1.10"></script>
 <script>
 (function(){
 "use strict";
@@ -563,8 +563,9 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.9";
+var APP_VERSION="1.10";
 var APP_VERSION_NOTAS=[
+  "v1.10: Corregido el QR del certificado: al escanearlo salia una pantalla de error de Google en vez de la verificacion.",
   "v1.9: Cada concepto y cada ficha se pueden eliminar desde la lista, con la papelera (sirve para los borradores y los repetidos).",
   "v1.9: Corregido el recuadro del QR del certificado, que habia quedado con fondo negro y letras ilegibles.",
   "v1.9: Al crear una inspeccion se puede escanear el QR o buscar el establecimiento: queda en la misma ficha y no se duplica.",
@@ -654,7 +655,7 @@ function esOnline(){return !!(SES&&SES.pase)}
    del backend es más vieja que esta app (guardar el código en Apps Script NO
    lo publica). En vez de un mensaje críptico, se explica qué hacer. */
 var SERVIDOR_VIEJO=false;
-var BACKEND_MIN="1.5";
+var BACKEND_MIN="1.6";
 function mensajeServidor(err){
   var e=String(err||"");
   if(/Acci[oó]n desconocida/i.test(e)){
@@ -901,7 +902,8 @@ function estaValidado(f){return !!(f&&f.sig&&f.codigo&&String(f.codigo).indexOf(
 function urlVerificacion(f){
   var c=encodeURIComponent(f.codigo||""), d=encodeURIComponent(f.sig||"");
   if(VERIFY)return VERIFY+"?c="+c+"&d="+d;
-  return BACKEND_URL+"?c="+c+"&d="+d;
+  /* Al servidor va "cod", no "c": Google reserva "c" en Apps Script. */
+  return BACKEND_URL+"?cod="+c+"&d="+d;
 }
 
 /* ---------- estado / vigencia ---------- */

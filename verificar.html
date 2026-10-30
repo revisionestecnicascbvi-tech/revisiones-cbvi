@@ -136,7 +136,7 @@
   </p>
 </main>
 
-<script src="logos.js?v=1.9"></script>
+<script src="logos.js?v=1.10"></script>
 <script>
 (function(){
 "use strict";
@@ -230,7 +230,9 @@ function consultar(c, d){
     '<div><h2>Consultando…</h2><p>Validando el certificado con el servidor del CBVI.</p></div>';
   $("#contenido").innerHTML = "";
 
-  var url = BACKEND_URL + "?api=1&c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
+  /* Al servidor el código va como "cod", NUNCA "c": Google reserva ese
+     parámetro y responde su página de error sin ejecutar el script. */
+  var url = BACKEND_URL + "?api=1&cod=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
   fetch(url, { method:"GET" })
     .then(function(r){ return r.text().then(function(t){ try{ return JSON.parse(t); }catch(e){ return { _noJson:true }; } }); })
     .then(function(res){
@@ -272,7 +274,7 @@ function reintentarEnElServidor(c,d){
     '<div><h2>Consultando…</h2><p>Abriendo la verificación oficial del CBVI.</p></div>';
   /* basico=1: que el servidor responda él mismo. Sin esto, el servidor nos
      devolvería a esta misma página y quedaríamos rebotando sin fin. */
-  var destino = BACKEND_URL + "?basico=1&c=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
+  var destino = BACKEND_URL + "?basico=1&cod=" + encodeURIComponent(c) + "&d=" + encodeURIComponent(d||"");
   setTimeout(function(){ location.replace(destino); }, 350);
 }
 function servidorNoResponde(){
