@@ -41,6 +41,9 @@
     --shadow-rail:0 0 0 1px rgba(255,255,255,.04);
     --ff-h:"Saira",system-ui,sans-serif; --ff:"Public Sans",system-ui,-apple-system,sans-serif;
     --ff-m:"IBM Plex Mono",ui-monospace,monospace;
+    /* Motion (DESIGN.md §Motion): entrar/salir/mover y duraciones. */
+    --ease-enter:cubic-bezier(.2,.8,.2,1); --ease-exit:ease-in; --ease-move:ease-in-out;
+    --dur-micro:100ms; --dur-short:180ms; --dur-med:250ms;
   }
   @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
     --ink:#eef1f4; --ink-2:#c5ccd4; --paper:#0f1216; --paper-2:#0b0e11;
@@ -193,7 +196,7 @@
   .topbar .sub{color:var(--muted);font-size:13px;margin-left:2px;align-self:center}
   .topbar .sp{flex:1}
   .icbtn{width:42px;height:42px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:16px;display:grid;place-items:center}
-  .icbtn:hover{border-color:var(--ink)}
+  @media (hover:hover) and (pointer:fine){.icbtn:hover{border-color:var(--ink)}}
   .syncbadge{font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--r-sm);border:1px solid var(--line);white-space:nowrap}
   .syncbadge.ok{color:var(--verde);background:var(--verde-bg);border-color:var(--verde)}
   .syncbadge.pend{color:var(--ambar);background:var(--ambar-bg);border-color:var(--ambar)}
@@ -232,8 +235,11 @@
   /* Hoja "Mas" (celular) */
   .modal.sheetwrap{place-items:end center;padding:0}
   .sheet{background:var(--surface);width:100%;max-width:520px;border-radius:var(--r-lg) var(--r-lg) 0 0;
-    padding:10px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:var(--shadow-pop);animation:subir .18s ease-out}
+    padding:10px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:var(--shadow-pop);
+    animation:subir var(--dur-short) var(--ease-enter);transition:transform var(--dur-micro) var(--ease-exit)}
   @keyframes subir{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+  /* Salida (JS agrega .leaving antes de vaciar #modalRoot — ver cerrarModal). */
+  .modal.leaving .sheet{transform:translateY(20px)}
   .sheetbar{width:42px;height:5px;border-radius:3px;background:var(--line);margin:2px auto 12px}
   .sheett{display:block;font-family:var(--ff-h);font-size:16px;margin:0 4px 8px}
   .sheetlist{display:grid;gap:4px}
@@ -249,7 +255,8 @@
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .pad{padding:18px}
   .grid{display:grid;gap:16px}
-  .btn{appearance:none;border:1px solid transparent;border-radius:var(--r-sm);min-height:var(--tap);padding:0 20px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .btn{appearance:none;border:1px solid transparent;border-radius:var(--r-sm);min-height:var(--tap);padding:0 20px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .1s ease-out,background .15s ease}
   .btn-p{background:var(--ink);color:var(--surface)}
   .btn-p:active{transform:translateY(1px)}
   .btn-p:hover{background:var(--ink-2)}
@@ -297,7 +304,7 @@
 
   /* Listas / filas */
   .row-item{display:flex;align-items:center;gap:14px;padding:13px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);width:100%;text-align:left;color:inherit}
-  .row-item:hover{border-color:var(--ink)}
+  @media (hover:hover) and (pointer:fine){.row-item:hover{border-color:var(--ink)}}
   .row-item .ava{width:44px;height:44px;border-radius:var(--r-sm);flex:0 0 auto;display:grid;place-items:center;font-size:19px;background:var(--surface-2);border:1px solid var(--line)}
   .row-item .meta{flex:1;min-width:0}
   .row-item .meta b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--ff-h);font-weight:600}
@@ -308,7 +315,7 @@
   .rowpar .row-item{flex:1;min-width:0}
   .rowdel{flex:0 0 auto;width:46px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);
     color:var(--rojo);font-size:17px;display:grid;place-items:center;cursor:pointer}
-  .rowdel:hover{border-color:var(--rojo);background:var(--surface-2)}
+  @media (hover:hover) and (pointer:fine){.rowdel:hover{border-color:var(--rojo);background:var(--surface-2)}}
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .search{flex:1;min-width:180px;position:relative}
   .search input{width:100%}
@@ -355,7 +362,7 @@
   .opt.sel.warn{background:var(--ambar);border-color:var(--ambar);color:#241a00}
   .itools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .mini{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:var(--r-sm);min-height:38px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
-  .mini:hover{border-color:var(--ink);color:var(--ink)}
+  @media (hover:hover) and (pointer:fine){.mini:hover{border-color:var(--ink);color:var(--ink)}}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   /* visor del lector de QR. OJO: NO usar .qrbox, que ya es la tarjeta del
      certificado; pisarla dejaba ese bloque con fondo negro e ilegible. */
@@ -418,19 +425,26 @@
   .seedtag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:3100;background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:var(--r-sm);font-size:14px;box-shadow:var(--shadow-pop);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
-  .modal{position:fixed;inset:0;z-index:3000;background:rgba(10,13,16,.55);display:grid;place-items:center;padding:16px}
+  .modal{position:fixed;inset:0;z-index:3000;background:rgba(10,13,16,.55);display:grid;place-items:center;padding:16px;
+    animation:modalin var(--dur-short) var(--ease-enter);transition:opacity var(--dur-micro) var(--ease-exit)}
+  @keyframes modalin{from{opacity:0}to{opacity:1}}
+  /* Salida (JS agrega .leaving antes de vaciar #modalRoot — ver cerrarModal). */
+  .modal.leaving{opacity:0}
   /* Formularios largos (censo): antes median mas que la pantalla y no se
      desplazaban, y "Guardar" quedaba fuera de alcance en el celular. */
   .modal .box{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:flex;flex-direction:column}
   .modal .box header,.modal .box footer{flex:none}
   .modal .box .c{overflow-y:auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .modal .box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);max-width:440px;width:100%;box-shadow:var(--shadow-pop);overflow:hidden}
+  .modal .box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);max-width:440px;width:100%;box-shadow:var(--shadow-pop);overflow:hidden;
+    animation:boxin var(--dur-short) var(--ease-enter);transition:transform var(--dur-micro) var(--ease-exit)}
+  @keyframes boxin{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal.leaving .box{transform:scale(.97)}
   .modal .box header{padding:16px 18px;border-bottom:1px solid var(--line-2);font-family:var(--ff-h);font-size:17px;font-weight:600}
   .modal .box .c{padding:18px;display:grid;gap:13px}
   .modal .box footer{padding:14px 18px;display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--line-2)}
   .note{font-size:12.5px;color:var(--muted)}
   .progwrap{height:6px;border-radius:4px;background:var(--paper-2);overflow:hidden;margin:10px 0}
-  .progwrap i{display:block;height:100%;background:var(--ink);transition:width .25s}
+  .progwrap i{display:block;height:100%;width:100%;transform-origin:left;background:var(--ink);transition:transform var(--dur-med) var(--ease-move)}
   .stepnav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
   .stepchip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:var(--r-sm);padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap}
   .stepchip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
@@ -445,7 +459,7 @@
   .guidebox .dg{flex:0 0 auto;width:180px;color:var(--ink)}
   .guidebox .dg svg{width:100%;height:auto}
   .guidebox ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--muted);display:grid;gap:4px;flex:1;min-width:170px}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
   /* ===== Mapa real (Leaflet + OpenStreetMap) ===== */
   /* position+z-index+isolation: las capas internas de Leaflet (z-index 400-1000)
@@ -606,9 +620,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.13"></script>
-<script src="form-inspeccion.js?v=1.13"></script>
-<script src="guias.js?v=1.13"></script>
+<script src="logos.js?v=1.14"></script>
+<script src="form-inspeccion.js?v=1.14"></script>
+<script src="guias.js?v=1.14"></script>
 <script>
 (function(){
 "use strict";
@@ -620,8 +634,11 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.13";
+var APP_VERSION="1.14";
 var APP_VERSION_NOTAS=[
+  "v1.14: Las ventanas de confirmación y el menú \"Más\" ahora entran y salen con una animación suave, en vez de aparecer y desaparecer de golpe.",
+  "v1.14: Los botones responden con un gesto suave al tocarlos.",
+  "v1.14: Corregido: en celular/tablet, el borde de botones y filas ya no se quedaba resaltado después de tocarlos.",
   "v1.13: Nuevo modo sol: en el boton de tema ahora hay claro, oscuro y sol, con maximo contraste y letra mas grande para trabajar a pleno sol.",
   "v1.13: En el PDF, el recuadro del concepto crece con el texto del nivel de riesgo; antes el texto largo se salia del recuadro.",
   "v1.13: Los modulos de la inspeccion van numerados como el formato en papel (00 a 10).",
@@ -1103,7 +1120,7 @@ function enAPK(){return !!(window.AndroidRT)}
    Devuelve true si la app lo resolvio (cerrar un aviso o volver de pantalla). */
 window.__rtAtras=function(){
   try{
-    var mr=$("#modalRoot"); if(mr&&mr.innerHTML){mr.innerHTML="";return true}
+    var mr=$("#modalRoot"); if(mr&&mr.innerHTML){cerrarModal(mr);return true}
     if(!$("#app").hidden){
       if(VIEW!=="dashboard"||NAVHIST.length){navAtras();return true}
       return false;                                   // en Inicio: el telefono cierra la app
@@ -1127,7 +1144,7 @@ function abrirMas(venc){
         (n.id==="vencimientos"&&venc?'<span class="badge">'+venc+'</span>':'')+'<span class="ch">›</span></button>'}).join("")+
     '<button type="button" id="shTema"><span class="ic">◐</span><span class="tx">Tema: claro / oscuro / sol</span></button>'+
     '</div><button type="button" class="btn btn-g" id="shSalir" style="width:100%;margin-top:6px">⎋ Cerrar sesión</button></div></div>';
-  var cerrar=function(){root.innerHTML=""};
+  var cerrar=function(){cerrarModal(root)};
   root.querySelector(".sheetwrap").addEventListener("click",function(e){if(e.target===this)cerrar()});
   $$(".sheetlist [data-v]",root).forEach(function(b){b.addEventListener("click",function(){cerrar();navTo(b.dataset.v)})});
   $("#shSalir",root).addEventListener("click",function(){cerrar();logout()});
@@ -1699,7 +1716,7 @@ function vInspeccion(v){
   head.innerHTML='<div class="pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
     '<b class="num" style="font-size:13px;color:var(--muted)">Paso '+(FORM._step+1)+' de '+steps.length+'</b>'+
     '<span class="mono" style="font-size:12px;color:var(--muted)">'+esc(FORM.codigo)+'</span></div>'+
-    '<div class="progwrap"><i style="width:'+prog+'%"></i></div>'+
+    '<div class="progwrap"><i style="transform:scaleX('+(prog/100)+')"></i></div>'+
     '<div class="stepnav">'+steps.map(function(s,i){return '<button class="stepchip '+(i===FORM._step?"on":"")+(i<FORM._step?" done":"")+'" data-i="'+i+'">'+esc(s.t)+'</button>'}).join("")+'</div></div>';
   v.appendChild(head);
   $$(".stepchip",head).forEach(function(b){b.addEventListener("click",function(){FORM._step=+b.dataset.i;render();window.scrollTo(0,0)})});
@@ -3269,6 +3286,16 @@ function modalPinListo(nombre,email,pin){
 }
 
 /* -------- modal / theme / auth -------- */
+/* Anima la salida (clase .leaving, DESIGN.md: --dur-micro/--ease-exit) antes
+   de vaciar el contenedor. Si durante esos ~100ms ya se abrio un modal nuevo
+   (ej. "Base borrada" tras un await), root.contains(m) ya da falso y no lo
+   borra por error. */
+function cerrarModal(root){
+  var m=root.querySelector(".modal");
+  if(!m){root.innerHTML="";return}
+  m.classList.add("leaving");
+  setTimeout(function(){if(root.contains(m))root.innerHTML=""},100);
+}
 /* I4: modales propios. Nada de confirm()/alert()/prompt() nativos — en el
    APK/WebView fallan en silencio. "extra" es un tercer botón opcional. */
 function modal(title,body,okTxt,onOk,extra){
@@ -3278,7 +3305,7 @@ function modal(title,body,okTxt,onOk,extra){
     '<footer>'+(extra?'<button class="btn btn-sm '+esc(extra.clase||"btn-g")+'" id="mExtra" style="margin-right:auto">'+esc(extra.texto)+'</button>':'')+
     '<button class="btn btn-g btn-sm" id="mCancel">Cancelar</button>'+
     '<button class="btn btn-p btn-sm" id="mOk">'+esc(okTxt)+'</button></footer></div></div>';
-  var close=function(){root.innerHTML=""};
+  var close=function(){cerrarModal(root)};
   $("#mCancel").addEventListener("click",close);
   $("#mOk").addEventListener("click",function(){if(onOk()!==false)close()});
   if(extra)$("#mExtra").addEventListener("click",function(){if(extra.accion()!==false)close()});
