@@ -623,9 +623,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.16"></script>
-<script src="form-inspeccion.js?v=1.16"></script>
-<script src="guias.js?v=1.16"></script>
+<script src="logos.js?v=1.17"></script>
+<script src="form-inspeccion.js?v=1.17"></script>
+<script src="guias.js?v=1.17"></script>
 <script>
 (function(){
 "use strict";
@@ -637,8 +637,9 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.16";
+var APP_VERSION="1.17";
 var APP_VERSION_NOTAS=[
+  "v1.17: Tipo de construcción tiene opción \"Mixta\" para edificaciones con más de un material. Si no hay subniveles, marca \"Ninguno\" y ya no pide área ni actividad del subnivel. Si no hay brigada de emergencias, ya no pide su certificación ni nivel.",
   "v1.16: El certificado ya no le exige al propietario trámites imposibles de cumplir a corto plazo (licencia de construcción, uso del suelo, o ensanchar escaleras/puertas/corredores existentes); esos datos siguen contando para el puntaje oficial, solo dejan de salir como \"corrija esto\".",
   "v1.15: Corregido: en el formulario de inspección, en celular, la barra de puntaje tapaba los botones \"Siguiente\" y \"Generar concepto\" y podía activar el equivocado al tocar.",
   "v1.14: Las ventanas de confirmación y el menú \"Más\" ahora entran y salen con una animación suave, en vez de aparecer y desaparecer de golpe.",
@@ -700,7 +701,10 @@ var MOD=window.MODULOS||[], META=window.FORM_META||{}, OCUP=window.OCUPACIONES_N
 var GUIAS=window.GUIAS||{}, DIAGRAMS=window.DIAGRAMS||{}, ITEM_TOPIC=window.ITEM_TOPIC||{}, OCUP_QUICK=window.OCUP_QUICK||[], EJEMPLOS=window.EJEMPLOS||{};
 var CONTEXTO=new Set(window.ITEMS_CONTEXTO||[]);
 var GATES=new Set();MOD.forEach(function(m){m.items.forEach(function(it){if(it.dependsOn)GATES.add(it.dependsOn.item)})});
-function applyDeps(root){if(!root)return;Array.prototype.slice.call(root.querySelectorAll('[data-dep-item]')).forEach(function(w){w.hidden=(FORM&&FORM.ans[w.dataset.depItem]!==w.dataset.depVal)})}
+function applyDeps(root){if(!root)return;Array.prototype.slice.call(root.querySelectorAll('[data-dep-item]')).forEach(function(w){
+  var av=FORM&&FORM.ans[w.dataset.depItem];
+  w.hidden=w.dataset.depNot?!(av!=null&&av!==w.dataset.depVal):(av!==w.dataset.depVal)
+})}
 /* Logos: vienen embebidos en logos.js, no dependen de una ruta ni de la red. */
 var LG=window.LOGOS||{};
 var LOGO_DATA=LG.cbviPdf||LG.cbvi||null;   // versión sobre blanco para el PDF
@@ -1033,7 +1037,14 @@ function itemMax(it){if(it.score===false||it.tipo==="texto")return 0;if(it.tipo=
 function inInter(it){return INTER.has(it.id)}
 function scoreVal(f,it){ if(it.tipo==="fuentes"){var pr=(f.fuentes[it.id]||[]).length;return Math.max(0,(it.maxPuntos||it.fuentes.length)-pr*(it.puntosPorAusencia||1))}
   var v=f.ans[it.id];if(v==null)return null;var o=(it.opts||[]).find(function(o){return o.v===v});return o?o.p:null}
-function depOk(f,it){ if(!it.dependsOn)return true; return f.ans[it.dependsOn.item]===it.dependsOn.value }
+/* dependsOn normal: visible SOLO si la respuesta de otro item ES value.
+   dependsOn.not: visible SOLO si YA se respondio y es DISTINTA de value
+   (ej. ocultar "area del subnivel" salvo que "Numero de subniveles" no sea
+   "Ninguno" — hay mas de un valor que lo deja visible, por eso "not" en vez
+   de una lista de "si es esto o esto otro"). */
+function depOk(f,it){ if(!it.dependsOn)return true;
+  var d=it.dependsOn, av=f.ans[d.item];
+  return d.not ? (av!=null&&av!==d.value) : (av===d.value) }
 /* Un hallazgo = lo que NO cumple + lo que hay que hacer + la foto que lo
    prueba. Solo los hallazgos llevan foto al PDF: si algo cumple, la foto
    queda como evidencia interna pero no se imprime. */
@@ -1953,7 +1964,7 @@ function renderToggle(m){
 function applyToggle(m,card){var w=card&&card.querySelector('[data-items="'+m.id+'"]');if(w)w.hidden=(FORM.ans[m.toggle.id]==="NO")}
 function renderItem(m,it){
   var wrap=el("div","item");wrap.dataset.it=it.id;
-  if(it.dependsOn){wrap.dataset.depItem=it.dependsOn.item;wrap.dataset.depVal=it.dependsOn.value;}
+  if(it.dependsOn){wrap.dataset.depItem=it.dependsOn.item;wrap.dataset.depVal=it.dependsOn.value;if(it.dependsOn.not)wrap.dataset.depNot="1";}
   wrap.innerHTML='<div class="q">'+esc(it.label)+(it.score!==false&&it.tipo!=="fuentes"&&it.tipo!=="texto"?' <span class="note">(máx '+itemMax(it)+')</span>':'')+'</div>';
   var g=GUIAS[it.id]||it.nota;
   if(g)wrap.insertAdjacentHTML("beforeend",'<div class="guia">'+esc(g)+'</div>');

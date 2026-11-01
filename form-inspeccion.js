@@ -83,7 +83,11 @@ window.MODULOS = [
       { id:"m4_remod", label:"La edificación tiene modificación / remodelación.", tipo:"sino", opts:SINO(1,0) },
       { id:"m4_lic",   label:"La edificación cuenta con licencia de construcción.", tipo:"sino", opts:SINO(1,0) },
       { id:"m4_tipo",  label:"Tipo de construcción (alta o baja resistencia al fuego).", tipo:"select",
-        opts:[{v:"Aporticado",p:4},{v:"Muros de carga",p:3},{v:"Madera",p:2},{v:"Metálica",p:1},{v:"Material aglomerado",p:0}] },
+        /* "Mixta" puntúa igual que el material menos resistente de los que
+           tenga (no un promedio): una pared de cemento no protege si el
+           techo es de madera, el fuego usa la parte más débil. */
+        opts:[{v:"Aporticado",p:4},{v:"Muros de carga",p:3},{v:"Madera",p:2},{v:"Metálica",p:1},
+              {v:"Material aglomerado",p:0},{v:"Mixta (dos o más materiales)",p:0}] },
       { id:"m4_propv", label:"Facilidad de la propagabilidad vertical del fuego.", tipo:"select",
         opts:[{v:"Alta",p:0},{v:"Media",p:1},{v:"Baja",p:2}] },
       { id:"m4_proph", label:"Facilidad de la propagabilidad horizontal del fuego.", tipo:"select",
@@ -94,10 +98,12 @@ window.MODULOS = [
       { id:"m4_areapiso",label:"Área construida por piso.", tipo:"select",
         opts:[{v:"Hasta 299 m²",p:2},{v:"300 a 999 m²",p:1},{v:"1000 a >1100 m²",p:0}] },
       { id:"m4_nsub",  label:"Número de subniveles del establecimiento o edificación.", tipo:"select",
-        opts:[{v:"1 a 2",p:1},{v:"> 3",p:0}] },
+        opts:[{v:"Ninguno",p:1},{v:"1 a 2",p:1},{v:"> 3",p:0}] },
       { id:"m4_areasub",label:"Área construida por subnivel.", tipo:"select",
-        opts:[{v:"0 a 100 m²",p:3},{v:"101 a 200 m²",p:2},{v:"> 200 m²",p:0}] },
-      { id:"m4_actsub",label:"Se realiza alguna otra actividad comercial en los subniveles.", tipo:"sino", opts:SINO(0,1) },
+        opts:[{v:"0 a 100 m²",p:3},{v:"101 a 200 m²",p:2},{v:"> 200 m²",p:0}],
+        dependsOn:{item:"m4_nsub",value:"Ninguno",not:true} },
+      { id:"m4_actsub",label:"Se realiza alguna otra actividad comercial en los subniveles.", tipo:"sino", opts:SINO(0,1),
+        dependsOn:{item:"m4_nsub",value:"Ninguno",not:true} },
       { id:"m4_ocup500",label:"La carga de ocupantes de todo el establecimiento es mayor a 500 personas.", tipo:"sino", opts:SINO(0,1) },
       { id:"m4_ocup100",label:"Se tienen cargas de ocupación mayores a 100 personas por encima o por debajo del nivel de descarga de la salida.", tipo:"sino", opts:SINO(0,1) }
     ]
@@ -209,10 +215,14 @@ window.MODULOS = [
       { id:"m9_s_bri",  label:"Plan socializado con: Brigada de emergencias.", tipo:"sino", opts:SINO(1,0) },
       { id:"m9_simul",  label:"Se han realizado simulacros en el último año.", tipo:"sino", opts:SINO(1,0) },
       { id:"m9_brigada",label:"Tiene brigada de emergencias.", tipo:"sino", opts:SINO(1,0), extra:"num_integrantes" },
-      { id:"m9_bricert",label:"La brigada de emergencias está certificada por niveles o clases.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_briclase",label:"Clase de brigada o nivel con que se cuenta.", tipo:"select", opts:[{v:"1",p:1},{v:"2",p:0}] },
-      { id:"m9_brinivel",label:"Este es el nivel adecuado y requerido por la edificación.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_bribom", label:"La brigada es certificada por el cuerpo de bomberos.", tipo:"sino", opts:SINO(1,0) }
+      { id:"m9_bricert",label:"La brigada de emergencias está certificada por niveles o clases.", tipo:"sino", opts:SINO(1,0),
+        dependsOn:{item:"m9_brigada",value:"SI"} },
+      { id:"m9_briclase",label:"Clase de brigada o nivel con que se cuenta.", tipo:"select", opts:[{v:"1",p:1},{v:"2",p:0}],
+        dependsOn:{item:"m9_brigada",value:"SI"} },
+      { id:"m9_brinivel",label:"Este es el nivel adecuado y requerido por la edificación.", tipo:"sino", opts:SINO(1,0),
+        dependsOn:{item:"m9_brigada",value:"SI"} },
+      { id:"m9_bribom", label:"La brigada es certificada por el cuerpo de bomberos.", tipo:"sino", opts:SINO(1,0),
+        dependsOn:{item:"m9_brigada",value:"SI"} }
     ]
   },
   {

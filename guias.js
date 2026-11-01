@@ -13,7 +13,7 @@ window.GUIAS = {
   "m3_cumple":"¿Arreglaron lo recomendado en la visita anterior? Si es la primera visita, marca NO.",
   "m3_emerg":"¿Hubo incendio u otra emergencia en el último año?",
   "m3_sistemas":"Si hubo emergencia, ¿funcionaron extintores/alarmas/salidas?",
-  "m4_tipo":"Mira de qué está hecha la estructura: concreto resiste más; madera/aglomerado, menos.",
+  "m4_tipo":"Mira de qué está hecha la estructura: concreto resiste más; madera/aglomerado, menos. Si hay más de un material (ej. paredes de cemento y techo de madera), marca 'Mixta': puntúa igual que el menos resistente de los que tenga.",
   "m4_propv":"¿Qué tan fácil subiría el fuego entre pisos? (ductos, vacíos, escaleras sin puerta).",
   "m4_proph":"¿Qué tan fácil se correría el fuego en el mismo piso? (mucho material junto, sin muros).",
   "m4_suelo":"¿El uso del suelo permite esta actividad aquí? (consulta POT/planeación).",
