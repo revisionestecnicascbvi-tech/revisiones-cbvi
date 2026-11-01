@@ -214,6 +214,9 @@
     .rail{display:none}
     .topbar{grid-column:1}
     main{grid-column:1;padding-bottom:84px}
+    /* .scorebar flota sobre el contenido encima de .tabs (ver buildScorebar);
+       sin esto tapaba Siguiente/Anterior/Generar concepto a 390px. */
+    body.has-scorebar main{padding-bottom:calc(84px + var(--sb-h,0px))}
     /* Celular: la barra media 401px en pantallas de 390 y el navegador
        encogia TODA la pagina. Menos espacio, titulo flexible, y Configuracion
        y Tema pasan al menu "Mas". */
@@ -620,9 +623,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.14"></script>
-<script src="form-inspeccion.js?v=1.14"></script>
-<script src="guias.js?v=1.14"></script>
+<script src="logos.js?v=1.15"></script>
+<script src="form-inspeccion.js?v=1.15"></script>
+<script src="guias.js?v=1.15"></script>
 <script>
 (function(){
 "use strict";
@@ -634,8 +637,9 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.14";
+var APP_VERSION="1.15";
 var APP_VERSION_NOTAS=[
+  "v1.15: Corregido: en el formulario de inspección, en celular, la barra de puntaje tapaba los botones \"Siguiente\" y \"Generar concepto\" y podía activar el equivocado al tocar.",
   "v1.14: Las ventanas de confirmación y el menú \"Más\" ahora entran y salen con una animación suave, en vez de aparecer y desaparecer de golpe.",
   "v1.14: Los botones responden con un gesto suave al tocarlos.",
   "v1.14: Corregido: en celular/tablet, el borde de botones y filas ya no se quedaba resaltado después de tocarlos.",
@@ -1181,7 +1185,7 @@ function renderNav(){
 function render(){
   renderNav();
   var v=$("#view");v.innerHTML="";
-  var old=$(".scorebar");if(old)old.remove();
+  var old=$(".scorebar");if(old){old.remove();document.body.classList.remove("has-scorebar")}
   var T={dashboard:["Inicio",""],barrido:["Barrido de la ciudad","Mapa, censo y evidencia del recorrido"],
     establecimientos:["Establecimientos",""],conceptos:["Conceptos emitidos","Todas las revisiones finalizadas"],
     metas:["Metas","Rendimiento del inspector"],
@@ -1925,6 +1929,13 @@ function buildScorebar(){
     '<div class="vd"><div class="r" id="vr">Diligencia la inspección</div><div class="d" id="vd"></div></div>'+
     '<button class="btn btn-p btn-sm" id="sbGen">Concepto</button></div>';
   document.body.appendChild(sb);
+  /* Altura real, no un numero fijo: el texto se rellena despues (refreshScore),
+     cargan las fuentes y el modo sol agranda la letra, y todo eso cambia lo que
+     mide .scorebar. ResizeObserver mantiene --sb-h al dia sin re-renderizar. */
+  var medir=function(){document.documentElement.style.setProperty("--sb-h",sb.offsetHeight+"px")};
+  medir();
+  if(window.ResizeObserver)new ResizeObserver(medir).observe(sb);
+  document.body.classList.add("has-scorebar");
   $("#sbGen",sb).addEventListener("click",function(){var r=compute(FORM);if(r.got<3){toast("Diligencia la inspección primero");return}finalizar()});
 }
 function renderToggle(m){
