@@ -240,10 +240,20 @@ window.ITEMS_CONTEXTO = [
   "m3_emerg","m3_reporte","m3_tipo","m3_detuvo","m3_sistemas",
   "m4_nueva","m4_nsr","m4_remod","m4_tipo","m4_propv","m4_proph",
   "m4_altura","m4_areapiso","m4_nsub","m4_areasub","m4_actsub","m4_ocup500","m4_ocup100",
+  /* m4_lic / m4_suelo: no son un "no cumple" que se corrija con un plan de
+     mejoramiento a corto plazo — tramitar licencia o uso del suelo de una
+     edificación existente es un proceso legal/técnico de meses, a veces
+     imposible sin reconstruir. Van con sus hermanos m4_nsr/m4_remod. */
+  "m4_lic","m4_suelo",
   "m5_fuentes",
   "m7_requiere",
   "m8_aforo","m8_anchocorr","m8_anchopuerta","m8_anchoesc","m8_anchoramp",
   "m8_anchosalida","m8_anchopsalida","m8_cantdesc","m8_escext",
+  /* Las 6 preguntas "¿es el ancho exigido por la norma?" son hermanas de las
+     medidas de arriba (m8_anchoX, ya en esta lista): exigir el cambio es
+     obra estructural (tumbar pared, rehacer escalera), no una corrección
+     de visita. */
+  "m8_salidanorma","m8_puertanorma","m8_corrnorma","m8_escnorma","m8_rampnorma","m8_psalidanorma",
   "m9_briclase",
   "m10_aseg"
 ];
