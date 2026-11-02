@@ -588,6 +588,7 @@
       </div>
 
       <p class="login-hint" style="margin-top:4px"><a href="#" id="verDemo" style="color:var(--muted);font-weight:500;text-decoration:underline">Ver una demostración sin conexión</a></p>
+      <p class="login-hint"><a href="landing.html" style="color:var(--muted);font-weight:500;text-decoration:underline">¿No eres inspector? Conoce la app aquí</a></p>
     </div>
   </div>
 </section>
@@ -623,9 +624,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.17"></script>
-<script src="form-inspeccion.js?v=1.17"></script>
-<script src="guias.js?v=1.17"></script>
+<script src="logos.js?v=1.18"></script>
+<script src="form-inspeccion.js?v=1.18"></script>
+<script src="guias.js?v=1.18"></script>
 <script>
 (function(){
 "use strict";
@@ -637,8 +638,9 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.17";
+var APP_VERSION="1.18";
 var APP_VERSION_NOTAS=[
+  "v1.18: En la pantalla de inicio de sesión hay un enlace a una página pública que explica cómo funciona la revisión técnica, para quien no es inspector.",
   "v1.17: Tipo de construcción tiene opción \"Mixta\" para edificaciones con más de un material. Si no hay subniveles, marca \"Ninguno\" y ya no pide área ni actividad del subnivel. Si no hay brigada de emergencias, ya no pide su certificación ni nivel.",
   "v1.16: El certificado ya no le exige al propietario trámites imposibles de cumplir a corto plazo (licencia de construcción, uso del suelo, o ensanchar escaleras/puertas/corredores existentes); esos datos siguen contando para el puntaje oficial, solo dejan de salir como \"corrija esto\".",
   "v1.15: Corregido: en el formulario de inspección, en celular, la barra de puntaje tapaba los botones \"Siguiente\" y \"Generar concepto\" y podía activar el equivocado al tocar.",
