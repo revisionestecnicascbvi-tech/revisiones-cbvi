@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<script>document.documentElement.classList.add("js")</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CBVI Revisiones Técnicas — Cuerpo de Bomberos Voluntarios de Inírida</title>
+<meta name="description" content="La revisión técnica de seguridad humana y protección contra incendios del Cuerpo de Bomberos Voluntarios de Inírida, digitalizada: censo, inspección DNBC, concepto técnico y certificado verificable con código QR.">
+<meta name="theme-color" content="#191d23">
+<link rel="icon" href="icon192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta property="og:title" content="CBVI Revisiones Técnicas">
+<meta property="og:description" content="Censo, inspección DNBC, concepto técnico y certificado con QR verificable — el proceso de revisión técnica del Cuerpo de Bomberos Voluntarios de Inírida, de punta a punta.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://revisionestecnicascbvi-tech.github.io/revisiones-cbvi/landing.html">
+<meta property="og:image" content="https://revisionestecnicascbvi-tech.github.io/revisiones-cbvi/icon512.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Tokens: mismos nombres y valores que index.html/verificar.html (DESIGN.md) — no se renombran para que
+   el sistema de diseño siga siendo uno solo entre pantallas. */
+:root{
+  --ink:#14181d; --paper:#eceef1; --surface:#fff; --surface-2:#f6f7f9;
+  --muted:#626b76; --line:#d9dde3; --line-strong:#9aa3ae;
+  --ember:#c0271f; --verde:#17864b; --verde-bg:#e4f1e8; --azul:#2563a8;
+  --r-xs:2px; --r-sm:4px; --r-md:8px; --r-lg:12px;
+  --ff-h:"Saira",system-ui,sans-serif; --ff:"Public Sans",system-ui,-apple-system,sans-serif;
+  --ff-m:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#eef1f4; --paper:#0f1216; --surface:#171b20; --surface-2:#1d2229;
+  --muted:#9aa3ae; --line:#2b313a; --line-strong:#4a525d;
+  --ember:#ef5a50; --verde:#49b97d; --verde-bg:#15271d; --azul:#5a9be0;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html{overflow-x:clip}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ff);line-height:1.5;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--ff-h);margin:0;letter-spacing:.2px;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+.mono{font-family:var(--ff-m);font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px}
+@media (min-width:720px){.wrap{padding-inline:40px}}
+
+.skip{position:absolute;left:-999px;top:0;background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:var(--r-sm);z-index:10}
+.skip:focus{left:12px;top:12px}
+
+a:focus-visible,button:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+a,button{-webkit-tap-highlight-color:transparent}
+
+header{border-bottom:1px solid var(--line);background:var(--surface)}
+header .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;min-height:44px;text-decoration:none}
+.brand img{width:30px;height:30px;border-radius:var(--r-sm);flex:0 0 auto}
+.brand span{font-family:var(--ff-h);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.btn{appearance:none;border:1px solid transparent;border-radius:var(--r-sm);min-height:48px;padding:0 18px;
+  font:600 15px var(--ff);display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  text-decoration:none;cursor:pointer;transition:transform 160ms ease-out,filter 120ms ease-out,border-color 120ms ease-out;
+  touch-action:manipulation}
+.btn:active{transform:scale(.97)}
+.btn-p{background:var(--ink);color:var(--surface)}
+.btn-p:active{filter:brightness(.92)}
+.btn-g{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn-g:active{border-color:var(--ink)}
+@media (hover:hover) and (pointer:fine){
+  .btn-g:hover{border-color:var(--ink)}
+}
+
+main{display:block}
+
+.hero{padding-block:56px 48px}
+.hero-grid{display:grid;gap:40px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:860px){.hero-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,340px);align-items:center}}
+.hero h1{font-size:clamp(1.9rem,4.4vw,2.75rem);font-weight:700;line-height:1.15;max-width:18ch}
+.hero .lede{margin-top:18px;max-width:62ch;color:var(--ink);font-size:1.0625rem;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+
+.specimen{position:relative;background:var(--surface);border:1px solid var(--ink);border-radius:0;
+  padding:20px;max-width:340px;margin-inline:auto;overflow:clip;transform:rotate(-2deg)}
+.specimen::before,.specimen::after{content:"";position:absolute;inset:6px;border:1px solid var(--line-strong);pointer-events:none}
+.specimen .sp-top{position:relative;display:flex;align-items:center;gap:8px;font:600 10.5px var(--ff);
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:center;justify-content:center}
+.specimen .sp-code{position:relative;margin-top:14px;font-size:1.25rem;font-weight:600;text-align:center;color:var(--ink)}
+.specimen .sp-row{position:relative;display:flex;justify-content:center;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--ff);padding:5px 10px;border-radius:999px;
+  background:var(--verde-bg);color:var(--verde);border:1px solid var(--verde)}
+.specimen .sp-foot{position:relative;margin-top:16px;text-align:center;font:600 10px var(--ff);letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted)}
+.sp-watermark{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);
+  font:700 1.6rem var(--ff-h);letter-spacing:.08em;color:var(--ember);opacity:.14;pointer-events:none;
+  text-transform:uppercase;white-space:nowrap}
+
+section{padding-block:48px;scroll-margin-top:16px}
+.divider{border-top:1px solid var(--line)}
+.section-head{max-width:62ch}
+.section-head h2{font-size:1.5rem;font-weight:600}
+.section-head p{margin-top:10px;color:var(--muted)}
+
+.steps{margin-top:32px;display:grid;gap:0;grid-template-columns:minmax(0,1fr)}
+@media (min-width:720px){.steps{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px}}
+.step{border-top:1px solid var(--line-strong);padding-top:16px;padding-bottom:28px;min-width:0}
+.step .n{font-family:var(--ff-m);font-size:.875rem;font-weight:600;color:var(--ember)}
+.step h3{margin-top:8px;font-size:1.0625rem;font-weight:600;font-family:var(--ff)}
+.step p{margin-top:8px;color:var(--muted);max-width:52ch}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
+.panel h3{font-size:1.1875rem;font-weight:600}
+.panel p{margin-top:6px;color:var(--muted);max-width:46ch}
+
+.insp{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px}
+.insp p{color:var(--muted);max-width:52ch;margin-top:6px}
+
+footer{border-top:1px solid var(--line);padding-block:32px;color:var(--muted);font-size:.875rem}
+footer .flex{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between}
+footer .motto{font-family:var(--ff-h);font-weight:600;color:var(--ink);letter-spacing:.02em}
+footer .fine{margin-top:16px;max-width:68ch;line-height:1.6}
+
+@media (prefers-reduced-motion:no-preference){
+  .reveal-in{animation:lpIn 520ms cubic-bezier(.23,1,.32,1) both}
+  @keyframes lpIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .specimen{animation:lpSpecimen 560ms cubic-bezier(.23,1,.32,1) both;animation-delay:240ms}
+  @keyframes lpSpecimen{from{opacity:0;transform:rotate(-5deg) scale(.95) translateY(10px)}to{opacity:1;transform:rotate(-2deg) scale(1) translateY(0)}}
+  html.js .step{opacity:0;transform:translateY(6px);transition:opacity 260ms ease-out,transform 260ms ease-out}
+  html.js .step.is-visible{opacity:1;transform:translateY(0)}
+}
+@media (prefers-reduced-motion:reduce){
+  .btn{transition:none}
+  .btn:active{transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#main">
+      <img src="icon192.png" alt="" width="30" height="30">
+      <span translate="no" class="notranslate">CBVI · Revisiones Técnicas</span>
+    </a>
+    <a class="btn btn-g" href="verificar.html">Verificar certificado</a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <h1 class="reveal-in">Una inspección en sitio. Un certificado que cualquiera puede verificar.</h1>
+        <p class="lede reveal-in" style="animation-delay:70ms">
+          El Cuerpo de Bomberos Voluntarios de Inírida digitalizó la revisión técnica de seguridad humana
+          y contra incendios que le hace a cada comercio: censo, inspección con el formato oficial <span translate="no" class="notranslate">DNBC</span>,
+          concepto técnico y certificado con código QR — pensada para funcionar sin señal y sincronizar después.
+        </p>
+        <div class="cta-row reveal-in" style="animation-delay:140ms">
+          <a class="btn btn-p" href="verificar.html">Verificar un certificado</a>
+          <a class="btn btn-g" href="#proceso">Ver cómo funciona ↓</a>
+        </div>
+      </div>
+      <div class="specimen" aria-hidden="true">
+        <span class="sp-watermark">Muestra</span>
+        <div class="sp-top">Cuerpo de Bomberos Voluntarios de Inírida</div>
+        <div class="sp-code mono" translate="no">RT-2026-0001</div>
+        <div class="sp-row"><span class="chip">✔ Vigente</span></div>
+        <div class="sp-foot">Abnegación y disciplina</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <section id="proceso">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Así funciona</h2>
+        <p>El mismo proceso que ya usan los inspectores en campo, de principio a fin.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="n mono">01</span>
+          <h3>Censo</h3>
+          <p>Se registra el comercio una sola vez: documento, nombre, actividad y ubicación. Si ya existe, la app lo reconoce y no lo duplica.</p>
+        </div>
+        <div class="step"><span class="n mono">02</span>
+          <h3>Inspección <span translate="no" class="notranslate">DNBC</span></h3>
+          <p>El inspector revisa cada ítem del formato oficial de seguridad humana y contra incendios desde el celular o la tablet, sin necesitar señal.</p>
+        </div>
+        <div class="step"><span class="n mono">03</span>
+          <h3>Concepto técnico</h3>
+          <p>El puntaje y el código del concepto los asigna el sistema al sincronizar, para que dos inspectores sin señal nunca generen el mismo número.</p>
+        </div>
+        <div class="step"><span class="n mono">04</span>
+          <h3>Certificado con QR</h3>
+          <p>El comercio recibe un certificado en PDF con un código QR. Cualquiera puede escanearlo y confirmar si sigue vigente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section>
+    <div class="wrap">
+      <div class="panel">
+        <div>
+          <h3>¿Tienes un certificado o escaneaste un código QR?</h3>
+          <p>Verifica en segundos si sigue vigente, sin necesidad de iniciar sesión.</p>
+        </div>
+        <a class="btn btn-p" href="verificar.html">Verificar ahora</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section>
+    <div class="wrap insp">
+      <div>
+        <h3>Si eres inspector del CBVI</h3>
+        <p>Entra con tu usuario para censar, inspeccionar y expedir certificados desde el sitio de la revisión.</p>
+      </div>
+      <a class="btn btn-g" href="index.html">Entrar a la app</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="flex">
+      <span class="motto">Abnegación y disciplina</span>
+      <span>Cuerpo de Bomberos Voluntarios de Inírida — Guainía, Colombia</span>
+    </div>
+    <p class="fine">Esta página es informativa. Para verificar un certificado, usa el botón de arriba o escanea el código QR impreso en el documento. © 2026 Cuerpo de Bomberos Voluntarios de Inírida.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var steps=document.querySelectorAll(".step");
+  var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce || !("IntersectionObserver" in window)){
+    steps.forEach(function(s){s.classList.add("is-visible")});
+    return;
+  }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e,i){
+      if(e.isIntersecting){
+        var el=e.target;
+        var idx=Array.prototype.indexOf.call(steps,el);
+        setTimeout(function(){el.classList.add("is-visible")}, (idx%2)*70);
+        io.unobserve(el);
+      }
+    });
+  },{threshold:.2,rootMargin:"0px 0px -40px 0px"});
+  steps.forEach(function(s){io.observe(s)});
+})();
+</script>
+</body>
+</html>
