@@ -49,6 +49,28 @@ window.OCUPACIONES_NSR10 = [
 /* Helpers de opciones */
 function SINO(pSi, pNo){ return [{v:"SI",p:pSi},{v:"NO",p:pNo}]; }
 function SINONA(pSi, pNo, pNa){ return [{v:"SI",p:pSi},{v:"NO",p:pNo},{v:"N/A",p:pNa}]; }
+/* Dependencias entre preguntas (v1.19). dependsOn puede ser un objeto o una
+   lista (todas deben cumplirse). Qué pasa cuando la pregunta madre la oculta:
+     sin "oculto"   -> NO APLICA: se quita del máximo (ej. sin subniveles no
+                       hay "área del subnivel").
+     oculto:"cero"  -> CONSECUENCIA: se oculta pero cuenta como NO (0 puntos)
+                       y el hallazgo queda solo en la pregunta madre. Ej.: sin
+                       seguro, la póliza no cubre nada. Si se quitara del
+                       máximo, NO tener extintores puntuaría MEJOR que tenerlos
+                       en mal estado.
+     oculto:"max"   -> se oculta y cuenta el puntaje máximo (ej. sin fuentes
+                       de ignición no hay riesgo de que se activen).
+   DEP(item, valor, modo)   = visible solo si item === valor.
+   DEPNO(item, valor, modo) = visible solo si ya se respondió y es distinto. */
+function DEP(item, value, oculto){ var d={item:item, value:value}; if(oculto)d.oculto=oculto; return d; }
+function DEPNO(item, value, oculto){ var d=DEP(item, value, oculto); d.not=true; return d; }
+/* Opción que deja la pregunta FUERA del puntaje (ni suma ni resta, no es
+   hallazgo) aunque quede respondida. */
+function NA(v){ return {v:v, na:true}; }
+/* Detalle de extintores: si no hay extintores cuentan como NO, SALVO que el
+   local no los requiera (m7_requiere = NO): ahí no aplican y salen del
+   máximo, para no castigar a un local exento. (noAplicaSi lo lee depEstado.) */
+var DEP_EXT = {item:"m7_cuenta", value:"SI", oculto:"cero", noAplicaSi:{item:"m7_requiere", value:"NO"}};
 
 window.MODULOS = [
   /* ===================== FACTORES AGRAVANTES (X) ===================== */
@@ -66,7 +88,11 @@ window.MODULOS = [
   {
     id: "m3", titulo: "Módulo 3. Antecedentes de la estructura", clase: "agravante", max: 9,
     items: [
-      { id:"m3_cumple", label:"Se evidencia el cumplimiento de los requerimientos generados en la inspección anterior.", tipo:"sino", opts:SINO(1,0) },
+      /* "Primera visita" (v1.19): antes había que marcar NO y salía en el
+         certificado como hallazgo "no cumplió lo de la visita anterior" a un
+         negocio que nunca había tenido visita. Ahora queda fuera del puntaje. */
+      { id:"m3_cumple", label:"Se evidencia el cumplimiento de los requerimientos generados en la inspección anterior.", tipo:"sino",
+        opts:[{v:"SI",p:1},{v:"NO",p:0},NA("Primera visita")] },
       { id:"m3_emerg",  label:"El establecimiento o edificación presentó emergencias en el último año.", tipo:"sino", opts:SINO(0,1) },
       { id:"m3_reporte",label:"Se evidencia reporte a la autoridad competente por el riesgo del establecimiento.", tipo:"sino", opts:SINO(1,0) },
       { id:"m3_tipo",   label:"Tipo de emergencia ocurrida en el establecimiento o edificación.", tipo:"select", score:false, dependsOn:{item:"m3_emerg",value:"SI"},
@@ -120,6 +146,7 @@ window.MODULOS = [
                  "Superficies calientes","Generación de brasas","Manipulación llamas abiertas","Soldadura y corte",
                  "Recalentamiento mercancías","Electricidad estática","Hornos","Mecheros, fósforos o candelas","Manejo de químicos"] },
       { id:"m5_activ", label:"Riesgos de activación de las fuentes de ignición.", tipo:"select",
+        dependsOn:{item:"m5_fuentes", fuentes:true, oculto:"max"},
         opts:[{v:"Alto",p:0},{v:"Medio",p:1},{v:"Bajo",p:2}] },
       { id:"m5_inflam",label:"Inflamabilidad de los materiales de la edificación o establecimiento.", tipo:"select",
         opts:[{v:"Baja",p:2},{v:"Media",p:1},{v:"Alta",p:0}] }
@@ -146,14 +173,14 @@ window.MODULOS = [
     items: [
       { id:"m7_requiere", label:"El establecimiento y/o edificación requiere extintores según la norma (NSR-10).", tipo:"sino", opts:SINO(1,0) },
       { id:"m7_cuenta",   label:"El establecimiento y/o edificación cuenta con extintores.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_aprop",    label:"Los extintores son los apropiados para el riesgo existente.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_distrib",  label:"Los extintores están distribuidos según la norma (NTC 2885 - NFPA 10).", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_senal",    label:"Los extintores están adecuadamente señalizados.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_visible",  label:"Los extintores están despejados y visibles.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_instal",   label:"Los extintores están adecuadamente instalados (altura).", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_recarga",  label:"Los extintores se observan recargados y vigentes.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_fisico",   label:"Los extintores se observan físicamente buenos.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_superv",   label:"Los extintores cuentan con supervisión permanente.", tipo:"sino", opts:SINO(2,0) }
+      { id:"m7_aprop",    label:"Los extintores son los apropiados para el riesgo existente.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_distrib",  label:"Los extintores están distribuidos según la norma (NTC 2885 - NFPA 10).", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_senal",    label:"Los extintores están adecuadamente señalizados.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_visible",  label:"Los extintores están despejados y visibles.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_instal",   label:"Los extintores están adecuadamente instalados (altura).", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_recarga",  label:"Los extintores se observan recargados y vigentes.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_fisico",   label:"Los extintores se observan físicamente buenos.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
+      { id:"m7_superv",   label:"Los extintores cuentan con supervisión permanente.", tipo:"sino", opts:SINO(2,0), dependsOn:DEP_EXT }
     ]
   },
   {
@@ -163,22 +190,21 @@ window.MODULOS = [
               nota:"Si NO aplica por aforo: puntúa 45 automático y se omiten los demás ítems." },
     items: [
       { id:"m8_egreso", label:"Cuenta con medios de egreso.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_visible",label:"Están visibles y señalizados.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_despej", label:"Están despejados, libres de obstáculos.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_ilum",   label:"Están iluminados con luces de emergencia de acuerdo a la norma.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_movil",  label:"Los medios de egreso permiten la evacuación de personas con movilidad reducida.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_visible",label:"Están visibles y señalizados.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_egreso","SI","cero") },
+      { id:"m8_despej", label:"Están despejados, libres de obstáculos.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_egreso","SI","cero") },
+      { id:"m8_movil",  label:"Los medios de egreso permiten la evacuación de personas con movilidad reducida.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_egreso","SI","cero") },
       { id:"m8_aforo",  label:"Aforo del establecimiento.", tipo:"select", opts:[{v:"1 a 50 personas",p:1},{v:"≥ 51 personas",p:0}] },
       { id:"m8_aforonsr",label:"El aforo está calculado con base en la carga de ocupación (NSR-10).", tipo:"sino", opts:SINO(1,0) },
       { id:"m8_descaforo",label:"Las descargas del establecimiento garantizan el aforo.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_egresoevac",label:"Los medios de egreso garantizan la evacuación requerida.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_egresoevac",label:"Los medios de egreso garantizan la evacuación requerida.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_egreso","SI","cero") },
       { id:"m8_anchocorr",label:"Anchos de acceso a las salidas (corredores).", tipo:"select", opts:[{v:"0,80 m < 1,20",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:0}] },
-      { id:"m8_corrnorma",label:"Corredores: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_corrnorma",label:"Corredores: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchocorr","N/A") },
       { id:"m8_anchopuerta",label:"Anchos (puertas).", tipo:"select", opts:[{v:"0,80 < 1,20 m",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:2}] },
-      { id:"m8_puertanorma",label:"Puertas: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_puertanorma",label:"Puertas: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchopuerta","N/A") },
       { id:"m8_anchoesc",label:"Anchos (escaleras).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:2}] },
-      { id:"m8_escnorma",label:"Escaleras: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_escnorma",label:"Escaleras: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchoesc","N/A") },
       { id:"m8_anchoramp",label:"Ancho (rampas).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:2}] },
-      { id:"m8_rampnorma",label:"Rampas: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_rampnorma",label:"Rampas: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchoramp","N/A") },
       { id:"m8_anchosalida",label:"Ancho de salida (escalera, corredor, rampa).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2}] },
       { id:"m8_salidanorma",label:"Salida: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
       { id:"m8_anchopsalida",label:"Anchos puerta de salida.", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2}] },
@@ -189,10 +215,13 @@ window.MODULOS = [
       { id:"m8_cierre",  label:"Las puertas cuentan con mecanismos de cierre.", tipo:"sino_na", opts:SINONA(1,0,1) },
       { id:"m8_escext",  label:"La estructura cuenta con escaleras exteriores.", tipo:"sino", opts:SINO(1,0) },
       { id:"m8_luces",   label:"Cuenta con luces de emergencia.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_autoensayo",label:"El sistema de iluminación de emergencia cuenta con auto-ensayo.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_ilumnorma",label:"El sistema de iluminación de emergencia es el requerido por norma.", tipo:"sino", opts:SINO(1,0) },
+      /* Movida debajo de "luces de emergencia" (v1.19): sin luces no puede
+         haber egreso iluminado por ellas. */
+      { id:"m8_ilum",   label:"Están iluminados con luces de emergencia de acuerdo a la norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_luces","SI","cero") },
+      { id:"m8_autoensayo",label:"El sistema de iluminación de emergencia cuenta con auto-ensayo.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_luces","SI","cero") },
+      { id:"m8_ilumnorma",label:"El sistema de iluminación de emergencia es el requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_luces","SI","cero") },
       { id:"m8_proced", label:"Cuenta con procedimiento de inspección para los componentes de evacuación, señalización e iluminación.", tipo:"sino", opts:SINO(2,0) },
-      { id:"m8_procaño",label:"Se ha realizado el procedimiento de inspección, prueba y mantenimiento el último año.", tipo:"sino", opts:SINO(2,0) },
+      { id:"m8_procaño",label:"Se ha realizado el procedimiento de inspección, prueba y mantenimiento el último año.", tipo:"sino", opts:SINO(2,0), dependsOn:DEP("m8_proced","SI","cero") },
       { id:"m8_monitoreo",label:"El sistema cuenta con vigilancia - monitoreo permanente.", tipo:"sino", opts:SINO(2,0) }
     ]
   },
@@ -203,34 +232,38 @@ window.MODULOS = [
               nota:"Si NO aplica: puntúa 18 automático y se omiten los demás ítems." },
     items: [
       { id:"m9_plan",   label:"Cuenta con plan de emergencias.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_r_inc",  label:"Riesgo contemplado: Incendio.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_r_fugas",label:"Riesgo contemplado: Fugas.", tipo:"sino_na", opts:SINONA(1,0,1) },
-      { id:"m9_r_derr", label:"Riesgo contemplado: Derrames.", tipo:"sino_na", opts:SINONA(1,0,1) },
-      { id:"m9_r_expl", label:"Riesgo contemplado: Explosiones.", tipo:"sino_na", opts:SINONA(1,0,1) },
-      { id:"m9_r_bleve",label:"Riesgo contemplado: BLEVEs.", tipo:"sino_na", opts:SINONA(1,0,1) },
-      { id:"m9_s_emp",  label:"Plan socializado con: Empleados.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_s_bom",  label:"Plan socializado con: Bomberos.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_s_com",  label:"Plan socializado con: Comunidad.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_s_soc",  label:"Plan socializado con: Organismos de socorro.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m9_s_bri",  label:"Plan socializado con: Brigada de emergencias.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m9_r_inc",  label:"Riesgo contemplado: Incendio.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_fugas",label:"Riesgo contemplado: Fugas.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_derr", label:"Riesgo contemplado: Derrames.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_expl", label:"Riesgo contemplado: Explosiones.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_bleve",label:"Riesgo contemplado: BLEVEs.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_s_emp",  label:"Plan socializado con: Empleados.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_s_bom",  label:"Plan socializado con: Bomberos.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_s_com",  label:"Plan socializado con: Comunidad.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_s_soc",  label:"Plan socializado con: Organismos de socorro.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
       { id:"m9_simul",  label:"Se han realizado simulacros en el último año.", tipo:"sino", opts:SINO(1,0) },
       { id:"m9_brigada",label:"Tiene brigada de emergencias.", tipo:"sino", opts:SINO(1,0), extra:"num_integrantes" },
       { id:"m9_bricert",label:"La brigada de emergencias está certificada por niveles o clases.", tipo:"sino", opts:SINO(1,0),
-        dependsOn:{item:"m9_brigada",value:"SI"} },
+        dependsOn:DEP("m9_brigada","SI","cero") },
       { id:"m9_briclase",label:"Clase de brigada o nivel con que se cuenta.", tipo:"select", opts:[{v:"1",p:1},{v:"2",p:0}],
-        dependsOn:{item:"m9_brigada",value:"SI"} },
+        dependsOn:DEP("m9_brigada","SI","cero") },
       { id:"m9_brinivel",label:"Este es el nivel adecuado y requerido por la edificación.", tipo:"sino", opts:SINO(1,0),
-        dependsOn:{item:"m9_brigada",value:"SI"} },
+        dependsOn:DEP("m9_brigada","SI","cero") },
       { id:"m9_bribom", label:"La brigada es certificada por el cuerpo de bomberos.", tipo:"sino", opts:SINO(1,0),
-        dependsOn:{item:"m9_brigada",value:"SI"} }
+        dependsOn:DEP("m9_brigada","SI","cero") },
+      /* Necesita plan Y brigada: no se socializa un plan que no existe ni con
+         una brigada que no hay. Va al final para que aparezca debajo de
+         "Tiene brigada", no arriba. */
+      { id:"m9_s_bri",  label:"Plan socializado con: Brigada de emergencias.", tipo:"sino", opts:SINO(1,0),
+        dependsOn:[DEP("m9_plan","SI","cero"), DEP("m9_brigada","SI","cero")] }
     ]
   },
   {
     id: "m10", titulo: "Módulo 10. Transferencia del riesgo del establecimiento", clase: "reductor", max: 10,
     items: [
       { id:"m10_seguro", label:"Tienen seguro contra incendios vigente.", tipo:"sino", opts:SINO(5,0) },
-      { id:"m10_poliza", label:"La póliza cubre la actividad desarrollada en la edificación.", tipo:"sino", opts:SINO(5,0) },
-      { id:"m10_aseg",   label:"Compañía aseguradora.", tipo:"texto", score:false }
+      { id:"m10_poliza", label:"La póliza cubre la actividad desarrollada en la edificación.", tipo:"sino", opts:SINO(5,0), dependsOn:DEP("m10_seguro","SI","cero") },
+      { id:"m10_aseg",   label:"Compañía aseguradora.", tipo:"texto", score:false, dependsOn:DEP("m10_seguro","SI") }
     ]
   }
 ];
