@@ -48,7 +48,7 @@ window.OCUPACIONES_NSR10 = [
 
 /* Helpers de opciones */
 function SINO(pSi, pNo){ return [{v:"SI",p:pSi},{v:"NO",p:pNo}]; }
-function SINONA(pSi, pNo, pNa){ return [{v:"SI",p:pSi},{v:"NO",p:pNo},{v:"N/A",p:pNa}]; }
+function SINONA(pSi, pNo){ return [{v:"SI",p:pSi},{v:"NO",p:pNo},NA("N/A","No aplica")]; }
 /* Dependencias entre preguntas (v1.19). dependsOn puede ser un objeto o una
    lista (todas deben cumplirse). Qué pasa cuando la pregunta madre la oculta:
      sin "oculto"   -> NO APLICA: se quita del máximo (ej. sin subniveles no
@@ -65,11 +65,13 @@ function SINONA(pSi, pNo, pNa){ return [{v:"SI",p:pSi},{v:"NO",p:pNo},{v:"N/A",p
 function DEP(item, value, oculto){ var d={item:item, value:value}; if(oculto)d.oculto=oculto; return d; }
 function DEPNO(item, value, oculto){ var d=DEP(item, value, oculto); d.not=true; return d; }
 /* Opción que deja la pregunta FUERA del puntaje (ni suma ni resta, no es
-   hallazgo) aunque quede respondida. */
-function NA(v){ return {v:v, na:true}; }
+   hallazgo) aunque quede respondida. v se guarda; l es el texto del botón.
+   El papel DNBC da puntaje completo a casi todo N/A; "ni suma ni resta" es
+   adaptación del CBVI. Solo va donde la cosa puede no existir sin ser falta. */
+function NA(v, l){ var o={v:v, na:true}; if(l)o.l=l; return o; }
 /* Detalle de extintores: si no hay extintores cuentan como NO, SALVO que el
-   local no los requiera (m7_requiere = NO): ahí no aplican y salen del
-   máximo, para no castigar a un local exento. (noAplicaSi lo lee depEstado.) */
+   local no los requiera (m7_requiere = NO): ahí todo M7 sale del máximo.
+   (noAplicaSi lo lee depEstado.) */
 var DEP_EXT = {item:"m7_cuenta", value:"SI", oculto:"cero", noAplicaSi:{item:"m7_requiere", value:"NO"}};
 
 window.MODULOS = [
@@ -94,7 +96,7 @@ window.MODULOS = [
       { id:"m3_cumple", label:"Se evidencia el cumplimiento de los requerimientos generados en la inspección anterior.", tipo:"sino",
         opts:[{v:"SI",p:1},{v:"NO",p:0},NA("Primera visita")] },
       { id:"m3_emerg",  label:"El establecimiento o edificación presentó emergencias en el último año.", tipo:"sino", opts:SINO(0,1) },
-      { id:"m3_reporte",label:"Se evidencia reporte a la autoridad competente por el riesgo del establecimiento.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m3_reporte",label:"Se evidencia reporte a la autoridad competente por el riesgo del establecimiento.", tipo:"sino", opts:[{v:"SI",p:1},{v:"NO",p:0},NA("N/A","No aplica")] },
       { id:"m3_tipo",   label:"Tipo de emergencia ocurrida en el establecimiento o edificación.", tipo:"select", score:false, dependsOn:{item:"m3_emerg",value:"SI"},
         opts:[{v:"Incendios",p:0},{v:"Emergencias MATPEL",p:0},{v:"Accidentes laborales",p:0},{v:"Otro tipo de emergencias",p:0}] },
       { id:"m3_detuvo", label:"Se detuvo la actividad económica del establecimiento o edificación.", tipo:"sino", opts:SINO(0,1), dependsOn:{item:"m3_emerg",value:"SI"} },
@@ -171,8 +173,8 @@ window.MODULOS = [
   {
     id: "m7", titulo: "Módulo 7. Extintores portátiles", clase: "reductor", max: 11,
     items: [
-      { id:"m7_requiere", label:"El establecimiento y/o edificación requiere extintores según la norma (NSR-10).", tipo:"sino", opts:SINO(1,0) },
-      { id:"m7_cuenta",   label:"El establecimiento y/o edificación cuenta con extintores.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m7_requiere", label:"El establecimiento y/o edificación requiere extintores según la norma (NSR-10).", tipo:"sino", opts:[{v:"SI",p:1},NA("NO")] },
+      { id:"m7_cuenta",   label:"El establecimiento y/o edificación cuenta con extintores.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m7_requiere","SI") },
       { id:"m7_aprop",    label:"Los extintores son los apropiados para el riesgo existente.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
       { id:"m7_distrib",  label:"Los extintores están distribuidos según la norma (NTC 2885 - NFPA 10).", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
       { id:"m7_senal",    label:"Los extintores están adecuadamente señalizados.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP_EXT },
@@ -197,13 +199,13 @@ window.MODULOS = [
       { id:"m8_aforonsr",label:"El aforo está calculado con base en la carga de ocupación (NSR-10).", tipo:"sino", opts:SINO(1,0) },
       { id:"m8_descaforo",label:"Las descargas del establecimiento garantizan el aforo.", tipo:"sino", opts:SINO(1,0) },
       { id:"m8_egresoevac",label:"Los medios de egreso garantizan la evacuación requerida.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m8_egreso","SI","cero") },
-      { id:"m8_anchocorr",label:"Anchos de acceso a las salidas (corredores).", tipo:"select", opts:[{v:"0,80 m < 1,20",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:0}] },
+      { id:"m8_anchocorr",label:"Anchos de acceso a las salidas (corredores).", tipo:"select", opts:[{v:"0,80 m < 1,20",p:1},{v:"≥ 1,20 m",p:2},NA("N/A","No aplica")] },
       { id:"m8_corrnorma",label:"Corredores: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchocorr","N/A") },
-      { id:"m8_anchopuerta",label:"Anchos (puertas).", tipo:"select", opts:[{v:"0,80 < 1,20 m",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:2}] },
+      { id:"m8_anchopuerta",label:"Anchos (puertas).", tipo:"select", opts:[{v:"0,80 < 1,20 m",p:1},{v:"≥ 1,20 m",p:2},NA("N/A","No aplica")] },
       { id:"m8_puertanorma",label:"Puertas: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchopuerta","N/A") },
-      { id:"m8_anchoesc",label:"Anchos (escaleras).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:2}] },
+      { id:"m8_anchoesc",label:"Anchos (escaleras).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2},NA("N/A","No aplica")] },
       { id:"m8_escnorma",label:"Escaleras: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchoesc","N/A") },
-      { id:"m8_anchoramp",label:"Ancho (rampas).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2},{v:"N/A",p:2}] },
+      { id:"m8_anchoramp",label:"Ancho (rampas).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2},NA("N/A","No aplica")] },
       { id:"m8_rampnorma",label:"Rampas: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0), dependsOn:DEPNO("m8_anchoramp","N/A") },
       { id:"m8_anchosalida",label:"Ancho de salida (escalera, corredor, rampa).", tipo:"select", opts:[{v:"0,90 a 1,20 m",p:1},{v:"≥ 1,20 m",p:2}] },
       { id:"m8_salidanorma",label:"Salida: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
@@ -211,9 +213,9 @@ window.MODULOS = [
       { id:"m8_psalidanorma",label:"Puerta de salida: es el ancho requerido por norma.", tipo:"sino", opts:SINO(1,0) },
       { id:"m8_cantdesc",label:"Cantidad de descargas.", tipo:"select", opts:[{v:"1",p:1},{v:"2",p:2},{v:"3",p:3},{v:"Más de 3",p:4}] },
       { id:"m8_descext",label:"La descarga es al exterior del establecimiento o edificación.", tipo:"sino", opts:SINO(1,0) },
-      { id:"m8_cortafuego",label:"Tiene puertas cortafuego certificadas.", tipo:"sino_na", opts:SINONA(1,0,1) },
-      { id:"m8_cierre",  label:"Las puertas cuentan con mecanismos de cierre.", tipo:"sino_na", opts:SINONA(1,0,1) },
-      { id:"m8_escext",  label:"La estructura cuenta con escaleras exteriores.", tipo:"sino", opts:SINO(1,0) },
+      { id:"m8_cortafuego",label:"Tiene puertas cortafuego certificadas.", tipo:"sino_na", opts:SINONA(1,0) },
+      { id:"m8_cierre",  label:"Las puertas cuentan con mecanismos de cierre.", tipo:"sino_na", opts:SINONA(1,0) },
+      { id:"m8_escext",  label:"La estructura cuenta con escaleras exteriores.", tipo:"sino_na", opts:SINONA(1,0) },
       { id:"m8_luces",   label:"Cuenta con luces de emergencia.", tipo:"sino", opts:SINO(1,0) },
       /* Movida debajo de "luces de emergencia" (v1.19): sin luces no puede
          haber egreso iluminado por ellas. */
@@ -233,10 +235,10 @@ window.MODULOS = [
     items: [
       { id:"m9_plan",   label:"Cuenta con plan de emergencias.", tipo:"sino", opts:SINO(1,0) },
       { id:"m9_r_inc",  label:"Riesgo contemplado: Incendio.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
-      { id:"m9_r_fugas",label:"Riesgo contemplado: Fugas.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
-      { id:"m9_r_derr", label:"Riesgo contemplado: Derrames.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
-      { id:"m9_r_expl", label:"Riesgo contemplado: Explosiones.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
-      { id:"m9_r_bleve",label:"Riesgo contemplado: BLEVEs.", tipo:"sino_na", opts:SINONA(1,0,1), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_fugas",label:"Riesgo contemplado: Fugas.", tipo:"sino_na", opts:SINONA(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_derr", label:"Riesgo contemplado: Derrames.", tipo:"sino_na", opts:SINONA(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_expl", label:"Riesgo contemplado: Explosiones.", tipo:"sino_na", opts:SINONA(1,0), dependsOn:DEP("m9_plan","SI","cero") },
+      { id:"m9_r_bleve",label:"Riesgo contemplado: BLEVEs.", tipo:"sino_na", opts:SINONA(1,0), dependsOn:DEP("m9_plan","SI","cero") },
       { id:"m9_s_emp",  label:"Plan socializado con: Empleados.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
       { id:"m9_s_bom",  label:"Plan socializado con: Bomberos.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },
       { id:"m9_s_com",  label:"Plan socializado con: Comunidad.", tipo:"sino", opts:SINO(1,0), dependsOn:DEP("m9_plan","SI","cero") },

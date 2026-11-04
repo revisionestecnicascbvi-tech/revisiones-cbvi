@@ -461,7 +461,8 @@
      una secuencia real) y dos columnas de criterio con icono + palabra. */
   .guidebox{margin:6px 0 12px;border:1px solid var(--line);border-top:2px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);padding:14px;display:grid;gap:12px;min-width:0}
   .guidebox .gt{font-family:var(--ff-h);font-weight:600;font-size:1.0625rem;line-height:1.2;color:var(--ink)}
-  .guidebox .dg{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;color:var(--ink);max-width:440px;width:100%}
+  .guidebox .dg{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:4px;color:var(--ink);max-width:440px;width:100%}
+  @media (max-width:520px){.guidebox{padding:8px}}
   .guidebox .dg svg{display:block;width:100%;height:auto}
   .guidebox .gpasos b,.guidebox .gcrit b{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
   .guidebox ol{margin:0;padding-left:20px;font-size:14px;line-height:1.45;color:var(--ink-2,var(--ink));display:grid;gap:5px}
@@ -637,9 +638,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.19"></script>
-<script src="form-inspeccion.js?v=1.19"></script>
-<script src="guias.js?v=1.19"></script>
+<script src="logos.js?v=1.20"></script>
+<script src="form-inspeccion.js?v=1.20"></script>
+<script src="guias.js?v=1.20"></script>
 <script>
 (function(){
 "use strict";
@@ -651,8 +652,11 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.19";
+var APP_VERSION="1.20";
 var APP_VERSION_NOTAS=[
+  "v1.20: Guías \"¿Cómo lo reviso?\" más claras. En los documentos (póliza, RETIE, licencias, registros y visita anterior) ahora se ve qué leer y cómo se ve uno que sirve y uno que no. También se rehicieron los dibujos de anchos de salida, rampa, descarga, inflamabilidad, activación y aforo, y se corrigieron textos que se montaban.",
+  "v1.20: Botón \"No aplica\" donde la cosa puede no existir sin ser falta (corredores, escaleras, rampas, puertas cortafuego, escaleras exteriores, riesgos del plan, reporte a la autoridad): no suma ni resta. Si el local no requiere extintores, ese módulo tampoco suma ni resta. Hay criterio claro para decir que el Módulo 8 no aplica por aforo.",
+  "v1.20: En el certificado se corrigieron recomendaciones que no correspondían a la pregunta (egreso, auto-ensayo, movilidad, procedimiento, monitoreo, socialización del plan, póliza, altura de extintores). Corregido el lector de QR por cámara en equipos sin lector nativo.",
   "v1.19: El formulario entiende las respuestas que dependen de otras: si no hay seguro, extintores, luces de emergencia, plan de emergencias o brigada, ya no pregunta los detalles y los da por NO (el hallazgo queda en la pregunta principal). \"Primera visita\" ya no sale como incumplimiento. Las guías \"¿Cómo lo reviso?\" son nuevas: dibujo más claro, pasos, y qué se ve cuando cumple y cuando no; ahora casi todas las preguntas tienen la suya.",
   "v1.19: En la pantalla de inicio de sesión hay un enlace a una página pública que explica cómo funciona la revisión técnica, para quien no es inspector.",
   "v1.17: Tipo de construcción tiene opción \"Mixta\" para edificaciones con más de un material. Si no hay subniveles, marca \"Ninguno\" y ya no pide área ni actividad del subnivel. Si no hay brigada de emergencias, ya no pide su certificación ni nivel.",
@@ -738,6 +742,7 @@ function applyDeps(root){if(!root||!FORM)return;
          :max?"Sin fuentes marcadas: el riesgo de activación cuenta como Bajo y no se pregunta."
          :fuera?(fuera>1?("Se omiten "+fuera+" preguntas que no aplican."):"Se omite 1 pregunta que no aplica.")
          :"";
+    if(w.dataset.it==="m7_requiere"&&FORM.ans.m7_requiere==="NO")t="No requiere extintores: este módulo no suma ni resta y no se pregunta.";
     nt.textContent=t;nt.hidden=!t})}
 /* Logos: vienen embebidos en logos.js, no dependen de una ruta ni de la red. */
 var LG=window.LOGOS||{};
@@ -1118,10 +1123,24 @@ function mkHallazgo(f,m,it,resp,etiqueta){
    PDF. Si no hay respuestas (importadas), se usa la copia guardada y se
    completa el "Que hacer" que le falte. Puntaje y concepto NO se tocan:
    quedan como se emitieron. */
+/* Antes de v1.20, "no requiere extintores" aún dejaba hallazgos de M7. Como el
+   concepto emitido no se recalcula, al reimprimir se conservan esos hallazgos. */
+function conM7Emitido(f,calc){
+  if(f.ans.m7_requiere==="SI"||!f.recs)return calc;
+  var m=MOD.filter(function(x){return x.id==="m7"})[0];if(!m)return calc;
+  var guardados={};f.recs.forEach(function(h){if(h)guardados[h.id]=1});
+  var extra=m.items.filter(function(it){
+    var v=f.ans[it.id];if(!guardados[it.id]||v==null||CONTEXTO.has(it.id))return false;
+    if(it.id!=="m7_cuenta"&&f.ans.m7_cuenta!=="SI")return false;
+    var o=optDe(it,v);return !!o&&typeof o.p==="number"&&o.p<itemMax(it)
+  }).map(function(it){return mkHallazgo(f,m,it,f.ans[it.id])});
+  var i=0;while(i<calc.length&&parseInt(String(calc[i].id).slice(1),10)<7)i++;
+  calc.splice.apply(calc,[i,0].concat(extra));
+  return calc}
 function hallazgosDe(f){
   if(!f)return [];
   var tieneRespuestas=f.ans&&Object.keys(f.ans).length>0;
-  if(tieneRespuestas)return compute(f).recs;
+  if(tieneRespuestas){var calc=compute(f).recs;return f.concepto?conM7Emitido(f,calc):calc}
   var ACC=window.ACCIONES||{}, ACM=window.ACCION_MODULO||{};
   return (f.recs||[]).filter(function(h){return h&&!CONTEXTO.has(h.id)}).map(function(h){
     var c=Object.assign({},h);
@@ -2013,6 +2032,8 @@ function buildScorebar(){
 function renderToggle(m){
   var it=el("div","item");
   it.innerHTML='<div class="q"><b>'+esc(m.toggle.label)+'</b></div>';
+  var gt=GUIAS[m.toggle.id]||m.toggle.nota;
+  if(gt)it.insertAdjacentHTML("beforeend",'<div class="guia">'+esc(gt)+'</div>');
   var opts=el("div","opts");
   [["SI","Sí, aplica"],["NO","No aplica"]].forEach(function(p){
     var o=el("button","opt",p[1]);if(FORM.ans[m.toggle.id]===p[0])o.classList.add("sel");
@@ -2068,7 +2089,7 @@ function renderItem(m,it){
     wrap.appendChild(fg);
   } else {
     var opts=el("div","opts");
-    it.opts.forEach(function(o){var mx=itemMax(it);var b=el("button","opt",o.v);
+    it.opts.forEach(function(o){var mx=itemMax(it);var b=el("button","opt",o.l||o.v);
       if(FORM.ans[it.id]===o.v)b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));
       b.addEventListener("click",function(){FORM.ans[it.id]=o.v;scheduleSave();$$(".opt",opts).forEach(function(x){x.className="opt"});b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));applyDeps(wrap.parentNode);refreshScore()});
       opts.appendChild(b)});
@@ -2647,7 +2668,7 @@ function eliminarEstablecimiento(e,alTerminar){
      3. Si la cámara no se puede abrir (el APK no tiene ese permiso), se toma
         una FOTO del QR con la cámara normal y se lee de la foto.
    Siempre queda la opción de escribirlo a mano. */
-var JSQR_URL="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js";
+var JSQR_URL="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
 var _jsqrCargando=null;
 function cargarJsQR(){
   if(window.jsQR) return Promise.resolve(window.jsQR);

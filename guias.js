@@ -12,6 +12,7 @@ window.GUIAS = {
   "m2_comp":"Marca la composición del personal; influye en la evacuación.",
   "m3_cumple":"¿Arreglaron lo recomendado en la visita anterior? Si es la primera visita, marca «Primera visita»: no suma, no resta ni sale como hallazgo.",
   "m3_emerg":"¿Hubo incendio u otra emergencia en el último año?",
+  "m3_reporte":"¿Reportaron a bomberos o a la autoridad alguna emergencia o riesgo? Si no hubo nada que reportar, marca «No aplica».",
   "m3_sistemas":"Si hubo emergencia, ¿funcionaron extintores/alarmas/salidas?",
   "m4_tipo":"Mira de qué está hecha la estructura: concreto resiste más; madera/aglomerado, menos. Si hay más de un material (ej. paredes de cemento y techo de madera), marca 'Mixta': puntúa igual que el menos resistente de los que tenga.",
   "m4_propv":"¿Qué tan fácil subiría el fuego entre pisos? (ductos, vacíos, escaleras sin puerta).",
@@ -28,7 +29,7 @@ window.GUIAS = {
   "m6_uso":"¿Usan bien la instalación o hay 'pulpos'/extensiones sobrecargadas?",
   "m6_sobre":"¿Hay breakers/tacos (protección contra sobrecarga)?",
   "m6_retie":"¿Tienen dictamen o revisión eléctrica RETIE reciente?",
-  "m7_requiere":"Casi todo comercio requiere extintores según NSR-10.",
+  "m7_requiere":"Casi todo comercio requiere extintores según NSR-10. Marca NO solo si de verdad no los requiere: el módulo de extintores no suma ni resta.",
   "m7_cuenta":"¿Hay extintores en el local? Si respondes NO, las demás preguntas de extintores se omiten y cuentan como NO.",
   "m7_aprop":"El tipo (ABC, CO₂…) debe servir para el riesgo del lugar (cocina, eléctrico…).",
   "m7_distrib":"Deben alcanzarse caminando poco (recorrido máx. ~15 m).",
@@ -37,8 +38,8 @@ window.GUIAS = {
   "m7_instal":"Colgados a la altura correcta (ver diagrama).",
   "m7_recarga":"Mira la etiqueta: recarga de menos de 1 año y manómetro en verde.",
   "m7_fisico":"Sin golpes, óxido, manguera rota ni seguro suelto.",
-  "m8_aplica":"Si el local es muy pequeño y de bajo aforo, puede no aplicar; marca 'No aplica'.",
-  "m8_egreso":"Salidas/puertas por donde la gente puede salir en emergencia.",
+  "m8_aplica":"Criterio CBVI: marca que no aplica solo si caben hasta 25 personas, la salida da directo a la calle a nivel del piso y se llega a ella en 15 m o menos. Si dudas, sí aplica.",
+  "m8_egreso":"¿Hay una ruta continua y libre desde cualquier punto hasta la calle? Si la única salida pasa por cocina o bodega, tiene candado o termina en un encierro, marca NO.",
   "m8_visible":"Señal de SALIDA visible (ver diagrama).",
   "m8_despej":"Rutas y salidas sin cajas, mesas ni candados (ver diagrama).",
   "m8_ilum":"Luz que prende sola si se va la energía (ver diagrama).",
@@ -48,6 +49,7 @@ window.GUIAS = {
   "m8_anchopuerta":"Mide el ancho libre de la puerta. Ideal ≥ 1,20 m.",
   "m8_luces":"¿Hay lámparas de emergencia instaladas?",
   "m8_descext":"La gente debe terminar saliendo a la calle o a un sitio seguro.",
+  "m8_escext":"Si es de un solo piso y no las necesita, marca «No aplica».",
   "m9_aplica":"Locales grandes o de alto riesgo deben tener plan. Pequeños pueden no aplicar.",
   "m9_plan":"Documento con qué hacer en emergencia, rutas y responsables.",
   "m9_simul":"¿Han hecho un simulacro de evacuación en el último año?",
@@ -123,8 +125,8 @@ window.DIAGRAMS = (function(){
   function ln(x1,y1,x2,y2,o){o=o||{};return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"'+(o.c?' stroke="'+o.c+'"':'')+(o.w?' stroke-width="'+o.w+'"':'')+(o.d?' stroke-dasharray="'+o.d+'"':'')+'/>'}
   function rc(x,y,w,h,o){o=o||{};return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(o.r||0)+'"'+(o.f?' fill="'+o.f+'"':'')+(o.c?' stroke="'+o.c+'"':'')+(o.w?' stroke-width="'+o.w+'"':'')+(o.d?' stroke-dasharray="'+o.d+'"':'')+'/>'}
   /* Sello de veredicto: icono + palabra (nunca solo color). */
-  function si(x,y,t){return '<g><circle cx="'+(x+8)+'" cy="'+(y-4)+'" r="8" fill="'+VE+'" stroke="none"/><path d="M'+(x+4)+' '+(y-4)+' l3 3 l5 -6" stroke="#fff" stroke-width="2"/>'+tx(x+21,y,t||"Así sí",{c:VE,s:12,w:700})+'</g>'}
-  function no(x,y,t){return '<g><circle cx="'+(x+8)+'" cy="'+(y-4)+'" r="8" fill="'+RO+'" stroke="none"/><path d="M'+(x+5)+' '+(y-7)+' l6 6 M'+(x+11)+' '+(y-7)+' l-6 6" stroke="#fff" stroke-width="2"/>'+tx(x+21,y,t||"Así no",{c:RO,s:12,w:700})+'</g>'}
+  function si(x,y,t){return '<g><circle cx="'+(x+8)+'" cy="'+(y-4)+'" r="8" fill="'+VE+'" stroke="none"/><path d="M'+(x+4)+' '+(y-4)+' l3 3 l5 -6" stroke="var(--surface)" stroke-width="2"/>'+tx(x+21,y,t||"Así sí",{c:VE,s:12,w:700})+'</g>'}
+  function no(x,y,t){return '<g><circle cx="'+(x+8)+'" cy="'+(y-4)+'" r="8" fill="'+RO+'" stroke="none"/><path d="M'+(x+5)+' '+(y-7)+' l6 6 M'+(x+11)+' '+(y-7)+' l-6 6" stroke="var(--surface)" stroke-width="2"/>'+tx(x+21,y,t||"Así no",{c:RO,s:12,w:700})+'</g>'}
   /* Divisor de comparación (dos mitades de 150 px). */
   var MID=ln(160,10,160,160,{c:MU,d:"3 4",w:1});
   function persona(x,y,s,c){s=s||1;c=c||"currentColor";return '<g stroke="'+c+'" stroke-width="2"><circle cx="'+x+'" cy="'+(y-22*s)+'" r="'+(5*s)+'"/><path d="M'+x+' '+(y-17*s)+' V'+(y-6*s)+' M'+(x-7*s)+' '+y+' L'+x+' '+(y-8*s)+' L'+(x+7*s)+' '+y+' M'+(x-7*s)+' '+(y-13*s)+' H'+(x+7*s)+'"/></g>'}
@@ -135,28 +137,41 @@ window.DIAGRAMS = (function(){
   function caja(x,y,w,h){return rc(x,y,w,h,{c:AM,f:"var(--ambar-bg)"})+ln(x,y,x+w,y+h,{c:AM,w:1})}
   function flecha(x1,y,x2,c){c=c||"currentColor";var d=x2>x1?-7:7;return '<path d="M'+x1+' '+y+' H'+x2+' M'+(x2+d)+' '+(y-5)+' L'+x2+' '+y+' L'+(x2+d)+' '+(y+5)+'" stroke="'+c+'"/>'}
   function doc(x,y,w,h,tit){return rc(x,y,w,h,{r:2,f:"var(--surface)"})+'<path d="M'+(x+w-14)+' '+y+' v14 h14" />'+tx(x+10,y+18,tit,{s:10,w:700})}
-  function lineas(x,y,w,n,gap){var o="";for(var i=0;i<n;i++)o+=ln(x,y+i*(gap||12),x+w-(i%2?18:0),y+i*(gap||12),{c:MU,w:1.5});return o}
   function cota(x,y1,y2,t,lado){/* cota vertical */var tx0=lado==="izq"?x-6:x+6, an=lado==="izq"?"end":"start";
     return ln(x,y1,x,y2,{w:1.4})+'<path d="M'+(x-4)+' '+(y1+6)+' L'+x+' '+y1+' L'+(x+4)+' '+(y1+6)+' M'+(x-4)+' '+(y2-6)+' L'+x+' '+y2+' L'+(x+4)+' '+(y2-6)+'" stroke-width="1.4"/>'+tx(tx0,(y1+y2)/2+4,t,{s:11,a:an})}
   function cotah(y,x1,x2,t){return ln(x1,y,x2,y,{w:1.4})+'<path d="M'+(x1+6)+' '+(y-4)+' L'+x1+' '+y+' L'+(x1+6)+' '+(y+4)+' M'+(x2-6)+' '+(y-4)+' L'+x2+' '+y+' L'+(x2-6)+' '+(y+4)+'" stroke-width="1.4"/>'+tx((x1+x2)/2,y-6,t,{s:11,a:"middle"})}
 
+  /* Documentos: se dibuja lo que hay que leer en el papel, bien y mal. */
+  function ficha(x,tit,fs,ok,g){var y0=38,o=doc(x,6,148,y0+(fs.length-1)*g+14,tit);
+    fs.forEach(function(f,i){var y=y0+i*g;
+      o+=tx(x+10,y,f[0],{s:10,c:MU})+tx(x+10,y+12,f[1],{s:11,w:700})+
+        (ok?'<path d="M'+(x+126)+' '+(y+5)+' l4 4 l7 -8" stroke="'+VE+'" stroke-width="2.2"/>'
+           :'<path d="M'+(x+127)+' '+y+' l8 8 M'+(x+135)+' '+y+' l-8 8" stroke="'+RO+'" stroke-width="2.2"/>')});
+    return o}
+  function dosFichas(t1,t2,a,b,vOk,vNo,g){var v=38+(a.length-1)*g+40;
+    return svg(ln(160,8,160,v+2,{c:MU,d:"3 4",w:1})+ficha(4,t1,a,true,g)+ficha(168,t2,b,false,g)+si(6,v,vOk)+no(170,v,vNo),v+8)}
+  function cotaColor(x1,y1,x2,y2,c){var h=y1===y2;
+    return '<g stroke="'+c+'" stroke-width="2">'+ln(x1,y1,x2,y2)+'<path d="'+(h
+      ?'M'+(x1+6)+' '+(y1-4)+' L'+x1+' '+y1+' L'+(x1+6)+' '+(y1+4)+' M'+(x2-6)+' '+(y1-4)+' L'+x2+' '+y1+' L'+(x2-6)+' '+(y1+4)
+      :'M'+(x1-4)+' '+(y1+6)+' L'+x1+' '+y1+' L'+(x1+4)+' '+(y1+6)+' M'+(x1-4)+' '+(y2-6)+' L'+x1+' '+y2+' L'+(x1+4)+' '+(y2-6))+'"/></g>'}
+  /* x,y = centro de la rueda sobre el piso */
+  function silla(x,y){return '<circle cx="'+x+'" cy="'+(y-11)+'" r="11"/><circle cx="'+(x-2)+'" cy="'+(y-42)+'" r="5"/>'+
+    '<path d="M'+(x-2)+' '+(y-36)+' V'+(y-19)+' H'+(x+13)+' V'+(y-6)+' H'+(x+20)+'"/>'}
+
   return {
   antecedentes:{titulo:"Visita anterior",
-    svg:svg(doc(24,18,130,134,"CONCEPTO ANTERIOR")+tx(34,52,"Hallazgos:",{s:10,c:MU})+
-      '<path d="M36 70 l4 4 l7 -8" stroke="'+VE+'"/>'+ln(54,70,140,70,{c:MU,w:1.5})+
-      '<path d="M36 92 l4 4 l7 -8" stroke="'+VE+'"/>'+ln(54,92,128,92,{c:MU,w:1.5})+
-      '<path d="M37 109 l8 8 M45 109 l-8 8" stroke="'+RO+'"/>'+ln(54,114,136,114,{c:MU,w:1.5})+
-      persona(232,150,1.6)+'<path d="M250 96 h28 v34 h-28 z" fill="var(--surface)"/>'+ln(255,106,272,106,{w:1.4})+ln(255,116,268,116,{w:1.4})+
-      tx(200,40,"Verifica uno",{s:11})+tx(200,54,"por uno",{s:11})),
-    pasos:["Busca el negocio en la app (renovación) o pide al dueño el concepto de la visita pasada.","Toma la lista de hallazgos de esa visita y revísalos uno por uno en el local.","Si es la primera vez que el CBVI lo revisa, marca «Primera visita»: no suma, no resta y no sale como hallazgo."],
+    svg:dosFichas("CONCEPTO ANTERIOR","CONCEPTO ANTERIOR",
+      [["Señalizar salida","ya está instalada"],["Recargar extintor","hay factura"],["Despejar pasillo","hoy está libre"]],
+      [["Señalizar salida","sigue sin señal"],["Recargar extintor","dicen, sin prueba"],["Despejar pasillo","sigue con cajas"]],
+      "Corregido","Sigue igual",32),
+    pasos:["Busca el negocio en la app (renovación) o pide al dueño el concepto de la visita pasada.","Toma la lista de hallazgos de esa visita y revísalos uno por uno en el local.","Si es la primera vez que el CBVI lo revisa, marca «Primera visita»: no suma, no resta y no sale como hallazgo.","Reporte a la autoridad: si no hubo emergencias ni riesgos que reportar, marca «No aplica»."],
     cumple:["Todo lo pedido la vez pasada está corregido.","Hay evidencia: factura de recarga, señal instalada, foto, documento."],
     noCumple:["Uno o más hallazgos de la visita anterior siguen igual.","Dicen que lo arreglaron pero no hay cómo comprobarlo."]},
 
   licencias:{titulo:"Documentos de la edificación",
-    svg:svg(doc(18,20,128,128,"LICENCIA")+tx(28,58,"de construcción",{s:10,c:MU})+lineas(28,78,100,3,14)+
-      '<circle cx="118" cy="128" r="12" stroke="'+AZ+'"/>'+tx(118,132,"✓",{s:12,c:AZ,a:"middle"})+
-      doc(174,20,128,128,"USO DEL SUELO")+tx(184,58,"Planeación / POT",{s:10,c:MU})+lineas(184,78,100,3,14)+
-      tx(184,136,"Actividad: comercio",{s:10})),
+    svg:svg(ficha(4,"LICENCIA",[["Dirección","la de este local"],["Obra","la que se ve hoy"]],true,32)+
+      ficha(168,"USO DEL SUELO",[["Dirección","la de este local"],["Actividad","la que hace hoy"]],true,32)+
+      tx(160,114,"Compara cada dato con lo que ves en el local",{s:11,c:MU,a:"middle"}),122),
     pasos:["Pregunta por la licencia de construcción o de la última reforma; pide verla.","Pide el concepto de uso del suelo (Planeación) o revisa que la actividad esté permitida en esa dirección.","Nueva: construida hace pocos años. Remodelada: tuvo ampliaciones o cambios de muros, pisos o techo."],
     cumple:["Muestran el documento y corresponde a esta dirección.","La actividad que se hace hoy es la que aparece en el uso del suelo."],
     noCumple:["No existe documento o es de otra dirección.","El local cambió de actividad (ej. de vivienda a bodega) sin trámite."],
@@ -224,20 +239,25 @@ window.DIAGRAMS = (function(){
 
   activacion:{titulo:"Riesgo de que la fuente encienda algo",
     svg:svg(MID+
-      rc(20,82,44,40,{r:3})+'<path d="M32 78 q4 -8 0 -14 M48 78 q4 -8 0 -14" stroke="'+EX+'" stroke-width="1.6"/>'+caja(110,90,32,32)+cotah(110,64,110,"≥ 1 m")+ln(12,122,150,122,{w:2.4})+si(24,152,"Bajo")+
-      rc(178,82,44,40,{r:3})+'<path d="M190 78 q4 -8 0 -14 M206 78 q4 -8 0 -14" stroke="'+EX+'" stroke-width="1.6"/>'+caja(224,86,30,36)+caja(256,96,28,26)+'<path d="M262 92 q6 -10 14 -2" stroke="'+AM+'"/>'+ln(170,122,310,122,{w:2.4})+no(182,152,"Alto")),
+      rc(20,82,44,40,{r:3})+'<path d="M32 78 q4 -8 0 -14 M48 78 q4 -8 0 -14" stroke="'+EX+'" stroke-width="1.6"/>'+caja(110,90,32,32)+cotah(110,64,110,"≥ 1 m")+ln(12,122,150,122,{w:2.4})+
+      tx(42,138,"estufa",{s:11,a:"middle"})+tx(126,138,"cartón",{s:11,a:"middle"})+si(24,160,"Bajo")+
+      rc(178,82,44,40,{r:3})+'<path d="M190 78 q4 -8 0 -14 M206 78 q4 -8 0 -14" stroke="'+EX+'" stroke-width="1.6"/>'+caja(224,86,30,36)+caja(256,96,28,26)+'<path d="M262 92 q6 -10 14 -2" stroke="'+AM+'"/>'+ln(170,122,310,122,{w:2.4})+
+      tx(200,138,"estufa",{s:11,a:"middle"})+tx(264,138,"cartón pegado",{s:11,a:"middle"})+no(182,160,"Alto"),168),
     pasos:["Por cada fuente marcada, mira qué material combustible tiene cerca.","Calcula la distancia a cartón, tela, plástico, aceite o cilindros de gas.","Pregunta cuánto tiempo pasa encendida y si alguien la vigila."],
     okT:"Bajo si", noT:"Alto si",
     cumple:["Fuentes separadas más de 1 m de cualquier combustible.","Se usan con alguien pendiente y se apagan al cerrar."],
     noCumple:["Estufa, soldadura o resistencias junto a cartón, telas o gas.","Equipos calientes encendidos sin vigilancia o toda la noche."]},
 
   inflamabilidad:{titulo:"Qué tan fácil arden los materiales",
-    svg:svg(rc(16,54,96,30,{f:"var(--verde-bg)",c:VE})+rc(112,54,96,30,{f:"var(--ambar-bg)",c:AM})+rc(208,54,96,30,{f:"var(--rojo-bg)",c:RO})+
-      tx(64,74,"Baja",{s:13,c:VE,w:700,a:"middle"})+tx(160,74,"Media",{s:13,c:AM,w:700,a:"middle"})+tx(256,74,"Alta",{s:13,c:RO,w:700,a:"middle"})+
-      tx(64,104,"metal, vidrio,",{s:10,a:"middle",w:500})+tx(64,118,"cerámica, concreto",{s:10,a:"middle",w:500})+
-      tx(160,104,"madera maciza,",{s:10,a:"middle",w:500})+tx(160,118,"cartón ordenado",{s:10,a:"middle",w:500})+
-      tx(256,104,"espuma, colchón,",{s:10,a:"middle",w:500})+tx(256,118,"tela, plástico,",{s:10,a:"middle",w:500})+tx(256,132,"pintura, alcohol",{s:10,a:"middle",w:500})+
-      tx(16,36,"Mira lo que más abunda en el local",{s:11,c:MU})),
+    svg:svg(tx(8,14,"Mira lo que más abunda en el local",{s:11,c:MU})+
+      /* botellas y lata */ rc(14,50,14,34,{r:3})+rc(18,40,6,10)+rc(34,50,14,34,{r:3})+rc(38,40,6,10)+rc(56,54,36,30,{r:2})+ln(56,62,92,62,{w:1.4})+ln(8,84,104,84,{w:2.4})+
+      tx(56,106,"Baja",{s:13,c:VE,w:700,a:"middle"})+tx(56,122,"metal, vidrio,",{s:10,a:"middle",w:500})+tx(56,135,"cerámica, concreto",{s:10,a:"middle",w:500})+
+      /* cajas ordenadas */ caja(122,54,36,30)+caja(160,54,36,30)+caja(141,26,36,28)+ln(112,84,208,84,{w:2.4})+
+      tx(160,106,"Media",{s:13,c:AM,w:700,a:"middle"})+tx(160,122,"madera maciza,",{s:10,a:"middle",w:500})+tx(160,135,"cartón ordenado",{s:10,a:"middle",w:500})+
+      /* colchón, rollo de tela y bidón */ '<g stroke="'+RO+'">'+rc(220,58,52,26,{r:8})+'<circle cx="240" cy="47" r="11"/><circle cx="240" cy="47" r="3"/>'+rc(278,46,28,38,{r:3})+'<path d="M286 46 v-6 h12 v6"/></g>'+
+      '<g fill="'+RO+'" stroke="none"><circle cx="234" cy="71" r="1.6"/><circle cx="246" cy="71" r="1.6"/><circle cx="258" cy="71" r="1.6"/></g>'+
+      '<g transform="translate(280,50) scale(0.3)"><path d="M40 64 C26 52 36 40 40 26 C48 38 58 44 50 60 C48 66 43 67 40 64 Z" fill="'+EX+'" stroke="'+EX+'"/></g>'+ln(216,84,312,84,{w:2.4})+
+      tx(264,106,"Alta",{s:13,c:RO,w:700,a:"middle"})+tx(264,122,"espuma, colchón,",{s:10,a:"middle",w:500})+tx(264,135,"tela, plástico,",{s:10,a:"middle",w:500})+tx(264,148,"pintura, alcohol",{s:10,a:"middle",w:500}),156),
     pasos:["Mira qué material abunda: el de la mercancía, los muebles, el cielo raso y las divisiones.","Fíjate en la cantidad: poco cartón ordenado no es lo mismo que una bodega llena.","Busca líquidos inflamables: pinturas, solventes, alcohol, combustibles."],
     okT:"Baja si", noT:"Alta si",
     cumple:["Predominan metal, vidrio, cerámica o concreto.","Poca mercancía combustible y bien ordenada."],
@@ -280,9 +300,10 @@ window.DIAGRAMS = (function(){
     ref:"RETIE · NTC 2050"},
 
   retie:{titulo:"Revisión eléctrica (RETIE)",
-    svg:svg(doc(60,14,150,142,"DICTAMEN RETIE")+tx(70,50,"Dirección: la del local",{s:10,c:MU})+tx(70,66,"Fecha de inspección",{s:10,c:MU})+lineas(70,84,110,2,14)+
-      ln(70,136,140,136,{w:1.4})+tx(70,148,"firma + matrícula",{s:9,c:MU})+'<circle cx="182" cy="128" r="16" stroke="'+AZ+'"/>'+tx(182,132,"OK",{s:10,c:AZ,a:"middle",w:700})+
-      tx(222,60,"o la declaración",{s:10})+tx(222,74,"de cumplimiento",{s:10})+tx(222,88,"del electricista",{s:10})),
+    svg:dosFichas("DICTAMEN RETIE","DICTAMEN RETIE",
+      [["Dirección","la de este local"],["Fecha","tras la última obra"],["Firma","con matrícula"]],
+      [["Dirección","otra dirección"],["Fecha","antes de ampliar"],["Firma","sin matrícula"]],
+      "Sirve","No sirve",32),
     pasos:["Pide el dictamen de inspección RETIE o la declaración de cumplimiento del electricista que hizo la instalación.","Revisa que diga la dirección de este local y tenga fecha y firma con matrícula profesional.","Si no hay documento, pregunta cuándo vino por última vez un electricista matriculado y qué hizo."],
     cumple:["Documento de este local, firmado por profesional con matrícula.","Revisión reciente o posterior a la última reforma eléctrica."],
     noCumple:["No hay ningún documento ni revisión.","El documento es de otra dirección o de antes de ampliar el local."]},
@@ -302,7 +323,7 @@ window.DIAGRAMS = (function(){
   extintor_distrib:{titulo:"Dónde van los extintores",
     svg:svg(rc(14,14,292,124,{r:2})+ln(150,14,150,80)+ln(150,104,150,138)+tx(80,32,"Atención",{s:10,c:MU,a:"middle"})+tx(228,32,"Cocina / bodega",{s:10,c:MU,a:"middle"})+
       ext(26,96,0.7)+ext(286,96,0.7)+persona(186,126,0.9)+
-      '<path d="M178 104 C150 92 110 92 34 80" stroke="'+AZ+'" stroke-dasharray="6 5"/>'+tx(102,74,"≤ 15 m caminando",{s:12,c:AZ,w:700,a:"middle"})+
+      '<path d="M178 104 C150 92 110 92 34 80" stroke="'+AZ+'" stroke-dasharray="6 5"/>'+tx(88,70,"≤ 15 m caminando",{s:12,c:AZ,w:700,a:"middle"})+
       ln(14,138,306,138,{w:2.4})+tx(160,160,"Desde cualquier punto, el extintor más cercano",{s:10,c:MU,a:"middle"}),168),
     pasos:["Párate en el punto más alejado del local.","Camina hasta el extintor más cercano contando pasos (1 paso ≈ 0,75 m; 15 m ≈ 20 pasos).","Repite en cocina, bodega y junto al tablero eléctrico."],
     cumple:["Desde cualquier punto hay un extintor a 15 m o menos caminando (en zonas solo de papel, madera o tela la norma permite hasta 22,9 m).","Hay uno cerca de cada zona de riesgo: cocina, tablero, bodega."],
@@ -319,8 +340,8 @@ window.DIAGRAMS = (function(){
 
   extintor_altura:{titulo:"Altura de instalación",
     svg:svg(MID+ln(20,150,150,150,{w:2.4})+ln(30,14,30,150)+
-      '<path d="M30 58 h14 v8" stroke-width="2.4"/>'+ext(54,136,1.5)+cota(100,74,150,"máx. 1,53 m")+ln(70,74,104,74,{d:"3 3",w:1})+
-      cota(60,136,150,"")+tx(66,147,"≥10 cm",{s:9,c:MU})+si(24,168,"En su soporte")+
+      '<path d="M30 70 h24 v6" stroke-width="2.4"/>'+ext(54,130,1.35)+cota(108,76,150,"")+ln(66,76,112,76,{d:"3 3",w:1})+
+      tx(114,108,"máx.",{s:11})+tx(114,122,"1,53 m",{s:11})+cota(54,130,150,"")+tx(60,145,"≥ 10 cm",{s:10})+si(24,168,"En su soporte")+
       ln(170,150,300,150,{w:2.4})+ln(180,14,180,150)+ext(240,150,1.5)+no(174,168,"En el piso"),176),
     pasos:["Mide del piso a la parte más alta del extintor (la manija).","Lee la capacidad en la etiqueta: hasta 18 kg o más de 18 kg.","Confirma que cuelga de su soporte, no del piso ni encima de un mueble."],
     cumple:["Hasta 18 kg: la parte de arriba a 1,53 m o menos del piso.","Más de 18 kg: la parte de arriba a 1,07 m o menos.","Queda al menos 10 cm entre el fondo y el piso."],
@@ -341,10 +362,11 @@ window.DIAGRAMS = (function(){
 
   extintor_fisico:{titulo:"Estado físico del extintor",
     svg:svg(ext(110,156,3.4)+
-      '<g stroke-width="1.4">'+ln(122,24,196,24)+ln(140,88,196,72)+ln(124,120,196,118)+ln(100,40,60,40)+'</g>'+
-      '<g fill="var(--surface)">'+'<circle cx="208" cy="24" r="10"/><circle cx="208" cy="72" r="10"/><circle cx="208" cy="118" r="10"/><circle cx="48" cy="40" r="10"/></g>'+
-      tx(208,28,"1",{s:11,a:"middle",w:700})+tx(208,76,"2",{s:11,a:"middle",w:700})+tx(208,122,"3",{s:11,a:"middle",w:700})+tx(48,44,"4",{s:11,a:"middle",w:700})+
-      tx(224,28,"Manija y pasador",{s:10})+tx(224,76,"Manguera",{s:10})+tx(224,122,"Cilindro",{s:10})+tx(30,64,"Etiqueta",{s:10})),
+      rc(92,84,36,30,{f:"var(--surface)"})+ln(98,94,122,94,{w:1.4})+ln(98,104,116,104,{w:1.4})+
+      '<g stroke-width="1.4">'+ln(122,24,196,24)+ln(140,88,196,72)+ln(124,134,196,134)+ln(92,98,60,98)+'</g>'+
+      '<g fill="var(--surface)">'+'<circle cx="208" cy="24" r="10"/><circle cx="208" cy="72" r="10"/><circle cx="208" cy="134" r="10"/><circle cx="48" cy="98" r="10"/></g>'+
+      tx(208,28,"1",{s:11,a:"middle",w:700})+tx(208,76,"2",{s:11,a:"middle",w:700})+tx(208,138,"3",{s:11,a:"middle",w:700})+tx(48,102,"4",{s:11,a:"middle",w:700})+
+      tx(224,28,"Manija y pasador",{s:11})+tx(224,76,"Manguera",{s:11})+tx(224,138,"Cilindro",{s:11})+tx(48,124,"Etiqueta",{s:11,a:"middle"})),
     pasos:["Manija y pasador: completos, el pasador con su precinto.","Manguera y boquilla: sin grietas, sin tapones de suciedad.","Cilindro: sin óxido, abolladuras ni pintura levantada.","Etiqueta de instrucciones: legible."],
     cumple:["Los cuatro puntos en buen estado."],
     noCumple:["Óxido, golpes, manguera rota o pasador faltante.","Etiqueta borrada: nadie sabría usarlo."]},
@@ -380,10 +402,10 @@ window.DIAGRAMS = (function(){
     ref:"NSR-10 Título K"},
 
   movilidad:{titulo:"Salida para personas con movilidad reducida",
-    svg:svg(MID+ln(10,140,30,140,{w:2.4})+'<path d="M30 140 L112 112 H150" stroke-width="2.4"/>'+rc(132,52,14,60,{c:VE})+
-      '<circle cx="74" cy="118" r="10"/><path d="M66 92 v16 h16 l6 8" /><circle cx="64" cy="84" r="4"/>'+tx(40,104,"rampa",{s:10,c:MU})+si(20,164,"Rampa o a nivel")+
-      ln(170,140,220,140,{w:2.4})+'<path d="M220 140 V124 H240 V108 H300" stroke-width="2.4"/>'+rc(286,48,14,60,{c:RO})+
-      '<circle cx="196" cy="128" r="10"/><path d="M188 102 v16 h16 l6 8" /><circle cx="186" cy="94" r="4"/>'+tx(250,130,"escalones",{s:10,c:RO})+no(176,164,"Solo escalones"),172),
+    svg:svg(MID+'<path d="M8 140 H62 L128 112 H152" stroke-width="2.4"/>'+rc(136,52,14,60,{c:VE})+
+      silla(30,140)+tx(104,140,"rampa",{s:11,c:VE,w:700,a:"middle"})+si(20,164,"Rampa o a nivel")+
+      '<path d="M168 140 H226 V124 H244 V108 H262 V92 H312" stroke-width="2.4"/>'+rc(296,32,14,60,{c:RO})+
+      silla(190,140)+tx(312,124,"escalones",{s:11,c:RO,w:700,a:"end"})+no(176,164,"Solo escalones"),172),
     pasos:["Mira la entrada y la salida: ¿hay escalones, desniveles o rejillas?","Si hay rampa, verifica que sea suave, firme y con pasamanos.","Mide el ancho libre de la puerta: una silla de ruedas necesita 0,80 m o más."],
     cumple:["Acceso a nivel o con rampa hasta la calle.","Puerta de 0,80 m o más y sin torniquetes que impidan el paso."],
     noCumple:["Solo se sale por escalones.","Puerta angosta, torniquete o mostrador que bloquea una silla de ruedas."],
@@ -392,29 +414,37 @@ window.DIAGRAMS = (function(){
   aforo:{titulo:"Aforo (cuántas personas caben)",
     svg:svg(rc(20,24,140,96,{r:2})+cotah(140,20,160,"8 m")+cota(176,24,120,"7 m")+
       persona(48,80,0.8)+persona(76,80,0.8)+persona(104,80,0.8)+persona(132,80,0.8)+persona(62,112,0.8)+persona(90,112,0.8)+persona(118,112,0.8)+
-      tx(214,50,"Área ÷ índice",{s:13,w:700})+tx(214,66,"de ocupación",{s:11})+tx(214,84,"(m² por persona",{s:10,c:MU})+tx(214,98,"según el uso,",{s:10,c:MU})+tx(214,112,"NSR-10 Título K)",{s:10,c:MU}),156),
+      tx(208,40,"8 × 7 = 56 m²",{s:13,w:700})+tx(208,57,"÷ índice de ocupación",{s:10})+tx(208,96,"= aforo",{s:13,w:700})+tx(208,114,"El índice sale de la",{s:10,c:MU})+tx(208,127,"NSR-10 Título K,",{s:10,c:MU})+tx(208,140,"según el uso",{s:10,c:MU}),156),
     pasos:["Mide el área donde está el público (largo × ancho).","Busca el índice de ocupación del uso en el Título K de la NSR-10 (m² por persona).","Aforo = área ÷ índice. Compáralo con las sillas y mesas y con lo que dice el encargado de las horas pico."],
     cumple:["El aforo está calculado y lo conocen (aviso, plan o constancia).","En hora pico no se pasa de ese número."],
     noCumple:["Nadie sabe cuántas personas caben.","En eventos o fines de semana llenan muy por encima."],
     ref:"NSR-10 Título K"},
 
   salida_ancho:{titulo:"Ancho libre de salidas",
-    svg:svg(MID+
-      rc(14,40,30,14,{f:"currentColor"})+rc(116,40,30,14,{f:"currentColor"})+'<path d="M116 54 L116 100" stroke-width="2.4"/><path d="M116 100 A46 46 0 0 0 70 54" stroke="'+MU+'" stroke-dasharray="3 4" stroke-width="1.2"/>'+
-      cotah(80,44,116,"ancho libre")+tx(80,124,"de marco a hoja abierta",{s:10,c:MU,a:"middle"})+si(20,156,"Medir lo que pasa")+
-      ln(178,40,300,40,{w:2.4})+ln(178,112,300,112,{w:2.4})+rc(232,40,40,22,{c:AM,f:"var(--ambar-bg)"})+tx(252,55,"estante",{s:9,c:AM,a:"middle"})+
-      cota(214,40,112,"pared")+cota(252,62,112,"real")+no(176,156,"Pared a pared")),
-    pasos:["Mide con flexómetro el paso LIBRE: en puertas, del marco a la hoja abierta; no de pared a pared.","En pasillos, mide el punto más angosto (estantes, exhibidores, mostrador).","En escaleras y rampas mide entre pasamanos. Si el local no tiene escaleras o rampas, marca N/A y la pregunta de norma desaparece."],
-    cumple:["1,20 m o más de paso libre: puntaje completo.","Entre 0,80 y 1,20 m: aceptable para locales pequeños, puntaje parcial."],
-    noCumple:["Menos de 0,80 m en cualquier punto de la ruta.","Exhibidores, mesas o mercancía que angostan el paso."],
+    svg:svg(ln(160,22,160,94,{c:MU,d:"3 4",w:1})+ln(160,120,160,196,{c:MU,d:"3 4",w:1})+
+      tx(8,12,"Pasillo, visto desde arriba",{s:11,w:700})+
+      ln(8,24,152,24,{w:2.4})+ln(8,88,152,88,{w:2.4})+rc(50,24,60,22,{c:AM,f:"var(--ambar-bg)"})+tx(80,39,"estante",{s:10,a:"middle",w:700})+
+      cotaColor(80,46,80,88,VE)+tx(87,72,"mide aquí",{s:11,c:VE,w:700})+
+      ln(168,24,312,24,{w:2.4})+ln(168,88,312,88,{w:2.4})+rc(210,24,60,22,{c:AM,f:"var(--ambar-bg)"})+tx(240,39,"estante",{s:10,a:"middle",w:700})+
+      cotaColor(264,24,264,88,RO)+tx(271,72,"así no",{s:11,c:RO,w:700})+
+      tx(8,112,"Puerta abierta, vista desde arriba",{s:11,w:700})+
+      rc(8,124,40,10,{f:"currentColor"})+rc(112,124,40,10,{f:"currentColor"})+rc(104,134,8,42,{f:"var(--surface)"})+
+      cotaColor(48,160,104,160,VE)+tx(75,152,"paso libre",{s:10,c:VE,w:700,a:"middle"})+tx(100,190,"hoja",{s:10,c:MU})+
+      rc(168,124,40,10,{f:"currentColor"})+rc(272,124,40,10,{f:"currentColor"})+rc(264,134,8,42,{f:"var(--surface)"})+
+      cotaColor(208,160,272,160,RO)+tx(236,152,"así no",{s:11,c:RO,w:700,a:"middle"})+tx(260,190,"hoja",{s:10,c:MU})+
+      si(8,212,"Paso real")+no(170,212,"Pared a pared"),220),
+    pasos:["Mide con flexómetro el paso LIBRE: en puertas, del marco a la hoja abierta; no de pared a pared.","En pasillos, mide el punto más angosto (estantes, exhibidores, mostrador).","En escaleras y rampas mide entre pasamanos. Si el local no tiene corredor, escaleras o rampas, marca «No aplica»: no suma ni resta y la pregunta de norma desaparece."],
+    cumple:["1,20 m o más de paso libre: puntaje completo.","Entre 0,80 y 1,20 m en corredores y puertas, o entre 0,90 y 1,20 m en escaleras, rampas y salidas: aceptable para locales pequeños, puntaje parcial."],
+    noCumple:["Menos de ese mínimo (0,80 o 0,90 m) en cualquier punto de la ruta.","Exhibidores, mesas o mercancía que angostan el paso."],
     ref:"NSR-10 Título K"},
 
   descarga:{titulo:"Hacia dónde descarga la salida",
-    svg:svg(MID+rc(20,30,100,80,{r:2})+'<path d="M120 70 H146" stroke="'+VE+'" stroke-width="2.4"/><path d="M138 64 L148 70 L138 76" stroke="'+VE+'" stroke-width="2.4"/>'+
-      ln(150,20,150,140,{c:MU,w:1})+tx(60,134,"sale a la calle",{s:10,c:MU,a:"middle"})+si(20,160,"Al exterior")+
-      rc(176,30,80,80,{r:2})+rc(256,40,46,60,{d:"4 3"})+tx(279,116,"patio",{s:10,c:MU,a:"middle"})+tx(279,128,"cerrado",{s:10,c:MU,a:"middle"})+
-      '<path d="M256 70 H276" stroke="'+RO+'" stroke-width="2.4"/><path d="M268 64 L278 70 L268 76" stroke="'+RO+'" stroke-width="2.4"/>'+no(176,160,"A un encierro")),
-    pasos:["Sigue cada salida hasta el final: ¿terminas en la calle o en un espacio abierto y seguro?","Cuenta cuántas salidas distintas llegan al exterior: esa es la cantidad de descargas.","Si hay segundo piso, mira si hay escalera exterior o una segunda escalera."],
+    svg:svg(ln(160,10,160,136,{c:MU,d:"3 4",w:1})+
+      rc(8,20,70,84,{r:2})+tx(43,66,"local",{s:11,a:"middle"})+'<path d="M78 62 H110" stroke="'+VE+'" stroke-width="2.4"/><path d="M102 56 L112 62 L102 68" stroke="'+VE+'" stroke-width="2.4"/>'+
+      ln(116,12,116,112,{w:2.4})+tx(135,66,"calle",{s:12,c:VE,w:700,a:"middle"})+si(8,130,"Al exterior")+
+      rc(168,20,62,84,{r:2})+tx(199,66,"local",{s:11,a:"middle"})+'<path d="M230 62 H254" stroke="'+RO+'" stroke-width="2.4"/><path d="M246 56 L256 62 L246 68" stroke="'+RO+'" stroke-width="2.4"/>'+
+      rc(258,20,54,84,{c:RO})+tx(285,60,"patio",{s:11,c:RO,w:700,a:"middle"})+tx(285,74,"cerrado",{s:11,c:RO,w:700,a:"middle"})+no(170,130,"A un encierro"),138),
+    pasos:["Sigue cada salida hasta el final: ¿terminas en la calle o en un espacio abierto y seguro?","Cuenta cuántas salidas distintas llegan al exterior: esa es la cantidad de descargas.","Si hay segundo piso, mira si hay escalera exterior o una segunda escalera. Si es de un solo piso y no la necesita, marca «No aplica»."],
     cumple:["Todas las salidas terminan en la calle o en un espacio abierto amplio.","Con mucho público: dos o más descargas separadas."],
     noCumple:["La salida termina en un patio cerrado, un parqueadero con reja o dentro de otro local.","Una sola salida para un local con mucha gente."],
     ref:"NSR-10 Título K"},
@@ -425,7 +455,7 @@ window.DIAGRAMS = (function(){
       rc(150,90,20,6,{f:"currentColor"})+rc(94,130,46,20,{c:AZ})+tx(117,144,"60 min",{s:9,c:AZ,a:"middle",w:700})+
       tx(206,140,"placa de",{s:10})+tx(206,152,"certificación",{s:10})+ln(140,140,200,140,{w:1})+
       tx(30,90,"se cierra",{s:10,a:"middle"})+tx(30,102,"sola",{s:10,a:"middle"}),170),
-    pasos:["Busca la placa o etiqueta de certificación en el canto de la puerta o en el marco.","Ábrela y suéltala: debe cerrarse sola y quedar cerrada (brazo cierrapuertas).","Si el local no tiene ni necesita puertas cortafuego (ej. un solo piso sin escalera encerrada), marca N/A."],
+    pasos:["Busca la placa o etiqueta de certificación en el canto de la puerta o en el marco.","Ábrela y suéltala: debe cerrarse sola y quedar cerrada (brazo cierrapuertas).","Si el local no tiene ni necesita puertas cortafuego (ej. un solo piso sin escalera encerrada), marca «No aplica»."],
     cumple:["Placa visible con su resistencia (ej. 60 o 90 min).","Cierra sola y ajusta en el marco."],
     noCumple:["Puerta cortafuego amarrada, con cuña o siempre abierta.","Sin placa, o cambiada por una puerta común."],
     ref:"NSR-10 Título J"},
@@ -435,27 +465,27 @@ window.DIAGRAMS = (function(){
       '<circle cx="160" cy="31" r="3" fill="'+VE+'" stroke="none"/>'+tx(160,50,"TEST",{s:10,a:"middle",w:700})+
       '<g stroke="'+AM+'" stroke-width="1.6"><path d="M116 58 L70 120 M124 58 L120 120 M196 58 L200 120 M204 58 L250 120"/></g>'+
       ln(30,130,290,130,{w:2.4})+'<path d="M80 122 H230" stroke="'+VE+'" stroke-dasharray="6 5"/><path d="M222 116 L232 122 L222 128" stroke="'+VE+'"/>'+
-      tx(236,20,"piloto verde",{s:10})+tx(236,32,"= cargando",{s:10,c:MU})+ln(163,31,232,22,{w:1})+
-      tx(30,24,"≥ 90 min",{s:13,w:700})+tx(30,38,"de autonomía",{s:10,c:MU})+tx(160,152,"Prende sola y alumbra la ruta hasta la salida",{s:10,c:MU,a:"middle"}),160),
+      tx(236,20,"piloto verde",{s:10})+tx(236,32,"= cargando",{s:10,c:MU})+'<path d="M160 27 V14 H232" stroke-width="1"/>'+
+      tx(8,24,"≥ 90 min",{s:13,w:700})+tx(8,38,"de autonomía",{s:10,c:MU})+tx(160,152,"Prende sola y alumbra la ruta hasta la salida",{s:10,c:MU,a:"middle"}),160),
     pasos:["Ubica las lámparas: deben estar en la ruta y junto a cada salida.","Mira el piloto (luz pequeña): encendido = conectada y cargando.","Presiona el botón TEST o pide que bajen el breaker: deben prender solas en segundos.","Autoensayo: la lámpara se prueba sola periódicamente y avisa con el piloto si falla (viene escrito en la etiqueta)."],
     cumple:["Prenden solas al cortar la energía y alumbran el camino hasta la salida.","Autonomía mínima de 90 minutos (dato de la etiqueta)."],
     noCumple:["No prenden, prenden débil o hay que conectarlas a mano.","Piloto apagado, batería hinchada o lámpara guardada en un cajón.","No tiene luces de emergencia (responde NO y las demás se omiten)."],
     ref:"NSR-10 Título K · NFPA 101"},
 
   mantenimiento:{titulo:"Inspección y mantenimiento",
-    svg:svg(doc(30,14,160,142,"BITÁCORA")+
-      (function(){var o="",r=["Salidas libres","Señales","Luces emerg.","Extintores"];for(var i=0;i<4;i++){var y=56+i*22;o+=tx(42,y,r[i],{s:10})+'<path d="M150 '+(y-6)+' l4 4 l7 -8" stroke="'+VE+'"/>'}return o})()+
-      ln(42,142,120,142,{w:1.2})+tx(42,152,"fecha · firma",{s:9,c:MU})+
-      tx(206,60,"Procedimiento",{s:11,w:700})+tx(206,74,"escrito + registro",{s:10})+tx(206,88,"de cada revisión",{s:10})),
+    svg:dosFichas("REGISTRO","REGISTRO",
+      [["Salidas","revisado este año"],["Señales","revisado este año"],["Luces emergencia","revisado este año"],["Responsable","con nombre y firma"]],
+      [["Salidas","hace 2 años"],["Señales","sin registro"],["Luces emergencia","sin registro"],["Responsable","nadie"]],
+      "Al día","Sin registro",28),
     pasos:["Pide el procedimiento escrito de revisión de salidas, señales e iluminación.","Pide el registro (bitácora o formatos) del último año, con fechas y firmas.","Monitoreo: pregunta si alguien vigila los sistemas todo el tiempo (vigilancia, panel o cámara)."],
     cumple:["Procedimiento escrito y registros del último año.","Responsable con nombre."],
     noCumple:["«Se revisa cuando se daña».","No hay registros o son de hace más de un año."]},
 
   plan_emergencia:{titulo:"Plan de emergencias",
-    svg:svg(doc(24,12,150,148,"PLAN DE EMERGENCIAS")+
+    svg:svg(doc(14,12,176,148,"PLAN DE EMERGENCIAS")+
       (function(){var o="",r=["Riesgos del local","Rutas y encuentro","Responsables","Teléfonos de emergencia","Simulacros"];for(var i=0;i<5;i++){var y=46+i*22;o+=rc(34,y-9,10,10,{r:1})+'<path d="M35 '+(y-4)+' l3 3 l6 -7" stroke="'+VE+'" stroke-width="1.6"/>'+tx(52,y,r[i],{s:10})}return o})()+
       persona(226,120,1.2)+persona(256,120,1.2)+persona(286,120,1.2)+tx(256,146,"socializado",{s:10,a:"middle"})+tx(256,158,"con todos",{s:10,a:"middle"}),168),
-    pasos:["Pide el documento escrito (impreso o digital).","Revisa que nombre los riesgos reales del local: incendio siempre; fugas, derrames, explosión o BLEVE si hay gas, químicos o combustibles (si no hay, N/A).","Pregunta a un empleado al azar qué haría si hay un incendio: así sabes si lo socializaron.","Simulacro: pide fecha y evidencia (fotos, lista de asistencia)."],
+    pasos:["Pide el documento escrito (impreso o digital).","Revisa que nombre los riesgos reales del local: incendio siempre; fugas, derrames, explosión o BLEVE si hay gas, químicos o combustibles (si no hay, «No aplica»).","Pregunta a un empleado al azar qué haría si hay un incendio: así sabes si lo socializaron.","Simulacro: pide fecha y evidencia (fotos, lista de asistencia)."],
     cumple:["Plan escrito, actualizado y con los riesgos reales del local.","Los empleados saben la ruta, el punto de encuentro y a quién llamar."],
     noCumple:["No existe plan (responde NO y las preguntas del plan se omiten).","Existe en papel pero nadie lo conoce."],
     ref:"Decreto 1072 de 2015 · Ley 1523 de 2012"},
@@ -470,13 +500,10 @@ window.DIAGRAMS = (function(){
     noCumple:["«Todos somos brigada» sin capacitación ni nombres.","Certificados vencidos o de un nivel menor al requerido."]},
 
   seguro:{titulo:"Póliza contra incendio",
-    svg:svg(doc(40,10,180,150,"PÓLIZA")+
-      tx(52,48,"Amparo:",{s:10,c:MU})+tx(100,48,"Incendio",{s:11,w:700})+
-      tx(52,70,"Vigencia:",{s:10,c:MU})+tx(104,70,"desde – hasta",{s:11})+
-      tx(52,92,"Riesgo:",{s:10,c:MU})+tx(98,92,"dirección del local",{s:11})+
-      tx(52,114,"Actividad:",{s:10,c:MU})+tx(108,114,"la que hace",{s:11})+
-      tx(52,136,"Aseguradora",{s:10,c:MU})+
-      '<path d="M240 48 l4 4 l7 -8 M240 70 l4 4 l7 -8 M240 92 l4 4 l7 -8 M240 114 l4 4 l7 -8" stroke="'+VE+'" stroke-width="2.2"/>'+tx(258,84,"revisa",{s:10})+tx(258,96,"los 4",{s:10}),170),
+    svg:dosFichas("PÓLIZA","PÓLIZA",
+      [["Amparo","incendio"],["Vigencia","incluye hoy"],["Dirección","la de este local"],["Actividad","la que hace hoy"]],
+      [["Amparo","solo robo"],["Vigencia","vencida"],["Dirección","otra dirección"],["Actividad","vivienda, es bodega"]],
+      "Sirve","No sirve",28),
     pasos:["Pide la póliza o su carátula (primera hoja).","Mira las fechas de vigencia: el día de hoy debe estar dentro.","Verifica que «incendio» esté en los amparos y que la dirección y la actividad sean las de este local.","Anota la aseguradora. Si no tienen póliza, responde NO: las demás preguntas del seguro se omiten."],
     cumple:["Póliza vigente con amparo de incendio.","Dirección y actividad asegurada coinciden con el local."],
     noCumple:["Póliza vencida o solo de otros riesgos (robo, responsabilidad civil).","Asegura otra dirección u otra actividad (ej. vivienda cuando es bodega)."]}
@@ -550,7 +577,7 @@ window.ACCIONES = {
   m7_cuenta:   "Dote el establecimiento con extintores adecuados al riesgo (NTC 2885 / NFPA 10).",
   m7_aprop:    "Cambie los extintores por el agente apropiado al tipo de fuego presente en el lugar.",
   m7_distrib:  "Redistribuya los extintores: el recorrido hasta el más cercano no debe superar 15 m (riesgo bajo) o 23 m según clase.",
-  m7_instal:   "Instale los extintores entre 10 cm y 1,50 m del piso, sobre soporte firme y sin obstáculos delante.",
+  m7_instal:   "Instale los extintores sobre soporte firme: la parte de arriba a 1,53 m o menos del piso (1,07 m si pesan más de 18 kg) y el fondo a 10 cm o más.",
   m7_visible:  "Deje los extintores a la vista y de fácil acceso; no los tape con mercancía, muebles ni puertas.",
   m7_senal:    "Señalice cada extintor con la placa reglamentaria visible a distancia.",
   m7_recarga:  "Recargue o haga mantenimiento a los extintores vencidos. La recarga es anual.",
@@ -580,15 +607,15 @@ window.ACCIONES = {
   m8_descext:      "Garantice que la descarga de la evacuación llegue al exterior sin pasar por zonas de riesgo.",
   m8_descaforo:    "La descarga debe tener capacidad suficiente para el aforo total del establecimiento.",
   m8_cantdesc:     "Habilite el número de descargas que exige la norma para este aforo.",
-  m8_egreso:       "Garantice al menos dos medios de egreso independientes y remotos entre sí.",
+  m8_egreso:       "Garantice una ruta continua y libre hasta la calle, sin pasar por cocinas, bodegas ni puertas con llave, con el número de salidas que exige la NSR-10 para su aforo y uso.",
   m8_egresoevac:   "Verifique que los medios de egreso permitan evacuar a todo el aforo en el tiempo seguro.",
   m8_aforo:        "Calcule y publique el aforo máximo en un aviso visible en la entrada.",
   m8_aforonsr:     "Ajuste el aforo real al que permite la NSR-10 para esta ocupación y área.",
   m8_cortafuego:   "Instale o repare los elementos cortafuego (muros, puertas, sellos) exigidos para separar áreas de riesgo.",
-  m8_movil:        "Retire o asegure el mobiliario que reduce el ancho de evacuación.",
-  m8_proced:       "Documente y divulgue el procedimiento de evacuación entre todo el personal.",
-  m8_autoensayo:   "Realice al menos un simulacro de evacuación al año y deje acta.",
-  m8_monitoreo:    "Instale detección y alarma de incendio conforme al riesgo, con monitoreo permanente.",
+  m8_movil:        "Adecúe la ruta de salida con rampa o acceso a nivel y paso libre suficiente, para que puedan evacuar personas con movilidad reducida.",
+  m8_proced:       "Escriba el procedimiento de inspección de salidas, señales e iluminación de emergencia y asigne un responsable.",
+  m8_autoensayo:   "Instale luces de emergencia con auto-ensayo.",
+  m8_monitoreo:    "Defina quién vigila de forma permanente los sistemas de evacuación, señalización e iluminación.",
 
   /* --- M9 · Preparación ante emergencias --- */
   m9_plan:     "Elabore el Plan de Emergencias y Contingencias del establecimiento (Decreto 1072/2015) y manténgalo actualizado.",
@@ -598,15 +625,15 @@ window.ACCIONES = {
   m9_briclase: "Complete la brigada con las clases que faltan (incendios, primeros auxilios, evacuación).",
   m9_bribom:   "Coordine con el Cuerpo de Bomberos la capacitación de la brigada.",
   m9_simul:    "Realice simulacros periódicos y registre los resultados.",
-  m9_s_bom:    "Registre y divulgue la línea del Cuerpo de Bomberos (119) en un lugar visible.",
-  m9_s_bri:    "Publique los nombres y contactos de la brigada en cartelera.",
-  m9_s_com:    "Defina el canal de comunicación con la comunidad vecina ante una emergencia.",
+  m9_s_bom:    "Socialice el plan de emergencias con el Cuerpo de Bomberos (línea 119).",
+  m9_s_bri:    "Socialice el plan de emergencias con la brigada.",
+  m9_s_com:    "Socialice el plan con la comunidad vecina y defina cómo avisarle ante una emergencia.",
   m9_s_emp:    "Informe y entrene a todos los empleados sobre el plan de emergencias.",
-  m9_s_soc:    "Socialice el plan de emergencias con todos los ocupantes del establecimiento.",
+  m9_s_soc:    "Socialice el plan de emergencias con los organismos de socorro.",
 
   /* --- M10 · Seguros --- */
   m10_seguro:  "Contrate una póliza de incendio que ampare el inmueble y su contenido.",
-  m10_poliza:  "Mantenga la póliza vigente y a disposición en el establecimiento.",
+  m10_poliza:  "Ajuste la póliza para que cubra la actividad real del establecimiento.",
   m10_aseg:    "Ajuste el valor asegurado al valor real del inmueble y su contenido.",
   m8_procaño:  "Realice la inspección, prueba y mantenimiento anual de salidas, señalización e iluminación de emergencia y deje el registro firmado.",
   m9_r_inc:    "Incluya el riesgo de incendio en el plan de emergencias, con su procedimiento de respuesta y responsables.",
