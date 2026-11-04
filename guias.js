@@ -7,32 +7,56 @@
 
 window.GUIAS = {
   "ocupacion":"Es el USO del local. Si no lo sabes, usa los atajos de abajo (tienda, restaurante, hotel…) y la app pone el código.",
-  "clasifRiesgo":"Qué tan peligroso es por lo que guarda y hace: Bajo (oficina, tienda pequeña), Moderado (restaurante, bodega, hotel), Alto/Especial (bar lleno, gas, químicos).",
+  "clasifRiesgo":"Qué tan peligroso es por lo que guarda y hace: Bajo (oficina, salón de clase, iglesia), Moderado (tienda, comedor, bodega, hotel), Alto (cocina industrial, taller mecánico, carpintería), Especial (gas, combustibles, químicos).",
   "m2_num":"Cuenta cuántas personas trabajan en el establecimiento.",
-  "m2_comp":"Marca la composición del personal; influye en la evacuación.",
+  "m2_comp":"Si alguien que trabaja aquí tiene dificultad para moverse, marca esa opción aunque sean solo hombres o solo mujeres.",
+  "m4_nueva":"Mira la fecha de la licencia o pregunta cuándo se construyó. Si es anterior al 15 de diciembre de 2010, cuando empezó a regir la NSR-10, marca NO.",
+  "m4_nsr":"SI si la licencia o los planos son posteriores a la NSR-10, o si se reforzó para cumplirla. Sin eso, NO.",
+  "m4_remod":"Solo lo que cambió la edificación: ampliaciones, muros, pisos o techo. Pintar no cuenta. Si nunca se ha reformado, marca «No ha tenido»: no suma ni resta.",
+  "m4_nsub":"Solo lo que queda por debajo de la calle (sótano, semisótano). Un mezanine no es subnivel.",
+  "m4_areasub":"Si hay varios subniveles, toma el más grande.",
+  "m4_ocup500":"Personas al tiempo en todo el establecimiento, no solo en un piso.",
+  "m4_ocup100":"En un local de un solo piso a nivel de la calle, la respuesta es NO.",
+  "m7_superv":"Debe haber un responsable y un registro de revisión con fecha, idealmente cada mes.",
+  "m8_descaforo":"Las salidas finales deben dar para todas las personas: personas × 5 mm en comercio y bodega (otros usos, Tabla 44). Nunca menos del ancho mínimo.",
+  "m8_egresoevac":"Tabla 41: hasta 100 personas, 1 salida; 101 a 500, 2; 501 a 1000, 3; más de 1000, 4. Una sola salida vale solo con las condiciones de la Tabla 42. Servicios (C-1): salida directa a la calle, 30 m o menos de recorrido y menos de 100 personas. Bienes (C-2): menos de 270 m² y ningún punto a más de 15 m de otro. Otros usos: mira la tabla. Revisa también la distancia hasta la salida.",
+  "m8_aforonsr":"Debe existir el cálculo: área ÷ índice de ocupación de la NSR-10. Contar sillas no es un cálculo.",
+  "m8_corrnorma":"Cumple si da para las personas que pasan por ahí: personas × 5 mm en comercio y bodega (otros usos, Tabla 44).",
+  "m8_puertanorma":"Cumple si da para las personas que pasan por ahí: personas × 5 mm en comercio y bodega (otros usos, Tabla 44).",
+  "m8_escnorma":"En comercio debe medir 1,20 m o más y dar para las personas que bajan (personas × 10 mm). En otros usos, 0,90 m solo si sirve a menos de 50 personas y no es de uso público.",
+  "m8_rampnorma":"Debe medir 1,10 m o más, con 0,90 m de paso libre, y dar para las personas que pasan por ahí.",
+  "m8_salidanorma":"Cumple si da para todas las personas que salen por ahí y mide 0,90 m o más.",
+  "m8_psalidanorma":"Cumple si da para todas las personas que salen por ahí y mide 0,90 m o más.",
+  "m8_anchosalida":"Tramo final de la ruta. Si la salida es una puerta directa a la calle, marca «No hay»: esa puerta se mide solo en la pregunta siguiente.",
+  "m8_anchopsalida":"La puerta por la que se llega al exterior. Mide el paso libre con la hoja abierta.",
+  "m8_cantdesc":"Cuenta cuántas salidas distintas terminan afuera. Dos puertas al mismo pasillo cerrado cuentan como una.",
+  "m8_cortafuego":"Marca «No aplica» si el local no las necesita, por ejemplo un solo piso sin escalera encerrada.",
+  "m8_ilumnorma":"Revisa la etiqueta: autonomía de 90 minutos o más. Al prenderse deben dejar ver el piso de toda la ruta.",
+  "m8_monitoreo":"Puede ser vigilancia, panel o cámara, o una persona responsable durante toda la jornada.",
+  "m9_briclase":"Marca la que diga el certificado.",
   "m3_cumple":"¿Arreglaron lo recomendado en la visita anterior? Si es la primera visita, marca «Primera visita»: no suma, no resta ni sale como hallazgo.",
   "m3_emerg":"¿Hubo incendio u otra emergencia en el último año?",
-  "m3_reporte":"¿Reportaron a bomberos o a la autoridad alguna emergencia o riesgo? Si no hubo nada que reportar, marca «No aplica».",
-  "m3_sistemas":"Si hubo emergencia, ¿funcionaron extintores/alarmas/salidas?",
-  "m4_tipo":"Mira de qué está hecha la estructura: concreto resiste más; madera/aglomerado, menos. Si hay más de un material (ej. paredes de cemento y techo de madera), marca 'Mixta': puntúa igual que el menos resistente de los que tenga.",
-  "m4_propv":"¿Qué tan fácil subiría el fuego entre pisos? (ductos, vacíos, escaleras sin puerta).",
+  "m3_reporte":"Pide el documento o la constancia del reporte. Si no hubo emergencias ni riesgos que reportar, marca «No aplica».",
+  "m3_sistemas":"¿Funcionaron extintores, alarmas y salidas? Si no hizo falta usarlos (ej. accidente laboral), marca «No se necesitaron»: no suma ni resta.",
+  "m4_tipo":"Mira de qué está hecha la estructura: concreto resiste más; madera y aglomerado, menos. Si combina materiales (ej. paredes de cemento y techo de madera), marca el menos resistente según este orden: Aporticado, Muros de carga, Madera, Metálica, Aglomerado.",
+  "m4_propv":"¿Qué tan fácil subiría el fuego entre pisos? (ductos, vacíos, escaleras sin puerta). Si es de un solo piso, marca Baja.",
   "m4_proph":"¿Qué tan fácil se correría el fuego en el mismo piso? (mucho material junto, sin muros).",
   "m4_suelo":"¿El uso del suelo permite esta actividad aquí? (consulta POT/planeación).",
   "m4_altura":"Número de pisos sobre el nivel de la calle.",
   "m4_areapiso":"Área aproximada de cada piso en m² (usa el flexómetro).",
-  "m5_almac":"Altura a la que apilan la mercancía. Más de 3 m dificulta apagar y evacuar.",
-  "m5_fuentes":"Marca SOLO lo que veas presente. Si no hay ninguna fuente, no marques nada (suma el punto) y la pregunta de activación se da por Bajo.",
+  "m5_almac":"Altura a la que apilan la mercancía. Más de 3 m dificulta apagar y evacuar. Si no guardan mercancía, marca 0 - 3 m.",
+  "m5_fuentes":"Marca SOLO lo que veas presente. «Eléctricas» no es tener una toma normal: márcala solo si hay instalación o equipos mal usados o sin protección cerca de material que arda. Si no hay ninguna fuente, no marques nada: la pregunta de activación se da por Bajo.",
   "m5_activ":"¿Qué tan probable es que esas fuentes enciendan algo? (cercanía a combustibles).",
-  "m5_inflam":"¿Los materiales del local arden fácil? (telas, papel, espuma = alta).",
-  "m6_deter":"Busca cables pelados, tomas quemadas, cajas sin tapa.",
-  "m6_estado":"Instalación ordenada, entubada, sin empalmes a la vista = buen estado.",
+  "m5_inflam":"Mira lo que hay dentro, no la estructura (esa ya se califica en Tipo de construcción). Baja: poco que arda, sobre todo metal, vidrio o cerámica. Media: cartón, papel, madera o ropa en cantidad normal y ordenados. Alta: líquidos o gases inflamables, espuma, icopor, o mucho material suelto.",
+  "m6_deter":"Busca cables pelados, tomas quemadas, cajas sin tapa. Aquí SI es lo malo: significa que encontraste algo dañado.",
+  "m6_estado":"Mira el conjunto, no una pieza suelta: instalación ordenada, entubada y sin empalmes a la vista = buen estado.",
   "m6_uso":"¿Usan bien la instalación o hay 'pulpos'/extensiones sobrecargadas?",
   "m6_sobre":"¿Hay breakers/tacos (protección contra sobrecarga)?",
-  "m6_retie":"¿Tienen dictamen o revisión eléctrica RETIE reciente?",
+  "m6_retie":"Pide el dictamen de inspección o la declaración de cumplimiento RETIE y mira la fecha. RETIE 2024 pide revisar cada 10 años; cada 5 en instalaciones especiales (gas, combustibles u otros ambientes peligrosos, hospitales y edificaciones esenciales). Si hubo una reforma eléctrica después, debe estar documentada.",
   "m7_requiere":"Casi todo comercio requiere extintores según NSR-10. Marca NO solo si de verdad no los requiere: el módulo de extintores no suma ni resta.",
   "m7_cuenta":"¿Hay extintores en el local? Si respondes NO, las demás preguntas de extintores se omiten y cuentan como NO.",
   "m7_aprop":"El tipo (ABC, CO₂…) debe servir para el riesgo del lugar (cocina, eléctrico…).",
-  "m7_distrib":"Deben alcanzarse caminando poco (recorrido máx. ~15 m).",
+  "m7_distrib":"Caminando hasta el extintor más cercano: 22,9 m o menos si solo hay papel, madera o tela; 15 m o menos con líquidos o gases (9 m con extintor pequeño); 9 m o menos en cocina con clase K.",
   "m7_senal":"Señal visible sobre cada extintor.",
   "m7_visible":"Nada tapándolos ni cajas encima; a la vista.",
   "m7_instal":"Colgados a la altura correcta (ver diagrama).",
@@ -42,33 +66,33 @@ window.GUIAS = {
   "m8_egreso":"¿Hay una ruta continua y libre desde cualquier punto hasta la calle? Si la única salida pasa por cocina o bodega, tiene candado o termina en un encierro, marca NO.",
   "m8_visible":"Señal de SALIDA visible (ver diagrama).",
   "m8_despej":"Rutas y salidas sin cajas, mesas ni candados (ver diagrama).",
-  "m8_ilum":"Luz que prende sola si se va la energía (ver diagrama).",
+  "m8_ilum":"Corta la energía o presiona TEST: las lámparas deben prender solas y alumbrar toda la ruta hasta la salida.",
   "m8_movil":"¿Puede salir alguien en silla de ruedas o con muletas?",
-  "m8_aforo":"Cuántas personas caben/atienden al tiempo.",
-  "m8_anchocorr":"Mide el ancho del pasillo. Ideal ≥ 1,20 m (ver diagrama).",
-  "m8_anchopuerta":"Mide el ancho libre de la puerta. Ideal ≥ 1,20 m.",
+  "m8_aforo":"Usa el aforo calculado. Si no lo tienen, estima el número máximo de personas al tiempo (hora pico).",
+  "m8_anchocorr":"Mide el pasillo en su punto más angosto. Si no hay corredor, marca «No aplica». Menos de 0,90 m sale como hallazgo.",
+  "m8_anchopuerta":"Solo puertas dentro de la ruta. Si la única puerta es la que da a la calle, marca «No aplica» y mídela más abajo, en la puerta de salida.",
   "m8_luces":"¿Hay lámparas de emergencia instaladas?",
   "m8_descext":"La gente debe terminar saliendo a la calle o a un sitio seguro.",
   "m8_escext":"Si es de un solo piso y no las necesita, marca «No aplica».",
-  "m9_aplica":"Locales grandes o de alto riesgo deben tener plan. Pequeños pueden no aplicar.",
+  "m9_aplica":"Criterio CBVI: el Decreto 1072 obliga a todo empleador a tener plan. Marca que no aplica solo si lo atiende el mismo dueño, sin empleados, y el riesgo es bajo. Si dudas, sí aplica.",
   "m9_plan":"Documento con qué hacer en emergencia, rutas y responsables.",
-  "m9_simul":"¿Han hecho un simulacro de evacuación en el último año?",
+  "m9_simul":"Pide fecha y evidencia (fotos, lista de asistencia). El Decreto 1072 pide mínimo uno al año.",
   "m9_brigada":"¿Hay personas capacitadas para primera respuesta?",
   "m10_seguro":"¿Tienen póliza de incendio vigente? Si respondes NO, la cobertura y la aseguradora se omiten."
 };
 
 /* Atajos: el inspector elige el tipo de negocio y la app pone ocupación + riesgo */
 window.OCUP_QUICK = [
-  {label:"Tienda / minimercado", ocup:"C-1", riesgo:"Bajo"},
-  {label:"Restaurante / comidas", ocup:"C-1", riesgo:"Moderado"},
-  {label:"Droguería", ocup:"C-1", riesgo:"Bajo"},
+  {label:"Tienda / minimercado", ocup:"C-2", riesgo:"Moderado"},
+  {label:"Restaurante / comidas", ocup:"L-3", riesgo:"Moderado"},
+  {label:"Droguería", ocup:"C-2", riesgo:"Moderado"},
   {label:"Oficina / servicios", ocup:"C-1", riesgo:"Bajo"},
-  {label:"Bodega / depósito", ocup:"A-2", riesgo:"Moderado"},
-  {label:"Ferretería", ocup:"A-2", riesgo:"Moderado"},
-  {label:"Taller", ocup:"A-2", riesgo:"Moderado"},
+  {label:"Bodega / depósito", ocup:"A-1", riesgo:"Moderado"},
+  {label:"Ferretería", ocup:"C-2", riesgo:"Moderado"},
+  {label:"Taller mecánico", ocup:"A-1", riesgo:"Alto"},
   {label:"Hotel / hospedaje", ocup:"R-3", riesgo:"Moderado"},
-  {label:"Colegio / jardín", ocup:"I-3", riesgo:"Moderado"},
-  {label:"Iglesia", ocup:"L-4", riesgo:"Moderado"},
+  {label:"Colegio / jardín", ocup:"I-3", riesgo:"Bajo"},
+  {label:"Iglesia", ocup:"L-4", riesgo:"Bajo"},
   {label:"Bar / discoteca", ocup:"L-3", riesgo:"Alto"},
   {label:"Gas / combustibles", ocup:"P", riesgo:"Especial"}
 ];
@@ -172,7 +196,7 @@ window.DIAGRAMS = (function(){
     svg:svg(ficha(4,"LICENCIA",[["Dirección","la de este local"],["Obra","la que se ve hoy"]],true,32)+
       ficha(168,"USO DEL SUELO",[["Dirección","la de este local"],["Actividad","la que hace hoy"]],true,32)+
       tx(160,114,"Compara cada dato con lo que ves en el local",{s:11,c:MU,a:"middle"}),122),
-    pasos:["Pregunta por la licencia de construcción o de la última reforma; pide verla.","Pide el concepto de uso del suelo (Planeación) o revisa que la actividad esté permitida en esa dirección.","Nueva: construida hace pocos años. Remodelada: tuvo ampliaciones o cambios de muros, pisos o techo."],
+    pasos:["Pregunta por la licencia de construcción o de la última reforma; pide verla.","Pide el concepto de uso del suelo (Planeación) o revisa que la actividad esté permitida en esa dirección.","Nueva: construida con la NSR-10 ya vigente (desde diciembre de 2010). Remodelada: tuvo ampliaciones o cambios de muros, pisos o techo."],
     cumple:["Muestran el documento y corresponde a esta dirección.","La actividad que se hace hoy es la que aparece en el uso del suelo."],
     noCumple:["No existe documento o es de otra dirección.","El local cambió de actividad (ej. de vivienda a bodega) sin trámite."],
     ref:"Decreto 1077 de 2015 · POT municipal"},
@@ -186,7 +210,7 @@ window.DIAGRAMS = (function(){
       /* aglomerado */ '<g stroke="'+RO+'">'+rc(258,24,56,70)+'</g><g fill="'+RO+'" stroke="none"><circle cx="270" cy="38" r="2"/><circle cx="292" cy="50" r="2"/><circle cx="280" cy="66" r="2"/><circle cx="300" cy="80" r="2"/><circle cx="268" cy="84" r="2"/><circle cx="302" cy="34" r="2"/></g>'+tx(286,112,"Aglomerado",{s:9,a:"middle"})+
       '<path d="M14 136 H306" stroke="'+MU+'" stroke-width="1.4"/><path d="M300 131 L306 136 L300 141" stroke="'+MU+'" stroke-width="1.4"/>'+
       tx(14,154,"resiste más el fuego",{s:10,c:VE})+tx(306,154,"resiste menos",{s:10,c:RO,a:"end"})),
-    pasos:["Mira las columnas y vigas: si son de concreto armado formando una retícula, es Aporticado.","Si no hay columnas y las paredes de ladrillo o bloque sostienen el techo, es Muros de carga.","Revisa también techo y entrepiso. Si combina materiales (ej. paredes de cemento y techo de madera), marca «Mixta»: puntúa como el más débil."],
+    pasos:["Mira las columnas y vigas: si son de concreto armado formando una retícula, es Aporticado.","Si no hay columnas y las paredes de ladrillo o bloque sostienen el techo, es Muros de carga.","Revisa también techo y entrepiso. Si combina materiales (ej. paredes de cemento y techo de madera), marca el menos resistente."],
     okT:"Resiste más", noT:"Resiste menos",
     cumple:["Concreto (aporticado) o ladrillo/bloque en toda la estructura.","Techo y entrepiso no combustibles."],
     noCumple:["Madera, aglomerado o láminas sin protección en paredes, entrepiso o techo.","Estructura metálica sin pintura ni recubrimiento contra fuego."]},
@@ -258,7 +282,7 @@ window.DIAGRAMS = (function(){
       '<g fill="'+RO+'" stroke="none"><circle cx="234" cy="71" r="1.6"/><circle cx="246" cy="71" r="1.6"/><circle cx="258" cy="71" r="1.6"/></g>'+
       '<g transform="translate(280,50) scale(0.3)"><path d="M40 64 C26 52 36 40 40 26 C48 38 58 44 50 60 C48 66 43 67 40 64 Z" fill="'+EX+'" stroke="'+EX+'"/></g>'+ln(216,84,312,84,{w:2.4})+
       tx(264,106,"Alta",{s:13,c:RO,w:700,a:"middle"})+tx(264,122,"espuma, colchón,",{s:10,a:"middle",w:500})+tx(264,135,"tela, plástico,",{s:10,a:"middle",w:500})+tx(264,148,"pintura, alcohol",{s:10,a:"middle",w:500}),156),
-    pasos:["Mira qué material abunda: el de la mercancía, los muebles, el cielo raso y las divisiones.","Fíjate en la cantidad: poco cartón ordenado no es lo mismo que una bodega llena.","Busca líquidos inflamables: pinturas, solventes, alcohol, combustibles."],
+    pasos:["Mira qué material abunda: el de la mercancía, los muebles, el cielo raso y las divisiones. La estructura no cuenta aquí: ya se califica en Tipo de construcción.","Fíjate en la cantidad: poco cartón ordenado no es lo mismo que una bodega llena.","Busca líquidos inflamables: pinturas, solventes, alcohol, combustibles."],
     okT:"Baja si", noT:"Alta si",
     cumple:["Predominan metal, vidrio, cerámica o concreto.","Poca mercancía combustible y bien ordenada."],
     noCumple:["Espuma, colchones, telas sintéticas, plásticos o icopor en cantidad.","Pinturas, solventes, alcohol o combustibles almacenados."]},
@@ -305,7 +329,7 @@ window.DIAGRAMS = (function(){
       [["Dirección","otra dirección"],["Fecha","antes de ampliar"],["Firma","sin matrícula"]],
       "Sirve","No sirve",32),
     pasos:["Pide el dictamen de inspección RETIE o la declaración de cumplimiento del electricista que hizo la instalación.","Revisa que diga la dirección de este local y tenga fecha y firma con matrícula profesional.","Si no hay documento, pregunta cuándo vino por última vez un electricista matriculado y qué hizo."],
-    cumple:["Documento de este local, firmado por profesional con matrícula.","Revisión reciente o posterior a la última reforma eléctrica."],
+    cumple:["Documento de este local, firmado por profesional con matrícula.","Revisión de los últimos 10 años (5 si es instalación especial) y posterior a la última reforma eléctrica."],
     noCumple:["No hay ningún documento ni revisión.","El documento es de otra dirección o de antes de ampliar el local."]},
 
   extintor_tipo:{titulo:"Extintor según lo que puede arder",
@@ -326,7 +350,7 @@ window.DIAGRAMS = (function(){
       '<path d="M178 104 C150 92 110 92 34 80" stroke="'+AZ+'" stroke-dasharray="6 5"/>'+tx(88,70,"≤ 15 m caminando",{s:12,c:AZ,w:700,a:"middle"})+
       ln(14,138,306,138,{w:2.4})+tx(160,160,"Desde cualquier punto, el extintor más cercano",{s:10,c:MU,a:"middle"}),168),
     pasos:["Párate en el punto más alejado del local.","Camina hasta el extintor más cercano contando pasos (1 paso ≈ 0,75 m; 15 m ≈ 20 pasos).","Repite en cocina, bodega y junto al tablero eléctrico."],
-    cumple:["Desde cualquier punto hay un extintor a 15 m o menos caminando (en zonas solo de papel, madera o tela la norma permite hasta 22,9 m).","Hay uno cerca de cada zona de riesgo: cocina, tablero, bodega."],
+    cumple:["Desde cualquier punto hay un extintor a 15 m o menos caminando (22,9 m en zonas solo de papel, madera o tela; 9 m en cocinas con clase K).","Hay uno cerca de cada zona de riesgo: cocina, tablero, bodega."],
     noCumple:["Todos los extintores están juntos en un solo sitio.","Para llegar hay que atravesar una puerta con llave o una bodega."],
     ref:"NTC 2885 / NFPA 10"},
 
@@ -434,8 +458,8 @@ window.DIAGRAMS = (function(){
       cotaColor(208,160,272,160,RO)+tx(236,152,"así no",{s:11,c:RO,w:700,a:"middle"})+tx(260,190,"hoja",{s:10,c:MU})+
       si(8,212,"Paso real")+no(170,212,"Pared a pared"),220),
     pasos:["Mide con flexómetro el paso LIBRE: en puertas, del marco a la hoja abierta; no de pared a pared.","En pasillos, mide el punto más angosto (estantes, exhibidores, mostrador).","En escaleras y rampas mide entre pasamanos. Si el local no tiene corredor, escaleras o rampas, marca «No aplica»: no suma ni resta y la pregunta de norma desaparece."],
-    cumple:["1,20 m o más de paso libre: puntaje completo.","Entre 0,80 y 1,20 m en corredores y puertas, o entre 0,90 y 1,20 m en escaleras, rampas y salidas: aceptable para locales pequeños, puntaje parcial."],
-    noCumple:["Menos de ese mínimo (0,80 o 0,90 m) en cualquier punto de la ruta.","Exhibidores, mesas o mercancía que angostan el paso."],
+    cumple:["1,20 m o más de paso libre: puntaje completo.","Entre 0,80 y 1,20 m en puertas, o entre 0,90 y 1,20 m en corredores, escaleras, rampas y salidas: puntaje parcial. La pregunta siguiente dice si cumple la norma para ese uso y aforo."],
+    noCumple:["Menos de 0,80 m en puertas o de 0,90 m en corredores, escaleras, rampas y salidas, en cualquier punto de la ruta.","Exhibidores, mesas o mercancía que angostan el paso."],
     ref:"NSR-10 Título K"},
 
   descarga:{titulo:"Hacia dónde descarga la salida",
@@ -510,6 +534,13 @@ window.DIAGRAMS = (function(){
   };
 })();
 
+/* Letra de los dibujos en celular (v1.21): cuánto puede crecer cada dibujo sin que el
+   texto choque con otro texto, se salga del lienzo o de su recuadro. Medido con 4 % de
+   margen por si la fuente del teléfono es más ancha y revisado a ojo. La mayor parte
+   de la ganancia viene de que el dibujo usa todo el ancho de la tarjeta (index.html). */
+window.DIAGRAM_FS = {"antecedentes":1.05,"licencias":1.08,"estructura":1.2,"propagacion":1.15,"edificacion":1.08,"almacenamiento":1.04,"fuentes":1.08,"activacion":1.12,"inflamabilidad":1.15,"electrico":1.15,"electrico_uso":1.02,"electrico_proteccion":1.08,"retie":1.08,"extintor_tipo":1.06,"extintor_distrib":1.03,"extintor_visible":1.15,"extintor_altura":1.08,"extintor_recarga":1.05,"extintor_fisico":1.02,"extintor_control":1.04,"senalizacion":1.13,"evacuacion":1.04,"movilidad":1.06,"aforo":1.02,"salida_ancho":1.06,"descarga":1.14,"puerta_cortafuego":1.15,"ilum_emergencia":1.15,"mantenimiento":1.08,"plan_emergencia":1.06,"brigada":1.08,"seguro":1.04};
+Object.keys(window.DIAGRAM_FS).forEach(function(k){ if(window.DIAGRAMS[k]) window.DIAGRAMS[k].fs = window.DIAGRAM_FS[k]; });
+
 window.EJEMPLOS = {
   "m2_num":"Pregunta: «¿Cuántas personas trabajan aquí normalmente?»",
   "m3_cumple":"Ej.: «En la visita pasada se pidió señalizar la salida; hoy verifico si ya la hicieron.» Pide el informe anterior.",
@@ -562,12 +593,12 @@ window.ACCIONES = {
 
   /* --- M5 · Carga de fuego y fuentes de ignición --- */
   m5_fuentes:  "Controle las fuentes de ignición detectadas: aléjelas de los materiales combustibles y manténgalas señalizadas.",
-  m5_inflam:   "Almacene los líquidos inflamables en recipientes cerrados y rotulados, en zona ventilada y lejos de fuentes de calor.",
+  m5_inflam:   "Reduzca y ordene el material que arde fácil. Guarde los líquidos inflamables en recipientes cerrados y rotulados, en zona ventilada y lejos de fuentes de calor.",
   m5_almac:    "Ordene el almacenamiento: separe pasillos, no obstruya salidas y mantenga 60 cm libres bajo el techo.",
   m5_activ:    "Delimite y señalice las áreas donde se realiza la actividad de riesgo.",
 
   /* --- M6 · Instalaciones eléctricas --- */
-  m6_retie:    "Obtenga el certificado RETIE del electricista o ingeniero que ejecutó la instalación.",
+  m6_retie:    "Obtenga el dictamen de inspección o la declaración de cumplimiento RETIE, con menos de 10 años (5 si es instalación especial), firmado por un profesional matriculado.",
   m6_estado:   "Contrate a un electricista certificado para corregir la instalación: tablero cerrado y rotulado, sin cables expuestos ni empalmes improvisados.",
   m6_deter:    "Reemplace el cableado, tomas e interruptores deteriorados. El material envejecido es causa frecuente de incendio.",
   m6_sobre:    "Elimine la sobrecarga: no conecte varios equipos en una sola toma ni use extensiones como instalación permanente.",
@@ -576,7 +607,7 @@ window.ACCIONES = {
   /* --- M7 · Extintores --- */
   m7_cuenta:   "Dote el establecimiento con extintores adecuados al riesgo (NTC 2885 / NFPA 10).",
   m7_aprop:    "Cambie los extintores por el agente apropiado al tipo de fuego presente en el lugar.",
-  m7_distrib:  "Redistribuya los extintores: el recorrido hasta el más cercano no debe superar 15 m (riesgo bajo) o 23 m según clase.",
+  m7_distrib:  "Redistribuya los extintores: el recorrido hasta el más cercano no debe superar 22,9 m en zonas de papel, madera o tela; 15 m con líquidos o gases, y 9 m en cocinas con clase K.",
   m7_instal:   "Instale los extintores sobre soporte firme: la parte de arriba a 1,53 m o menos del piso (1,07 m si pesan más de 18 kg) y el fondo a 10 cm o más.",
   m7_visible:  "Deje los extintores a la vista y de fácil acceso; no los tape con mercancía, muebles ni puertas.",
   m7_senal:    "Señalice cada extintor con la placa reglamentaria visible a distancia.",
@@ -586,32 +617,32 @@ window.ACCIONES = {
 
   /* --- M8 · Evacuación y seguridad humana --- */
   m8_salidanorma:  "Adecue las salidas de emergencia al ancho y número exigidos por la NSR-10 Título J y K según el aforo.",
-  m8_anchosalida:  "Amplíe el ancho libre de la salida; no debe reducirse con muebles, cajas ni puertas que invadan el paso.",
+  m8_anchosalida:  "Amplíe el último tramo de la salida a 0,90 m o más de paso libre; no debe reducirse con muebles, cajas ni puertas que invadan el paso.",
   m8_puertanorma:  "Las puertas de evacuación deben abrir en el sentido de la salida y sin llave ni candado durante la jornada.",
-  m8_anchopuerta:  "Amplíe el ancho libre de la puerta de evacuación.",
-  m8_cierre:       "Instale cierrapuertas y herrajes antipánico donde la norma los exija.",
+  m8_anchopuerta:  "Amplíe la puerta de la ruta de evacuación a 0,80 m o más de paso libre.",
+  m8_cierre:       "Instale cierrapuertas en las puertas cortafuego para que cierren solas.",
   m8_despej:       "Mantenga permanentemente despejadas las rutas de evacuación. Retire todo lo que obstruya el paso.",
   m8_visible:      "Señalice las rutas de evacuación y salidas con señales fotoluminiscentes visibles desde cualquier punto.",
   m8_ilum:         "Instale iluminación de emergencia con batería de respaldo en rutas y salidas.",
   m8_ilumnorma:    "Ajuste la iluminación de emergencia: autonomía mínima de 90 minutos y nivel suficiente en el piso.",
   m8_luces:        "Reponga o repare las luces de emergencia que no encienden al cortar la energía.",
   m8_corrnorma:    "Adecue el ancho y la altura libre de los corredores de evacuación.",
-  m8_anchocorr:    "Despeje y amplíe el corredor: debe permitir el paso del aforo sin estrechamientos.",
+  m8_anchocorr:    "Despeje y amplíe el corredor a 0,90 m o más: debe permitir el paso del aforo sin estrechamientos.",
   m8_escnorma:     "Adecue las escaleras: huella, contrahuella, pasamanos a ambos lados y superficie antideslizante.",
-  m8_anchoesc:     "Amplíe el ancho libre de la escalera de evacuación.",
+  m8_anchoesc:     "Amplíe la escalera de evacuación a 0,90 m o más de paso libre.",
   m8_escext:       "Habilite o repare la escalera exterior de emergencia.",
   m8_rampnorma:    "Adecue la rampa: pendiente máxima, pasamanos y piso antideslizante.",
-  m8_anchoramp:    "Amplíe el ancho libre de la rampa.",
+  m8_anchoramp:    "Amplíe la rampa a 0,90 m o más de paso libre.",
   m8_psalidanorma: "Adecue el punto de salida: debe desembocar en zona segura a nivel de la vía pública.",
-  m8_anchopsalida: "Amplíe el ancho del punto de salida.",
+  m8_anchopsalida: "Amplíe la puerta de salida al exterior: debe medir 0,90 m o más de paso libre.",
   m8_descext:      "Garantice que la descarga de la evacuación llegue al exterior sin pasar por zonas de riesgo.",
   m8_descaforo:    "La descarga debe tener capacidad suficiente para el aforo total del establecimiento.",
   m8_cantdesc:     "Habilite el número de descargas que exige la norma para este aforo.",
   m8_egreso:       "Garantice una ruta continua y libre hasta la calle, sin pasar por cocinas, bodegas ni puertas con llave, con el número de salidas que exige la NSR-10 para su aforo y uso.",
-  m8_egresoevac:   "Verifique que los medios de egreso permitan evacuar a todo el aforo en el tiempo seguro.",
+  m8_egresoevac:   "Ajuste el número de salidas y la distancia de recorrido a lo que exige la NSR-10 para este aforo.",
   m8_aforo:        "Calcule y publique el aforo máximo en un aviso visible en la entrada.",
   m8_aforonsr:     "Ajuste el aforo real al que permite la NSR-10 para esta ocupación y área.",
-  m8_cortafuego:   "Instale o repare los elementos cortafuego (muros, puertas, sellos) exigidos para separar áreas de riesgo.",
+  m8_cortafuego:   "Instale puertas cortafuego certificadas, con su cierre automático, donde la norma las exija para separar áreas de riesgo.",
   m8_movil:        "Adecúe la ruta de salida con rampa o acceso a nivel y paso libre suficiente, para que puedan evacuar personas con movilidad reducida.",
   m8_proced:       "Escriba el procedimiento de inspección de salidas, señales e iluminación de emergencia y asigne un responsable.",
   m8_autoensayo:   "Instale luces de emergencia con auto-ensayo.",

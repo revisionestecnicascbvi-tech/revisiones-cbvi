@@ -1,15 +1,15 @@
-/* sw.js — CBVI Revisiones Técnicas · caché v1-20
+/* sw.js — CBVI Revisiones Técnicas · caché v1-21
    ESTRATEGIA: network-first para los archivos propios (siempre la versión más
    nueva cuando hay señal) y caché como respaldo cuando no hay red — Inírida
    tiene cobertura parcial y zonas rurales sin señal por días.
    index.html solo se usa como respaldo en NAVEGACIONES (req.mode==='navigate'),
    nunca para JS/CSS: devolver HTML donde se espera un script rompe la app.
    REGLA: subir la versión del CACHE en cada cambio del front (v1-0, v1-1, …). */
-var CACHE = "cbvi-revisiones-v1-20";
+var CACHE = "cbvi-revisiones-v1-21";
 var ASSETS = [
   "./", "./index.html", "./verificar.html", "./landing.html", "./manifest.json",
-  "./form-inspeccion.js?v=1.20", "./guias.js?v=1.20", "./logos.js?v=1.20",
-  "./form-inspeccion.js", "./guias.js", "./logos.js",
+  "./form-inspeccion.js?v=1.21", "./guias.js?v=1.21", "./logos.js?v=1.21", "./fuentes-pdf.js?v=1.21",
+  "./form-inspeccion.js", "./guias.js", "./logos.js", "./fuentes-pdf.js",
   "./icon192.png", "./icon512.png", "./iconmaskable192.png", "./iconmaskable512.png"
 ];
 
@@ -83,7 +83,7 @@ self.addEventListener("fetch", function (e) {
     }).catch(function () {
       return caches.match(req).then(function (hit) {
         if (hit) return hit;
-        if (req.mode === "navigate") return caches.match("./index.html");
+        if (req.mode === "navigate") return caches.match(url.pathname.indexOf("verificar.html") > -1 ? "./verificar.html" : "./index.html");
         return new Response("", { status: 504, statusText: "Sin conexión" });
       });
     })

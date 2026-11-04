@@ -401,15 +401,22 @@
   /* Certificado */
   .cert{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
   /* marco de doble línea tipo documento de seguridad + filete rojo de marca bajo la cabecera */
-  .cert{box-shadow:inset 0 0 0 5px var(--surface),inset 0 0 0 6px var(--line-strong)}
-  .cert .top{background:var(--rail);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--ember)}
+  .cert{position:relative;border:1.2px solid var(--ink);border-radius:0;box-shadow:inset 0 0 0 7px var(--surface),inset 0 0 0 7.6px var(--ink)}
+  .cert .certagua{position:absolute;left:50%;top:44%;width:min(420px,86%);transform:translate(-50%,-50%);opacity:.05;pointer-events:none}
+  .cert .top{position:relative;color:var(--ink);padding:20px 20px 13px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--ink);margin:0 8px}
+  .cert .top:after{content:"";position:absolute;left:0;right:0;bottom:-5px;border-top:2.5px solid var(--ember)}
+  .cert .verdict{position:relative;overflow:hidden;background:var(--surface);border-radius:0}
+  .cert .verdict .ondas{position:absolute;inset:0;width:100%;height:100%;color:inherit;pointer-events:none}
+  .cert .verdict>div{position:relative}
+  .cert .bd{position:relative}
   .cert .kv .v.mono,.cert .mono{font-family:var(--ff-m)}
   .cert .top h3{font-size:18px}
-  .cert .top small{font-size:10px;letter-spacing:2px;color:var(--rail-faint);display:block}
+  .cert .top small{font-size:12px;font-weight:600;color:var(--muted);display:block}
   .cert .bd{padding:20px}
   .verdict{border-radius:var(--r-md);padding:16px;margin-bottom:16px;display:flex;gap:16px;align-items:center;border:1.5px solid}
   .verdict.fav{background:var(--verde-bg);border-color:var(--verde);color:var(--verde)}
   .verdict.no{background:var(--rojo-bg);border-color:var(--rojo);color:var(--rojo)}
+  .verdict.warn{background:var(--ambar-bg);border-color:var(--ambar);color:var(--ambar)}
   .verdict .big{font-family:var(--ff-h);font-size:30px;line-height:.9}
   .verdict p{margin:4px 0 0;color:var(--ink);font-size:13px}
   .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px}
@@ -454,15 +461,17 @@
   .stepchip.done{border-color:var(--verde);color:var(--verde)}
   .stepchip.on.done{background:var(--verde);border-color:var(--verde);color:#fff}
   .guia{font-size:12.5px;color:var(--muted);margin:-2px 0 9px;line-height:1.4}
-  .guidebtn{border:1px solid var(--line);background:var(--surface-2);color:var(--azul);border-radius:var(--r-sm);min-height:36px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;margin-bottom:4px}
-  .ejbtn{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:var(--r-sm);min-height:36px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 0 4px 6px}
+  .modintro{margin:12px 16px 2px;padding-left:10px;border-left:2px solid var(--line-strong);font-size:14px}
+  .guidebtn{border:1px solid var(--line);background:var(--surface-2);color:var(--azul);border-radius:var(--r-sm);min-height:48px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;margin-bottom:4px}
+  .ejbtn{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:var(--r-sm);min-height:48px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center;margin:0 0 4px 6px}
   .ejbox{font-size:13px;color:var(--ink);background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r-sm);padding:10px 12px;margin:4px 0 10px;line-height:1.45}
   /* Guía visual v1.19: hoja de campo — dibujo arriba, pasos numerados (son
      una secuencia real) y dos columnas de criterio con icono + palabra. */
   .guidebox{margin:6px 0 12px;border:1px solid var(--line);border-top:2px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface-2);padding:14px;display:grid;gap:12px;min-width:0}
   .guidebox .gt{font-family:var(--ff-h);font-weight:600;font-size:1.0625rem;line-height:1.2;color:var(--ink)}
   .guidebox .dg{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:4px;color:var(--ink);max-width:440px;width:100%}
-  @media (max-width:520px){.guidebox{padding:8px}}
+  @media (max-width:520px){.guidebox{margin-left:-16px;margin-right:-16px;padding:12px 16px;border-left:0;border-right:0;border-radius:0}
+    .guidebox .dg{margin:0 -16px;width:calc(100% + 32px);max-width:none;padding:4px 0;border-left:0;border-right:0;border-radius:0}}
   .guidebox .dg svg{display:block;width:100%;height:auto}
   .guidebox .gpasos b,.guidebox .gcrit b{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px}
   .guidebox ol{margin:0;padding-left:20px;font-size:14px;line-height:1.45;color:var(--ink-2,var(--ink));display:grid;gap:5px}
@@ -517,7 +526,7 @@
   .halls{display:grid;gap:12px;margin:4px 0 6px}
   .hall{display:flex;gap:12px;border:1px solid var(--line);border-left:3px solid var(--rojo);
     border-radius:var(--r-sm);background:var(--surface-2);padding:13px 14px}
-  .hall .hn{flex:0 0 26px;height:26px;border-radius:50%;background:var(--rojo);color:#fff;
+  .hall .hn{flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--rojo);color:#fff;
     display:grid;place-items:center;font-family:var(--ff-h);font-weight:700;font-size:13px}
   .hall .hc{flex:1;min-width:0}
   .hall .hc > b{font-size:14.5px;font-family:var(--ff-h);display:block;line-height:1.35}
@@ -638,9 +647,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.20"></script>
-<script src="form-inspeccion.js?v=1.20"></script>
-<script src="guias.js?v=1.20"></script>
+<script src="logos.js?v=1.21"></script>
+<script src="form-inspeccion.js?v=1.21"></script>
+<script src="guias.js?v=1.21"></script>
 <script>
 (function(){
 "use strict";
@@ -652,8 +661,11 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.20";
+var APP_VERSION="1.21";
 var APP_VERSION_NOTAS=[
+  "v1.21: Certificado rediseñado para imprimir: membrete, escudo de agua, tramas de línea fina, microtexto en el marco y sello con el distintivo. La página que abre el QR tiene la misma identidad, con una hora que avanza en vivo. Para ver los datos de un certificado ahora se necesita también su distintivo.",
+  "v1.21: Formulario más claro. Se aclararon preguntas ambiguas y rangos sin salida (empleados, subniveles, áreas, anchos), con el criterio de cada una. Inflamabilidad ahora mira lo que hay dentro del local, no la estructura. Ya se puede registrar un ancho menor al mínimo y sale como hallazgo. Si combina materiales, se marca el menos resistente. Si los equipos no se necesitaron en una emergencia, no suma ni resta.",
+  "v1.21: Sin brigada certificada o sin puerta cortafuego ya no se preguntan sus detalles. Los atajos de tipo de negocio ponen la ocupación que dice el manual (tienda y droguería C-2, restaurante L-3). Verificar dentro de la app consulta al servidor si el certificado no está en la tablet: ya no dice \"posible falsificación\" por eso. En celular, la letra de los dibujos es algo más grande.",
   "v1.20: Guías \"¿Cómo lo reviso?\" más claras. En los documentos (póliza, RETIE, licencias, registros y visita anterior) ahora se ve qué leer y cómo se ve uno que sirve y uno que no. También se rehicieron los dibujos de anchos de salida, rampa, descarga, inflamabilidad, activación y aforo, y se corrigieron textos que se montaban.",
   "v1.20: Botón \"No aplica\" donde la cosa puede no existir sin ser falta (corredores, escaleras, rampas, puertas cortafuego, escaleras exteriores, riesgos del plan, reporte a la autoridad): no suma ni resta. Si el local no requiere extintores, ese módulo tampoco suma ni resta. Hay criterio claro para decir que el Módulo 8 no aplica por aforo.",
   "v1.20: En el certificado se corrigieron recomendaciones que no correspondían a la pregunta (egreso, auto-ensayo, movilidad, procedimiento, monitoreo, socialización del plan, póliza, altura de extintores). Corregido el lector de QR por cámara en equipos sin lector nativo.",
@@ -732,11 +744,15 @@ function applyDeps(root){if(!root||!FORM)return;
     w.hidden=depEstado(FORM,ITEM_BY_ID[w.dataset.it])!=="ver"});
   Array.prototype.slice.call(root.querySelectorAll('[data-gate]')).forEach(function(w){
     var nt=w.querySelector(".depnote");if(!nt)return;
-    var cero=0,fuera=0,max=0;(DEPS_DE[w.dataset.it]||[]).forEach(function(it){
-      /* Solo cuenta lo que ESTA madre oculta (m9_s_bri depende de plan y brigada). */
-      var dm=depsOf(it).filter(function(d){return d.item===w.dataset.it})[0], av=FORM.ans[w.dataset.it];
-      if(dm&&!dm.fuentes&&av!=null&&(dm.not?(av!==dm.value):(av===dm.value)))return;
-      var st=depEstado(FORM,it);if(st==="cero")cero++;else if(st==="max")max++;else if(st==="fuera"&&(it.dependsOn&&FORM.ans[depsOf(it)[0].item]!=null))fuera++});
+    var cero=0,fuera=0,max=0,visto={};(DEPS_DE[w.dataset.it]||[]).forEach(function(it){
+      /* Solo cuenta lo que ESTA madre oculta (m9_s_bri depende de plan y brigada;
+         un ancho tiene dos condiciones sobre la misma madre). */
+      var dms=depsOf(it).filter(function(d){return d.item===w.dataset.it}), av=FORM.ans[w.dataset.it];
+      if(dms.length&&av!=null&&dms.every(function(d){return !d.fuentes&&(d.not?(av!==d.value):(av===d.value))}))return;
+      var st=depEstado(FORM,it);if(st==="cero"){if(!visto[it.id]){visto[it.id]=1;cero++}
+        /* Cadenas: sin brigada tampoco se pregunta lo que dependía de su certificación. */
+        (DEPS_DE[it.id]||[]).forEach(function(h){if(!visto[h.id]&&depEstado(FORM,h)==="cero"){visto[h.id]=1;cero++}})}
+      else if(st==="max")max++;else if(st==="fuera"&&!visto[it.id]&&(it.dependsOn&&FORM.ans[depsOf(it)[0].item]!=null)){visto[it.id]=1;fuera++}});
     var t=cero?(cero>1?("Se omiten "+cero+" preguntas que dependen de esta: cuentan como NO y el hallazgo queda solo aquí.")
                       :"Se omite 1 pregunta que depende de esta: cuenta como NO y el hallazgo queda solo aquí.")
          :max?"Sin fuentes marcadas: el riesgo de activación cuenta como Bajo y no se pregunta."
@@ -1137,12 +1153,23 @@ function conM7Emitido(f,calc){
   var i=0;while(i<calc.length&&parseInt(String(calc[i].id).slice(1),10)<7)i++;
   calc.splice.apply(calc,[i,0].concat(extra));
   return calc}
+/* Antes de v1.21 la pregunta de cierre no dependía de la puerta cortafuego. Un
+   concepto emitido con ese hallazgo lo conserva, con la pregunta como se hizo. */
+function conCierreEmitido(f,calc){
+  var guardado=(f.recs||[]).some(function(h){return h&&h.id==="m8_cierre"});
+  if(!guardado||f.ans.m8_cierre!=="NO"||f.ans.m8_cortafuego==="SI"||calc.some(function(h){return h.id==="m8_cierre"}))return calc;
+  var m=MOD.filter(function(x){return x.id==="m8"})[0];if(!m)return calc;
+  var it=m.items.filter(function(x){return x.id==="m8_cierre"})[0];if(!it)return calc;
+  var h=mkHallazgo(f,m,it,"NO","Las puertas cuentan con mecanismos de cierre.");
+  var i=calc.length;while(i>0&&parseInt(String(calc[i-1].id).slice(1),10)>8)i--;
+  calc.splice(i,0,h);
+  return calc}
 function hallazgosDe(f){
   if(!f)return [];
   var tieneRespuestas=f.ans&&Object.keys(f.ans).length>0;
-  if(tieneRespuestas){var calc=compute(f).recs;return f.concepto?conM7Emitido(f,calc):calc}
+  if(tieneRespuestas){var calc=compute(f).recs;return f.concepto?conCierreEmitido(f,conM7Emitido(f,calc)):calc}
   var ACC=window.ACCIONES||{}, ACM=window.ACCION_MODULO||{};
-  return (f.recs||[]).filter(function(h){return h&&!CONTEXTO.has(h.id)}).map(function(h){
+  return (f.recs||[]).filter(function(h){return h&&(!CONTEXTO.has(h.id)||/^Menos de /.test(String(h.r||"")))}).map(function(h){
     var c=Object.assign({},h);
     if(!c.accion)c.accion=ACC[c.id]||ACM[String(c.id||"").split("_")[0]]||"Corrija lo observado.";
     if(!c.fotos)c.fotos=[];
@@ -1175,7 +1202,7 @@ function compute(f){
         /* Hallazgo = item CORREGIBLE sin el puntaje maximo. Los de
            caracterizacion (edificacion nueva, area, fuentes de ignicion...)
            suman al puntaje pero no son un "no cumple" para el propietario. */
-        if(it.tipo!=="fuentes"&&p!=null&&p<mx&&!CONTEXTO.has(it.id))recs.push(mkHallazgo(f,m,it,f.ans[it.id]));
+        if(it.tipo!=="fuentes"&&p!=null&&p<mx&&(!CONTEXTO.has(it.id)||(oa&&oa.hallazgo)))recs.push(mkHallazgo(f,m,it,f.ans[it.id]));
       }
     });}
     if(m.clase==="agravante")X+=modVal; else if(m.clase==="reductor")Y+=modVal;
@@ -1995,6 +2022,7 @@ function renderModuleStep(body,m){
   var card=el("div","card");
   card.innerHTML='<div class="modhead"><div class="n">'+("0"+m.id.replace("m","")).slice(-2)+'</div><h4>'+esc(m.titulo.replace(/^Módulo\s*\d+\.\s*/,""))+'</h4><span class="mx">'+(m.clase==="agravante"?"agravante":"reductor")+'</span></div>';
   var bd=el("div");bd.style.cssText="padding:2px 0";
+  if(m.intro){var mi=el("div","guia modintro",m.intro);bd.appendChild(mi)}
   if(m.toggle)bd.appendChild(renderToggle(m));
   var wrap=el("div");wrap.dataset.items=m.id;
   m.items.forEach(function(it){wrap.appendChild(renderItem(m,it))});
@@ -2046,7 +2074,10 @@ function applyToggle(m,card){var w=card&&card.querySelector('[data-items="'+m.id
 /* Guía visual (v1.19): dibujo + pasos + criterios Cumple / No cumple. */
 function guiaHTML(d){if(!d)return "";
   var li=function(a){return (a||[]).map(function(t){return '<li>'+esc(t)+'</li>'}).join("")};
-  var h=(d.titulo?'<b class="gt">'+esc(d.titulo)+'</b>':'')+'<div class="dg">'+(d.svg||"")+'</div>';
+  /* En celular el dibujo se encoge: se agranda su letra solo lo que se midió que cabe (DIAGRAM_FS). */
+  var svg=d.svg||"";
+  if(d.fs>1&&window.innerWidth<=520)svg=svg.replace(/font-size="([\d.]+)"/g,function(_,n){return 'font-size="'+(parseFloat(n)*d.fs).toFixed(1)+'"'});
+  var h=(d.titulo?'<b class="gt">'+esc(d.titulo)+'</b>':'')+'<div class="dg">'+svg+'</div>';
   if(d.pasos&&d.pasos.length)h+='<div class="gpasos"><b>Cómo revisarlo</b><ol>'+li(d.pasos)+'</ol></div>';
   if((d.cumple&&d.cumple.length)||(d.noCumple&&d.noCumple.length))
     h+='<div class="gcrit"><div class="gok"><b>✔ '+esc(d.okT||"Cumple si")+'</b><ul>'+li(d.cumple)+'</ul></div>'+
@@ -2089,7 +2120,7 @@ function renderItem(m,it){
     wrap.appendChild(fg);
   } else {
     var opts=el("div","opts");
-    it.opts.forEach(function(o){var mx=itemMax(it);var b=el("button","opt",o.l||o.v);
+    it.opts.forEach(function(o){if(o.oculta&&FORM.ans[it.id]!==o.v)return;var mx=itemMax(it);var b=el("button","opt",o.l||o.v);
       if(FORM.ans[it.id]===o.v)b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));
       b.addEventListener("click",function(){FORM.ans[it.id]=o.v;scheduleSave();$$(".opt",opts).forEach(function(x){x.className="opt"});b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));applyDeps(wrap.parentNode);refreshScore()});
       opts.appendChild(b)});
@@ -2319,13 +2350,18 @@ function vCertificado(v){
       '<button class="btn btn-p btn-sm" id="emitir">Emitir ahora</button></div>');
   }
 
+  /* Letras del PDF listas antes de que pulsen descargar. */
+  cargarFuentesPDF();
+  var ondas=(function(){var o="";for(var k=0;k<14;k++){o+="M";for(var x=0;x<=320;x+=8){o+=(x?" ":"")+x+" "+(50+Math.sin(x/26+k*.33)*42*Math.cos(x/150+k*.09)).toFixed(1)}}
+    return '<svg class="ondas" aria-hidden="true" viewBox="0 0 320 100" preserveAspectRatio="none"><path d="'+o+'" fill="none" stroke="currentColor" stroke-width=".3" opacity=".3" vector-effect="non-scaling-stroke"/></svg>'})();
   var card=el("div","cert");
   card.innerHTML=
+    '<img class="certagua" data-logo alt="">'+
     '<div class="top"><div class="logo-chip"><img data-logo alt="CBVI"></div><div>'+
-      '<small>CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA</small>'+
+      '<small>Cuerpo de Bomberos Voluntarios de Inírida</small>'+
       '<h3>Concepto técnico de seguridad humana y protección contra incendios</h3></div></div>'+
     '<div class="bd">'+
-    '<div class="verdict '+(fav?"fav":"no")+'"><div class="big">'+r.s100+'<span style="font-size:14px">/100</span></div>'+
+    '<div class="verdict '+(fav?"fav":"no")+'">'+ondas+'<div class="big">'+r.s100+'<span style="font-size:14px">/100</span></div>'+
       '<div><b style="font-family:var(--ff-h);font-size:17px">'+(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE")+'</b> · Riesgo '+esc(r.band.riesgo)+
       '<p>'+esc(r.band.texto||"")+'</p></div></div>'+
     '<div class="kv">'+
@@ -2337,13 +2373,13 @@ function vCertificado(v){
       kv("Ocupación NSR-10",FORM.ocupacion)+
       kv("Inspector",FORM.inspector)+
       kv("Fecha",fmt(FORM.fecha))+
-      kv("Vigente hasta",fmt(FORM.vigenciaHasta))+'</div>'+
+      (fav?kv("Vigente hasta",fmt(FORM.vigenciaHasta)):"")+'</div>'+
 
     '<div class="sech"><h3>Hallazgos y recomendaciones</h3><div class="ln"></div>'+
       (hall.length?'<span class="count">'+hall.length+'</span>':'')+'</div>'+
     (hall.length
       ? '<div class="halls">'+hall.map(function(h,i){return hallHTML(h,i)}).join("")+'</div>'
-      : '<p class="note">Sin hallazgos: el establecimiento cumple en todos los puntos evaluados.</p>')+
+      : '<p class="note">'+(fav?'Sin hallazgos: el establecimiento cumple en todos los puntos evaluados.':'Este documento no tiene hallazgos registrados.')+'</p>')+
 
     '<div class="sech"><h3>Firmas</h3><div class="ln"></div></div>'+
     '<div class="signrow"><div><label class="lbl">Inspector</label><canvas class="pad-c" id="padI"></canvas></div>'+
@@ -2417,167 +2453,283 @@ function qrDataURL(){var q=$("#qr");if(!q)return null;var c=q.querySelector("can
    datos, puntaje, concepto, SOLO los hallazgos (cada uno con su foto y qué
    debe hacer), firmas y QR de verificación. Al final se guarda en Drive
    para que el QR lo pueda abrir desde cualquier celular. */
+/* Letras del certificado: se traen al primer uso. Sin señal y sin caché, el PDF
+   sale igual con las letras base del generador. */
+var _cargaFuentes=null, _vTurno=0;
+function cargarFuentesPDF(){
+  if(window.FUENTES_PDF)return Promise.resolve();
+  if(_cargaFuentes)return _cargaFuentes;
+  _cargaFuentes=new Promise(function(ok){
+    var s=document.createElement("script");s.src="fuentes-pdf.js?v="+APP_VERSION;
+    s.onload=function(){ok()};s.onerror=function(){_cargaFuentes=null;ok()};
+    document.head.appendChild(s)});
+  return _cargaFuentes}
+/* La firma se dibuja con el color del tema: en modo oscuro es clara y en papel
+   blanco no se vería. Para imprimir se pasa siempre a tinta. */
+function firmaEnTinta(url){
+  if(!url)return Promise.resolve(null);
+  return new Promise(function(ok){
+    var im=new Image();
+    im.onload=function(){try{
+      var c=document.createElement("canvas");c.width=im.width;c.height=im.height;
+      var x=c.getContext("2d");x.drawImage(im,0,0);x.globalCompositeOperation="source-in";
+      x.fillStyle="#14181d";x.fillRect(0,0,c.width,c.height);ok(c.toDataURL("image/png"))
+    }catch(e){ok(url)}};
+    im.onerror=function(){ok(url)};im.src=url})}
 function makePDF(r,est){
   if(!(window.jspdf&&window.jspdf.jsPDF)){toast("El generador de PDF no cargó. Revisa tu conexión y recarga.");return}
-  var validado=estaValidado(FORM);
+  toast("Preparando el certificado…");
+  /* Se trabaja con ESTE certificado: si mientras tanto abren otro, no se mezclan los
+     datos de uno con el número, el QR y el PDF en Drive del otro. Con señal débil
+     no se espera las letras más de 4 s: el PDF sale con las letras base. */
+  var F=FORM, tope=new Promise(function(ok){setTimeout(ok,4000)});
+  Promise.all([Promise.race([cargarFuentesPDF(),tope]),firmaEnTinta(F.firmaInsp),firmaEnTinta(F.firmaRecibe)]).then(function(v){
+    if(FORM!==F){toast("Saliste de este certificado. Ábrelo y pulsa Descargar otra vez.");return}
+    armarPDF(r,est,v[1],v[2])
+  }).catch(function(){toast("No se pudo generar el PDF. Inténtalo de nuevo.")});
+}
+/* QR propio para imprimir: más resolución que el de pantalla. */
+function qrParaPDF(){
+  try{var t=document.createElement("div");
+    new QRCode(t,{text:urlVerificacion(FORM),width:512,height:512,correctLevel:QRCode.CorrectLevel.M});
+    var c=t.querySelector("canvas");if(c)return c.toDataURL("image/png")
+  }catch(e){}
+  return qrDataURL()}
+function armarPDF(r,est,firmaI,firmaR){
+  var F=FORM, validado=estaValidado(FORM);
   var d=new window.jspdf.jsPDF({unit:"pt",format:"letter",compress:true});
   var W=d.internal.pageSize.getWidth(), H=d.internal.pageSize.getHeight();
-  var m=42, y=0, fav=r.band.favorable, PIE=56;
+  var m=44, y=0, ancho=W-2*m, fav=r.band.favorable, PIE=62;
+  var INK=[20,24,29], TX2=[42,49,57], MUT=[98,107,118], LIN=[217,221,227], LS=[154,163,174], EMB=[192,39,31], VER=[23,134,75];
+  var AC=fav?VER:EMB;
+  d.setProperties({title:"Concepto técnico "+(validado?FORM.codigo:"provisional"),author:"Cuerpo de Bomberos Voluntarios de Inírida",subject:"Seguridad humana y protección contra incendios"});
 
-  function nueva(){ d.addPage(); encabezadoCorto(); y=96; }
-  function espacio(alto){ if(y+alto>H-PIE){ nueva(); } }
+  /* Letras: Saira y Public Sans y Plex Mono si cargaron; si no, las base. */
+  var FN={t:["helvetica","bold"],x:["helvetica","bold"],b:["helvetica","normal"],s:["helvetica","bold"],m:["courier","bold"]};
+  try{var FP=window.FUENTES_PDF;if(FP){
+    [["S-B.ttf",FP.sairaB,"Saira","bold"],["S-X.ttf",FP.sairaX,"SairaX","normal"],["P-R.ttf",FP.publicR,"PublicSans","normal"],["P-S.ttf",FP.publicS,"PublicSans","bold"],["M-S.ttf",FP.plex,"CBVIMono","normal"]].forEach(function(a){
+      d.addFileToVFS(a[0],a[1]);d.addFont(a[0],a[2],a[3])});
+    FN={t:["Saira","bold"],x:["SairaX","normal"],b:["PublicSans","normal"],s:["PublicSans","bold"],m:["CBVIMono","normal"]}
+  }}catch(e){}
+  function f(k,sz,c){d.setFont(FN[k][0],FN[k][1]);d.setFontSize(sz);if(c)d.setTextColor(c[0],c[1],c[2])}
+  function raya(c,lw){d.setDrawColor(c[0],c[1],c[2]);d.setLineWidth(lw)}
+  function relleno(c){d.setFillColor(c[0],c[1],c[2])}
+
+  /* Lo primero en cada hoja, para que quede debajo de todo: escudo de agua y,
+     si no tiene número oficial, el aviso de provisional. */
+  function fondo(){
+    if(LOGO_DATA&&d.GState){try{
+      d.setGState(new d.GState({opacity:.055}));
+      d.addImage(LOGO_DATA,"JPEG",(W-350)/2,(H-350)/2+34,350,350,"escudo");
+    }catch(e){}
+      try{d.setGState(new d.GState({opacity:1}))}catch(e){}}
+    if(!validado){f("x",70,[226,229,233]);d.text("PROVISIONAL",W/2-188,H/2+150,{angle:45})}
+  }
+  function nueva(){d.addPage();fondo();encabezadoCorto();y=88}
+  function espacio(alto){if(y+alto>H-PIE)nueva()}
 
   function encabezado(){
-    d.setFillColor(25,29,35);d.rect(0,0,W,72,"F");
-    if(LOGO_DATA){ d.setFillColor(255,255,255);d.roundedRect(m,12,48,48,6,6,"F");
-      try{ d.addImage(LOGO_DATA,"JPEG",m+3,15,42,42) }catch(e){} }
-    d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(12.5);
-    d.text("CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA",m+60,28);
-    d.setFont("helvetica","normal");d.setFontSize(8.6);d.setTextColor(205,211,219);
-    d.text("Concepto técnico de seguridad humana y protección contra incendios",m+60,43);
-    d.text("Inírida, Guainía — Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m+60,56);
-    d.setFillColor(192,39,31);d.rect(0,72,W,3,"F");   /* filete rojo de marca */
+    if(LOGO_DATA){try{d.addImage(LOGO_DATA,"JPEG",m,33,58,58,"escudo")}catch(e){}}
+    var nom="Cuerpo de Bomberos Voluntarios de Inírida", sz=15.5;
+    f("t",sz);while(d.getTextWidth(nom)>ancho-68-128&&sz>11){sz-=.5;f("t",sz)}
+    f("t",sz,INK);d.text(nom,m+68,60);
+    f("b",9,MUT);d.text("Guainía, Colombia. Abnegación y Disciplina",m+68,74);
+    raya(LS,.6);d.line(W-m-116,47,W-m-116,78);
+    f("s",7.6,MUT);d.text("Concepto N.º",W-m,56,{align:"right"});
+    f("m",validado?12.5:10,INK);d.text(validado?String(FORM.codigo):"POR ASIGNAR",W-m,72,{align:"right"});
+    relleno(EMB);d.rect(m,98,ancho,2.3,"F");relleno(INK);d.rect(m,102,ancho,.6,"F");
   }
   function encabezadoCorto(){
-    d.setFillColor(25,29,35);d.rect(0,0,W,46,"F");
-    if(LOGO_DATA){ d.setFillColor(255,255,255);d.roundedRect(m,8,30,30,4,4,"F");
-      try{ d.addImage(LOGO_DATA,"JPEG",m+2,10,26,26) }catch(e){} }
-    d.setTextColor(255);d.setFont("helvetica","bold");d.setFontSize(9.5);
-    d.text("CBVI — Concepto técnico "+(validado?FORM.codigo:"(provisional)"),m+40,27);
-    d.setFillColor(192,39,31);d.rect(0,46,W,2,"F");
+    if(LOGO_DATA){try{d.addImage(LOGO_DATA,"JPEG",m,32,28,28,"escudo")}catch(e){}}
+    f("t",10,INK);d.text("Cuerpo de Bomberos Voluntarios de Inírida",m+36,44);
+    f("b",8,MUT);d.text("Concepto técnico, continuación",m+36,55);
+    f("m",10,INK);d.text(validado?String(FORM.codigo):"PROVISIONAL",W-m,50,{align:"right"});
+    relleno(EMB);d.rect(m,65,ancho,1.6,"F");relleno(INK);d.rect(m,68,ancho,.5,"F");
+  }
+  /* Trama de línea fina, como la de un billete. Se dibuja en un tono muy claro. */
+  function trama(x0,y0,w,h,c){
+    var t=[Math.round(255-(255-c[0])*.34),Math.round(255-(255-c[1])*.34),Math.round(255-(255-c[2])*.34)];
+    raya(t,.28);
+    for(var k=0;k<18;k++){
+      var ps=[],py=null,oy=0;
+      for(var x=0;x<=w;x+=6){
+        var yy=h/2+Math.sin(x/30+k*.31)*(h*.42)*Math.cos(x/175+k*.09);
+        if(py===null){oy=yy}else{ps.push([6,yy-py])}
+        py=yy}
+      d.lines(ps,x0,y0+oy,[1,1],"S",false)}
+  }
+  /* Sello con el distintivo: texto en círculo, letra por letra. */
+  function sello(cx,cy,R){
+    raya(EMB,1.4);d.circle(cx,cy,R,"S");raya(EMB,.5);d.circle(cx,cy,R*.7,"S");
+    var txt="CBVI · ABNEGACIÓN Y DISCIPLINA · INÍRIDA · ", rr=R*.78, i, tot=0, an=[];
+    f("t",6.5,EMB);
+    for(i=0;i<txt.length;i++){an[i]=d.getTextWidth(txt.charAt(i));tot+=an[i]}
+    var sobra=(2*Math.PI*rr-tot)/txt.length, a=0;
+    for(i=0;i<txt.length;i++){
+      var mid=a+(an[i]/2)/rr, gx=cx+rr*Math.sin(mid), gy=cy-rr*Math.cos(mid);
+      d.text(txt.charAt(i),gx-(an[i]/2)*Math.cos(mid),gy-(an[i]/2)*Math.sin(mid),{angle:-mid*180/Math.PI});
+      a+=(an[i]+sobra)/rr}
+    f("s",5.6,EMB);d.text("Distintivo",cx,cy-4,{align:"center"});
+    f("m",10.5,EMB);d.text(String(FORM.sig||""),cx,cy+8,{align:"center"});
+  }
+  function seccion(t){
+    espacio(44);y+=13;
+    f("t",10.5,INK);d.text(t,m,y);var tw=d.getTextWidth(t);
+    raya(LS,.6);d.line(m+tw+7,y-3.2,W-m,y-3.2);y+=7;
+  }
+  /* Filas de dos columnas, con la raya fina de un acta. */
+  function filas(rows){
+    var col=(ancho-20)/2, rot=72;
+    rows.forEach(function(rw){
+      f("b",9.2);
+      var ls=rw.map(function(c){f(c[2]?"m":"b",c[2]?8.8:9.2);return d.splitTextToSize(String(c[1]==null||c[1]===""?"—":c[1]),col-rot)});
+      var alto=Math.max(ls[0].length,ls[1]?ls[1].length:1)*11+6;
+      espacio(alto+2);
+      rw.forEach(function(c,i){
+        var x=m+i*(col+20);
+        f("s",7.6,MUT);d.text(String(c[0]),x,y+8);
+        f(c[2]?"m":"b",c[2]?8.8:9.2,INK);d.text(ls[i],x+rot,y+8);
+        raya(LIN,.45);d.line(x,y+alto,x+col,y+alto)});
+      y+=alto});
   }
 
+  fondo();
   encabezado();
 
-  /* --- Veredicto --- */
-  y=92;
-  /* el texto del riesgo puede ocupar varias líneas: el recuadro crece con él
-     (antes medía siempre 56 y el texto largo se salía por debajo) */
-  d.setFont("helvetica","normal");d.setFontSize(8.5);
-  var lRiesgo=d.splitTextToSize("Nivel de riesgo "+r.band.riesgo+". "+(r.band.texto||""),W-2*m-240);
-  var altoV=Math.min(112,Math.max(56,38+lRiesgo.length*10+8));
-  d.setFillColor(fav?228:247, fav?241:228, fav?232:226);
-  d.rect(m,y,W-2*m-120,altoV,"F");
-  d.setDrawColor(fav?23:192, fav?134:39, fav?75:31);d.setLineWidth(1.2);d.rect(m,y,W-2*m-120,altoV,"S");
-  d.setTextColor(fav?23:192, fav?134:39, fav?75:31);
-  d.setFont("helvetica","bold");d.setFontSize(22);d.text(String(r.s100)+"/100",m+16,y+36);
-  d.setFontSize(12);d.text(fav?"CONCEPTO FAVORABLE":"CONCEPTO NO FAVORABLE",m+112,y+25);
-  d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(60);
-  d.text(lRiesgo.slice(0,7),m+112,y+38);
+  /* --- Título y constancia --- */
+  y=127;
+  f("t",20,INK);d.text("Concepto técnico",m,y);
+  y+=14;
+  f("b",9.6,TX2);
+  var intro=d.splitTextToSize("Seguridad humana y protección contra incendios. El Cuerpo de Bomberos Voluntarios de Inírida hace constar que realizó la revisión técnica al establecimiento relacionado, con este resultado:",ancho-40);
+  d.text(intro,m,y);y+=intro.length*11.6+3;
 
-  /* --- QR al lado del veredicto --- */
-  var qr=validado?qrDataURL():null;
-  if(qr){ try{
-    d.addImage(qr,"PNG",W-m-104,y-4,104,104);
-    d.setFontSize(6.4);d.setTextColor(120);
-    d.text("Escanea para verificar",W-m-104,y+112);
-  }catch(e){} }
-  else {
-    d.setDrawColor(200);d.setLineWidth(.8);d.rect(W-m-104,y-4,104,104,"S");
-    d.setFontSize(7.5);d.setTextColor(150);
-    d.text(d.splitTextToSize("Certificado sin validar. Sincronice la app para emitir el QR.",92),W-m-99,y+40);
+  /* --- Veredicto: puntaje, palabra y QR sobre la trama --- */
+  var altoV=110, xQ=W-m-105;
+  trama(m,y,ancho,altoV,AC);
+  raya(AC,1.2);d.rect(m,y,ancho,altoV,"S");
+  f("x",42,AC);d.text(String(r.s100),m+54,y+60,{align:"center"});
+  f("s",8.6,AC);d.text("de 100",m+54,y+74,{align:"center"});
+  f("x",fav?24:21,AC);d.text(fav?"FAVORABLE":"NO FAVORABLE",m+106,y+53);
+  var riesgo=String(r.band.riesgo||"").toLowerCase();
+  var frase="Riesgo "+riesgo+". "+(fav?("Vigente hasta el "+fmt(FORM.vigenciaHasta)):"Debe subsanar los hallazgos");
+  f("s",9.2,INK);
+  relleno([255,255,255]);d.rect(m+102,y+59,d.getTextWidth(frase)+8,14,"F");
+  d.text(frase,m+106,y+69);
+  /* QR en su recuadro propio */
+  relleno([255,255,255]);d.rect(xQ,y+3,104,104,"F");
+  var qr=validado?qrParaPDF():null;
+  if(qr){try{d.addImage(qr,"PNG",xQ+8,y+11,88,88)}catch(e){qr=null}}
+  if(!qr){
+    f("s",7.6,MUT);
+    d.text(d.splitTextToSize(validado?"Verifique con el número y el distintivo de este documento.":"Sin validar. Sincronice la app para emitir el QR.",86),xQ+9,y+42);
+  }
+  y+=altoV+11;
+  if(r.band.texto){
+    f("b",8.3,TX2);
+    var lT=d.splitTextToSize(String(r.band.texto),ancho);
+    d.text(lT,m,y);y+=(lT.length-1)*10;
   }
 
   /* --- Datos --- */
-  y+=124;
-  function fila(k,val,mono){
-    espacio(20);
-    d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(110);d.text(String(k).toUpperCase(),m,y);
-    d.setFont(mono?"courier":"helvetica",mono?"bold":"normal");d.setTextColor(25);d.setFontSize(10);
-    var ln=d.splitTextToSize(String(val==null||val===""?"—":val),W-2*m-160);
-    d.text(ln,m+160,y); y+=Math.max(16,ln.length*12+4);
-  }
-  fila("Establecimiento",est.nombre);
-  fila("Razón social",est.razonSocial||est.nombre);
-  fila("Propietario / encargado",est.rep);
-  fila("NIT",est.nit,true);
-  fila("Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:""));
-  fila("Actividad",est.act||est.tipo);
-  fila("Número del concepto",(validado?FORM.codigo:"POR ASIGNAR")+(validado?("  ·  distintivo "+FORM.sig):""),true);
-  fila("Tipo de trámite",tramiteLegible(FORM.tramite));
-  fila("Ocupación NSR-10",FORM.ocupacion);
-  fila("Clasificación del riesgo",FORM.clasifRiesgo);
-  fila("Fecha de la revisión",fmt(FORM.fecha));
-  fila("Vigente hasta",fmt(FORM.vigenciaHasta));
-  fila("Inspector",FORM.inspector);
+  seccion("Establecimiento");
+  filas([
+    [["Nombre",est.nombre],["NIT",est.nit,true]],
+    [["Razón social",est.razonSocial||est.nombre],["Actividad",est.act||est.tipo]],
+    [["Propietario",est.rep],["Dirección",(est.dir||"")+(est.barrio?", "+est.barrio:"")]]
+  ]);
+  seccion("Revisión");
+  filas([
+    [["Número",validado?FORM.codigo:"POR ASIGNAR",true],["Distintivo",validado?FORM.sig:"—",true]],
+    [["Fecha",fmt(FORM.fecha)],["Vigente hasta",fav?fmt(FORM.vigenciaHasta):"Sin vigencia: no favorable"]],
+    [["Tipo de trámite",tramiteLegible(FORM.tramite)],["Ocupación",FORM.ocupacion?"NSR-10 "+FORM.ocupacion:""]],
+    [["Inspector",FORM.inspector],["Clasif. de riesgo",FORM.clasifRiesgo]]
+  ]);
 
   /* --- Hallazgos con su foto y su recomendación --- */
   var hall=hallazgosDe(FORM);
-  y+=12; espacio(40);
-  d.setDrawColor(215);d.setLineWidth(.8);d.line(m,y,W-m,y); y+=18;
-  d.setFont("helvetica","bold");d.setFontSize(12);d.setTextColor(25);
-  d.text(hall.length?("Hallazgos y recomendaciones ("+hall.length+")"):"Hallazgos y recomendaciones",m,y);
-  y+=8;
-  d.setFont("helvetica","normal");d.setFontSize(8.2);d.setTextColor(120);
-  d.text("Solo se relaciona lo que NO cumple. Lo demás fue verificado y cumple.",m,y+10);
-  y+=24;
-
+  seccion(hall.length?("Hallazgos y recomendaciones ("+hall.length+")"):"Hallazgos y recomendaciones");
+  f("b",8.2,MUT);
+  d.text("Solo se relaciona lo que no cumple. Lo demás fue verificado y cumple.",m,y+5);
+  y+=15;
   if(!hall.length){
-    d.setFontSize(10);d.setTextColor(23,134,75);
-    d.text("Sin hallazgos: el establecimiento cumple en todos los puntos evaluados.",m,y); y+=18;
+    f("s",9.6,fav?VER:INK);
+    d.text(fav?"Sin hallazgos: el establecimiento cumple en todos los puntos evaluados.":"Este documento no tiene hallazgos registrados.",m,y+4);y+=16;
   } else {
     hall.forEach(function(h,i){
-      var foto=(h.fotos&&h.fotos[0])||null;
-      var anchoTxt=foto?(W-2*m-128):(W-2*m-26);
-      var lTit=d.splitTextToSize(String(h.q||""),anchoTxt);
-      var lObs=d.splitTextToSize("Se observó: "+String(h.r||""),anchoTxt);
-      var lNota=h.obs?d.splitTextToSize("Observación del inspector: "+h.obs,anchoTxt):[];
-      var lAcc=d.splitTextToSize("Qué hacer: "+String(h.accion||""),anchoTxt);
-      var altoTxt=lTit.length*12+lObs.length*11+lNota.length*11+lAcc.length*11+26;
-      var alto=Math.max(altoTxt, foto?96:0)+14;
+      var foto=(h.fotos&&h.fotos[0])||null, tx=m+20, rot=50;
+      var anchoTit=(foto?ancho-124:ancho-20), anchoV=anchoTit-rot;
+      var resp=String(h.r||""); resp=resp==="SI"?"Sí":(resp==="NO"?"No":resp);
+      f("s",9.4);var lTit=d.splitTextToSize(String(h.q||""),anchoTit);
+      f("b",8.9);
+      var lObs=d.splitTextToSize(resp,anchoV);
+      var lNota=h.obs?d.splitTextToSize(String(h.obs),anchoV):[];
+      if(lNota.length>30){lNota=lNota.slice(0,30);lNota[29]+=" …"}
+      f("s",8.9);var lAcc=d.splitTextToSize(String(h.accion||""),anchoV);
+      var altoTx=lTit.length*11.6+lObs.length*10.8+lNota.length*10.8+lAcc.length*10.8+12;
+      var alto=Math.max(altoTx,foto?92:0)+9;
       espacio(alto);
-
-      /* franja roja a la izquierda */
-      d.setFillColor(192,39,31);d.rect(m,y-9,3,alto-8,"F");
-      d.setFont("helvetica","bold");d.setFontSize(9.6);d.setTextColor(25);
-      d.text(String(i+1)+".  "+lTit[0],m+12,y);
-      for(var k=1;k<lTit.length;k++){ d.text(lTit[k],m+24,y+k*12); }
-      var yy=y+lTit.length*12+2;
-      d.setFont("helvetica","normal");d.setFontSize(8.8);d.setTextColor(90);
-      d.text(lObs,m+24,yy); yy+=lObs.length*11+2;
-      if(lNota.length){ d.setTextColor(120);d.text(lNota,m+24,yy); yy+=lNota.length*11+2; }
-      d.setTextColor(192,39,31);d.setFont("helvetica","bold");d.setFontSize(8.8);
-      d.text(lAcc,m+24,yy+2);
-      if(foto){ try{ d.addImage(foto,"JPEG",W-m-112,y-9,104,88) }catch(e){} }
+      f("m",10,EMB);d.text(String(i+1),m,y+9);
+      f("s",9.4,INK);d.text(lTit,tx,y+9);
+      var yy=y+9+lTit.length*11.6;
+      f("s",7.6,MUT);d.text("Se observó",tx,yy);
+      f("b",8.9,TX2);d.text(lObs,tx+rot,yy);yy+=lObs.length*10.8+1;
+      if(lNota.length){
+        f("s",7.6,MUT);d.text("Nota",tx,yy);
+        f("b",8.9,TX2);d.text(lNota,tx+rot,yy);yy+=lNota.length*10.8+1}
+      f("s",7.6,EMB);d.text("Qué hacer",tx,yy);
+      f("s",8.9,INK);d.text(lAcc,tx+rot,yy);
+      if(foto){try{
+        var pf=d.getImageProperties(foto), esc=Math.min(98/pf.width,84/pf.height), fw=pf.width*esc, fh=pf.height*esc;
+        d.addImage(foto,"JPEG",W-m-fw,y+2,fw,fh)
+      }catch(e){}}
+      raya(LIN,.45);d.line(m,y+alto-1,W-m,y+alto-1);
       y+=alto;
     });
   }
 
-  /* --- Firmas --- */
-  espacio(110); y+=16;
-  try{ if(FORM.firmaInsp)d.addImage(FORM.firmaInsp,"PNG",m,y,150,50) }catch(e){}
-  try{ if(FORM.firmaRecibe)d.addImage(FORM.firmaRecibe,"PNG",W-m-150,y,150,50) }catch(e){}
-  y+=54;d.setDrawColor(150);d.setLineWidth(.6);d.line(m,y,m+170,y);d.line(W-m-170,y,W-m,y);
-  d.setFont("helvetica","normal");d.setFontSize(8);d.setTextColor(90);
-  d.text("Inspector — "+(FORM.inspector||""),m,y+12);
-  d.text("Quien recibe — "+(est.rep||""),W-m-170,y+12);
-  d.setFontSize(7.2);d.setTextColor(130);
-  d.text("Vigencia: "+fmt(FORM.vigenciaHasta)+". Este concepto pierde validez si cambian las condiciones evaluadas.",m,y+28);
+  /* --- Firmas y sello --- */
+  espacio(128);
+  y+=14;
+  var anFirma=178, yLinea=y+66;
+  try{if(firmaI)d.addImage(firmaI,"PNG",m+8,y+12,150,52)}catch(e){}
+  try{if(firmaR)d.addImage(firmaR,"PNG",W-m-anFirma+8,y+12,150,52)}catch(e){}
+  raya(INK,.7);d.line(m,yLinea,m+anFirma,yLinea);d.line(W-m-anFirma,yLinea,W-m,yLinea);
+  f("s",8.6,INK);
+  var nomFirma=function(t){var l=d.splitTextToSize(String(t||"—"),anFirma);if(l.length>2){l=l.slice(0,2);l[1]=l[1].replace(/\s*\S*$/,"")+" …"}return l};
+  var nI=nomFirma(FORM.inspector), nR=nomFirma(est.rep);
+  d.text(nI,m,yLinea+11);d.text(nR,W-m-anFirma,yLinea+11);
+  f("b",8,MUT);d.text("Inspector",m,yLinea+11+nI.length*10.2);d.text("Quien recibe",W-m-anFirma,yLinea+11+nR.length*10.2);
+  if(validado)sello(W/2,y+46,42);
 
-  /* --- Pie de todas las páginas --- */
+  /* --- Marco y pie de todas las hojas --- */
   var tot=d.internal.getNumberOfPages();
+  var MT="CUERPO DE BOMBEROS VOLUNTARIOS DE INÍRIDA  ABNEGACIÓN Y DISCIPLINA  ";
+  f("s",3);
+  var anMT=d.getTextWidth(MT), linea=function(L){var s="",n=Math.ceil(L/anMT);while(n-->0)s+=MT;return s.slice(0,Math.floor(s.length*L/(Math.ceil(L/anMT)*anMT)))};
+  var mtH=linea(W-46), mtV=linea(H-46);
   for(var p=1;p<=tot;p++){
     d.setPage(p);
-    /* marco de doble línea tipo documento de seguridad (no tapa la cabecera) */
-    var top0=(p===1?75:48)+6;
-    d.setDrawColor(150);d.setLineWidth(.9);d.rect(12,top0,W-24,H-top0-12,"S");
-    d.setDrawColor(190);d.setLineWidth(.35);d.rect(16,top0+4,W-32,H-top0-20,"S");
-    d.setDrawColor(225);d.setLineWidth(.6);d.line(m,H-44,W-m,H-44);
-    d.setFont("helvetica","normal");d.setFontSize(6.8);d.setTextColor(130);
-    d.text("Cuerpo de Bomberos Voluntarios de Inírida — Guainía, Colombia  ·  ABNEGACIÓN Y DISCIPLINA",m,H-32);
+    raya(INK,1);d.rect(16,16,W-32,H-32,"S");
+    raya(INK,.4);d.rect(24,24,W-48,H-48,"S");
+    /* Microtexto entre las dos líneas: de lejos parece una raya, de cerca se lee. */
+    f("s",3,MUT);
+    d.text(mtH,23,21.4);d.text(mtH,23,H-18.4);
+    d.text(mtV,21.4,H-23,{angle:90});d.text(mtV,W-18.6,H-23,{angle:90});
+    raya(LIN,.5);d.line(m,H-54,W-m,H-54);
+    f("b",6.9,MUT);
+    d.text("Pierde vigencia si cambia la línea de servicio, la razón social o las condiciones evaluadas.",m,H-44);
     if(validado){
-      /* Legible y tecleable: la direccion base + codigo + distintivo, que es
-         justo lo que pide la pagina de verificacion. Toda la linea es un
-         enlace a la verificacion directa (en el PDF digital se puede tocar). */
+      /* Legible y tecleable; toda la línea es enlace a la verificación directa. */
       var base=urlVerificacion(FORM).split("?")[0].replace(/^https?:\/\//,"");
-      var pie="Verifique en "+base+"  \u00b7  C\u00f3digo "+FORM.codigo+"  \u00b7  Distintivo "+FORM.sig;
-      var maxW=W-2*m-62, fs=6.8;
+      var pie="Verifique en "+base+"  ·  Número "+FORM.codigo+"  ·  Distintivo "+FORM.sig;
+      var maxW=ancho-58, fs=6.9;
       while(d.getTextWidth(pie)>maxW&&fs>5){fs-=.3;d.setFontSize(fs)}
-      try{ d.textWithLink(pie,m,H-22,{url:urlVerificacion(FORM)}) }catch(e){ d.text(pie,m,H-22) }
-      d.setFontSize(6.8);
+      try{d.textWithLink(pie,m,H-34,{url:urlVerificacion(FORM)})}catch(e){d.text(pie,m,H-34)}
+      d.setFontSize(6.9);
     }
-    else d.text("DOCUMENTO PROVISIONAL — sin número oficial ni código de verificación.",m,H-22);
-    d.text("Página "+p+" de "+tot,W-m-54,H-22);
+    else d.text("DOCUMENTO PROVISIONAL: sin número oficial ni código de verificación.",m,H-34);
+    d.text("Página "+p+" de "+tot,W-m,H-34,{align:"right"});
   }
 
   var nombre="Certificado_"+(validado?FORM.codigo:"PROVISIONAL")+".pdf";
@@ -2596,8 +2748,9 @@ function makePDF(r,est){
     try{
       var b64=d.output("datauristring");
       api("guardarCertificado",{codigo:FORM.codigo,base64:b64}).then(function(res){
-        if(res&&res.ok){ FORM.pdfUrl=res.url; saveInsp(); }
-      }).catch(function(){});
+        if(res&&res.ok){ var vivo=DB.inspecciones.filter(function(x){return x.id===F.id})[0]||F; vivo.pdfUrl=res.url; persist(); }
+        else toast("El PDF no se guardó en Drive: descárgalo otra vez con señal para que el QR lo abra.");
+      }).catch(function(){toast("El PDF no se guardó en Drive: descárgalo otra vez con señal para que el QR lo abra.")});
     }catch(e){}
   }
 }
@@ -3014,7 +3167,7 @@ function vVerificar(v){
       '<button class="btn btn-g btn-sm" id="vBuscar">Buscar</button></div>'+
     '<div id="vHallado"></div>'+
     '<p class="note" style="text-align:center;margin:10px 0 4px">o escribe el código</p>'+
-    '<div class="ff"><div><label class="lbl">Código</label><input id="vC" type="text" placeholder="RT-2026-0001"></div>'+
+    '<div class="ff"><div><label class="lbl">Código</label><input id="vC" type="text" placeholder="RT-2026-0000"></div>'+
     '<div><label class="lbl">Distintivo</label><input id="vD" type="text" placeholder="6 caracteres"></div></div>'+
     '<div style="margin-top:14px"><button class="btn btn-g" id="vGo">Verificar</button></div>'+
     '<div id="vRes" style="margin-top:16px"></div></div>');
@@ -3069,18 +3222,45 @@ function vVerificar(v){
   $("#vBuscar").addEventListener("click",function(){buscarEnVerificar($("#vBuscaTxt").value)});
   $("#vBuscaTxt").addEventListener("keydown",function(ev){if(ev.key==="Enter"){ev.preventDefault();buscarEnVerificar(this.value)}});
   $("#vGo").addEventListener("click",function(){
-    var c=($("#vC").value||"").trim().toUpperCase(), dd=($("#vD").value||"").trim().toUpperCase();
+    var turno=++_vTurno, c=($("#vC").value||"").trim().toUpperCase(), dd=($("#vD").value||"").trim().toUpperCase();
     var insp=DB.inspecciones.find(function(x){return x.codigo===c&&x.estado==="finalizada"});
     var box=$("#vRes");
-    if(!insp||!insp.sig||String(insp.sig).toUpperCase()!==dd){box.innerHTML='<div class="verdict no"><div class="big">✖</div><div><b style="font-family:var(--ff-h)">No verificado</b><p>El código o el distintivo no coinciden. Posible falsificación.</p></div></div>';return}
+    var aviso=function(k,ic,tit,txt){box.innerHTML='<div class="verdict '+k+'"><div class="big">'+ic+'</div><div><b style="font-family:var(--ff-h)">'+esc(tit)+'</b><p>'+esc(txt)+'</p></div></div>'};
+    if(!c||!dd){aviso("warn","!","Faltan datos","Escribe el número y el distintivo que aparecen en el documento.");return}
+    /* La tablet no tiene todos los certificados: que no esté aquí no significa que
+       sea falso. Decide el servidor (misma consulta pública de verificar.html, sin
+       sesión). Solo si él lo niega se habla de falsificación; sin señal, se dice que
+       no se pudo confirmar. */
+    if(!insp||!insp.sig||String(insp.sig).toUpperCase()!==dd){
+      if(!esOnline()){aviso("warn","!","Sin confirmar","La demostración no consulta al servidor. Entra con tu correo y PIN para verificar certificados reales.");return}
+      if(navigator.onLine===false){aviso("warn","!","Sin confirmar","Este certificado no está en esta tablet y no hay señal para consultar el servidor. Eso no significa que sea falso: verifícalo cuando haya señal.");return}
+      aviso("warn","…","Consultando","Validando el certificado con el servidor del CBVI.");
+      var sinResp=function(){aviso("warn","!","Sin confirmar","El servidor no pudo responder. Eso no significa que el certificado sea falso: inténtalo de nuevo en unos minutos.")};
+      var listo=false, tope=setTimeout(function(){if(!listo&&turno===_vTurno){listo=true;sinResp()}},20000);
+      fetch(BACKEND_URL+"?api=1&o=app&cod="+encodeURIComponent(c)+"&d="+encodeURIComponent(dd),{method:"GET",headers:{"Content-Type":"text/plain;charset=utf-8"}})
+        .then(function(r){return r.json()})
+        .then(function(res){
+          if(listo||turno!==_vTurno)return;listo=true;clearTimeout(tope);
+          if(!res||!res.ok||!res.cert){
+            /* Solo acusa si el servidor dice que no coincide; un error interno no dice nada del documento. */
+            if(res&&/^(No existe|El distintivo|El código o el distintivo)/.test(String(res.error||"")))aviso("no","✖","No verificado","El número o el distintivo no coinciden con los registros del CBVI. No lo aceptes como auténtico sin confirmarlo con la estación.");
+            else sinResp();
+            return}
+          var ce=res.cert, tit={vigente:"Concepto vigente y auténtico",porvencer:"Concepto auténtico, próximo a vencer",vencido:"Concepto vencido",nofav:"Concepto no favorable"}[ce.estado]||"Concepto registrado";
+          aviso(ce.estado==="vigente"?"fav":(ce.estado==="porvencer"?"warn":"no"),ce.estado==="vigente"?"✔":"!",tit,
+            (ce.establecimiento||"")+" · "+(ce.favorable?"Favorable":"No favorable")+(ce.favorable&&ce.vigenciaHasta?" · vence "+fmt(ce.vigenciaHasta):"")+" · confirmado por el servidor");
+        })
+        .catch(function(){if(listo||turno!==_vTurno)return;listo=true;clearTimeout(tope);sinResp()});
+      return}
     var est=DB.establecimientos.find(function(x){return x.id===insp.establecimientoId})||{};
     var dias=Math.round((new Date(insp.vigenciaHasta)-NOW)/86400000), vig=dias>=0&&insp.concepto.favorable;
     box.innerHTML='<div class="verdict '+(vig?"fav":"no")+'"><div class="big">'+(vig?"✔":"!")+'</div><div><b style="font-family:var(--ff-h)">'+(vig?"Concepto vigente y auténtico":(insp.concepto.favorable?"Concepto vencido":"Concepto no favorable"))+'</b>'+
-      '<p>'+esc(est.nombre||"")+' · '+(insp.concepto.favorable?"Favorable":"No favorable")+' · vence '+fmt(insp.vigenciaHasta)+(dias<0?(" (hace "+(-dias)+" días)"):"")+'</p></div></div>'+
+      '<p>'+esc(est.nombre||"")+' · '+(insp.concepto.favorable?("Favorable · vence "+fmt(insp.vigenciaHasta)+(dias<0?(" (hace "+(-dias)+" días)"):"")):"No favorable")+'</p></div></div>'+
       '<button class="btn btn-g btn-sm" id="vVer">Ver certificado</button>';
     $("#vVer").addEventListener("click",function(){FORM=insp;VIEW="certificado";render()});
   });
-  v.insertAdjacentHTML("beforeend",'<p class="note" style="text-align:center;margin-top:12px">Prueba con <span class="mono">RT-2026-0001</span> y su distintivo del certificado.</p>');
+  /* Pista solo para la demostración: en uso real ese número puede ser de un comercio. */
+  if(!esOnline())v.insertAdjacentHTML("beforeend",'<p class="note" style="text-align:center;margin-top:12px">Prueba con <span class="mono">RT-2026-0001</span> y su distintivo del certificado.</p>');
 }
 
 /* -------- Configuración: importar / exportar -------- */
