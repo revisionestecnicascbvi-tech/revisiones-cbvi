@@ -647,9 +647,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.21"></script>
-<script src="form-inspeccion.js?v=1.21"></script>
-<script src="guias.js?v=1.21"></script>
+<script src="logos.js?v=1.22"></script>
+<script src="form-inspeccion.js?v=1.22"></script>
+<script src="guias.js?v=1.22"></script>
 <script>
 (function(){
 "use strict";
@@ -661,8 +661,11 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.21";
+var APP_VERSION="1.22";
 var APP_VERSION_NOTAS=[
+  "v1.22: La demostración usa siempre datos de ejemplo y no muestra ni cambia lo que hay guardado en este equipo.",
+  "v1.22: Un concepto que ya tiene número oficial no se puede editar. Si tiene un error, el administrador lo elimina y se hace una inspección nueva.",
+  "v1.22: Si tu sesión deja de ser válida con envíos pendientes, la app te avisa y los guarda hasta que vuelvas a entrar; antes se podían perder.",
   "v1.21: Certificado rediseñado para imprimir: membrete, escudo de agua, tramas de línea fina, microtexto en el marco y sello con el distintivo. La página que abre el QR tiene la misma identidad, con una hora que avanza en vivo. Para ver los datos de un certificado ahora se necesita también su distintivo.",
   "v1.21: Formulario más claro. Se aclararon preguntas ambiguas y rangos sin salida (empleados, subniveles, áreas, anchos), con el criterio de cada una. Inflamabilidad ahora mira lo que hay dentro del local, no la estructura. Ya se puede registrar un ancho menor al mínimo y sale como hallazgo. Si combina materiales, se marca el menos resistente. Si los equipos no se necesitaron en una emergencia, no suma ni resta.",
   "v1.21: Sin brigada certificada o sin puerta cortafuego ya no se preguntan sus detalles. Los atajos de tipo de negocio ponen la ocupación que dice el manual (tienda y droguería C-2, restaurante L-3). Verificar dentro de la app consulta al servidor si el certificado no está en la tablet: ya no dice \"posible falsificación\" por eso. En celular, la letra de los dibujos es algo más grande.",
@@ -785,19 +788,29 @@ var _t;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show
 
 /* ---------- store ---------- */
 function load(){try{return JSON.parse(localStorage.getItem(LS))}catch(e){return null}}
-function persist(){try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}}
+/* v1.22: en la demostración no se guarda nada: trabaja con datos de ejemplo en
+   memoria y los datos reales del equipo ni se muestran ni se tocan. */
+function persist(){if(SES&&SES.demo)return;try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}}
 function defcfg(){return {metaRevisiones:12,metaRenovaciones:6,metaBarrido:30,vigenciaMeses:12,cobroActivo:false,tarifas:[{nivel:"Impacto 1",valor:97000},{nivel:"Impacto 2",valor:196000},{nivel:"Impacto 3",valor:327000}]}}
 function emptyDB(){return {establecimientos:[],inspecciones:[],barridos:[],config:defcfg()}}
-var DB=load()||emptyDB();
-if(!DB.barridos)DB.barridos=[];          // migración de bases guardadas antes del censo
-if(!DB.config)DB.config=defcfg();
+function cargarDB(){var d=load()||emptyDB();
+  if(!d.barridos)d.barridos=[];          // migración de bases guardadas antes del censo
+  if(!d.config)d.config=defcfg();
+  return d}
+var DB=cargarDB();
 
 /* ---------- backend / sincronización offline-first ---------- */
 var BACKEND_URL="https://script.google.com/macros/s/AKfycbzXkG5Kw1kapPK1dwL55PdhUwCrkZP0Qmdok84rE7PpO-iWl4pIR8-u-yuZrS73T3Kp/exec";
 var QK="cbvi_rt_queue_v1";
 function loadQ(){try{return JSON.parse(localStorage.getItem(QK))||[]}catch(e){return[]}}
 function saveQ(){try{localStorage.setItem(QK,JSON.stringify(QUEUE))}catch(e){}}
-var QUEUE=loadQ(), _flushing=false;
+var QUEUE=loadQ(), _flushing=false, _avisoSesion=false;
+var RQK="cbvi_rt_rechazos_v1";
+function guardarRechazo(op,err){
+  try{var l=JSON.parse(localStorage.getItem(RQK))||[];
+    l.push({a:op.a,p:op.p,error:String(err||""),fecha:new Date().toISOString()});
+    localStorage.setItem(RQK,JSON.stringify(l.slice(-50)))}catch(e){}
+  toast(("El servidor no aceptó un envío ("+op.a+"): "+mensajeServidor(err)).slice(0,190))}
 function esOnline(){return !!(SES&&SES.pase)}
 /* El servidor responde "Acción desconocida: X" cuando la versión PUBLICADA
    del backend es más vieja que esta app (guardar el código en Apps Script NO
@@ -832,19 +845,73 @@ function updateSync(){
   setSync(n?(n+" pend."):"Sincronizado", n?"pend":"ok");
 }
 function enqueue(a,p){if(!esOnline())return;QUEUE.push({a:a,p:p});saveQ();updateSync();flush()}
-function flush(){if(_flushing||!esOnline()||navigator.onLine===false||!QUEUE.length){updateSync();return}_flushing=true;var op=QUEUE[0];
-  api(op.a,op.p).then(function(res){if(res&&res.ok&&op.a==="guardarInspeccion"&&res.inspeccion){var l=DB.inspecciones.find(function(x){return x.id===op.p.inspeccion.idCliente});if(l){l.codigo=res.inspeccion.codigo;l.sig=res.inspeccion.sig;l._sync=true;persist()}}
+function flush(){if(_flushing||!esOnline()||navigator.onLine===false||!QUEUE.length){updateSync();return}_flushing=true;var op=QUEUE[0];_enVuelo=op;
+  /* v1.22: la acción se quita por IDENTIDAD, no por posición: si mientras viaja
+     alguien filtra la cola (finalizar), shift() se llevaba otra acción. */
+  var quitar=function(){var ix=QUEUE.indexOf(op);if(ix>=0)QUEUE.splice(ix,1);saveQ()};
+  var fin=function(){_flushing=false;_enVuelo=null};
+  api(op.a,op.p).then(function(res){
+    /* v1.22: con la sesión vencida o desactivada el envío NO se descarta: queda en
+       cola hasta que la persona vuelva a entrar. Antes se perdía sin aviso. */
+    if(res&&!res.ok&&/No autorizado/i.test(String(res.error||""))){fin();updateSync();
+      if(!_avisoSesion){_avisoSesion=true;toast("Tu sesión ya no es válida. Sal y vuelve a entrar con tu PIN: lo pendiente sigue guardado en este equipo.")}
+      return}
+    /* Falla pasajera del servidor (candado ocupado, Sheets caído, versión vieja):
+       se queda en cola y se reintenta en 5 min, como las fotos. */
+    if(!res||(!res.ok&&!errorDefinitivo(res.error))){fin();updateSync();
+      clearTimeout(_reintCola);_reintCola=setTimeout(flush,300000);return}
+    /* Rechazo definitivo (datos que el servidor nunca aceptará): antes se borraba
+       sin rastro. Ahora se guarda aparte para poder revisarlo. */
+    if(!res.ok)guardarRechazo(op,res.error);
+    if(res.ok&&op.a==="guardarInspeccion"&&res.inspeccion){var l=DB.inspecciones.find(function(x){return x.id===op.p.inspeccion.idCliente});if(l){var adop=adoptarServidor(l,res,true);l.codigo=res.inspeccion.codigo;l.sig=res.inspeccion.sig;l._sync=true;persist();numeroLlego(l,adop)}}
     if(res&&res.ok&&op.a==="guardarInspeccion"&&FORM&&VIEW==="certificado"){
       var cur=DB.inspecciones.filter(function(x){return x.id===FORM.id})[0];
       if(cur&&cur.codigo&&cur.codigo!==FORM.codigo){FORM.codigo=cur.codigo;FORM.sig=cur.sig;render()}
     }
-    QUEUE.shift();saveQ();_flushing=false;updateSync();flush()}).catch(function(){_flushing=false;updateSync()})}
+    quitar();fin();updateSync();flush()}).catch(function(){fin();updateSync()})}
+var _reintCola=null, _enVuelo=null;
+/* Errores que reintentar nunca arreglaría. El resto se reintenta. */
+function errorDefinitivo(e){return /^(Falta|El lote|Máximo|Solo el administrador|Solo quien|JSON inválido)/.test(String(e||""))}
+/* Si el servidor ya tenía este concepto (reintento o edición después de enviarlo),
+   manda SU versión: es la que muestra el QR. Así el PDF nunca dice otra cosa. */
+/* Respuestas comparables: sin entradas vacías (abrir M5 crea fuentes:[]) y con
+   las claves en orden, para no avisar de un cambio que no existe. */
+function canonResp(o){o=o||{};return JSON.stringify(Object.keys(o).sort().filter(function(k){var v=o[k];
+  return !(v==null||v===""||(Array.isArray(v)&&!v.length))}).map(function(k){return [k,o[k]]}))}
+function adoptarServidor(l,res,siempre){
+  var si=res&&res.inspeccion; if(!si||!(siempre||res.idempotente||res.yaEstaba))return false;
+  if(!si.respuestas&&si.score100==null)return false;
+  var srv=insDeServidor(si), conResp=Object.keys(srv.ans||{}).length>0;
+  /* Se compara el resultado Y las respuestas: un cambio que no mueve el puntaje
+     igual cambia los hallazgos del certificado. */
+  var igual=String(si.score100)===String(l.score100)&&String(si.favorable)===String(!!(l.concepto&&l.concepto.favorable))&&
+    (!conResp||(canonResp(srv.ans)===canonResp(l.ans)&&canonResp(srv.fuentes)===canonResp(l.fuentes)));
+  if(igual)return false;
+  ["recs","score100","fecha","vigenciaHasta","X","Y","total"].forEach(function(k){if(srv[k]!=null)l[k]=srv[k]});
+  if(conResp){l.ans=srv.ans;l.fuentes=srv.fuentes||{}}
+  l.concepto={favorable:srv.concepto.favorable,riesgo:srv.concepto.riesgo,texto:""};
+  if(FORM&&FORM.id===l.id&&FORM!==l)Object.assign(FORM,l);
+  setTimeout(function(){modal("Se conservó la versión enviada",
+    '<p class="note">El servidor ya tenía este concepto con el resultado de la primera vez que se envió ('+esc(srv.score100)+'/100). '+
+    'Esa es la que muestra el QR, así que la tablet vuelve a ella. Si había un error, el administrador lo elimina y se hace una inspección nueva.</p>',
+    "Entendido",function(){return true})},300);
+  return true}
+/* v1.22: si el número oficial llega mientras el concepto está abierto en el
+   formulario, se sale de él. Lo que se cambiara después ya no llegaría al
+   servidor y el certificado diría una cosa y el QR otra. */
+function numeroLlego(l,yaAviso){
+  if(!FORM||FORM.id!==l.id||VIEW!=="inspeccion"||!estaValidado(l))return;
+  FORM=l;VIEW="certificado";render();window.scrollTo(0,0);
+  if(!yaAviso)modal("Concepto ya emitido",'<p class="note">Este concepto recibió su número oficial mientras lo editabas. Se muestra la versión que quedó registrada; los cambios posteriores no se aplican. Si tiene un error, el administrador lo elimina y se hace una inspección nueva.</p>',"Entendido",function(){return true})}
 function pullAll(){if(!esOnline())return Promise.resolve();setSync("Sincronizando…","pend");
   return Promise.all([api("listarEstablecimientos").catch(function(){return{}}),api("listarInspecciones").catch(function(){return{}}),api("getConfig").catch(function(){return{}})]).then(function(r){
     if(r[0]&&r[0].ok&&r[0].establecimientos)DB.establecimientos=mergeBy(DB.establecimientos,r[0].establecimientos.map(estFromServer),"id");
     if(r[1]&&r[1].ok&&r[1].inspecciones)DB.inspecciones=mergeInsp(DB.inspecciones,r[1].inspecciones);
     if(r[2]&&r[2].ok&&r[2].config)DB.config=Object.assign(defcfg(),r[2].config);
-    DB._ejemplo=false;persist();updateSync();if(!$("#app").hidden)render()}).catch(function(){updateSync()})}
+    DB._ejemplo=false;
+    if(FORM&&VIEW==="inspeccion"){var cur=DB.inspecciones.filter(function(x){return x.id===FORM.id})[0];
+      if(cur&&cur!==FORM&&estaValidado(cur)){persist();updateSync();numeroLlego(cur);return}}
+    persist();updateSync();if(!$("#app").hidden)render()}).catch(function(){updateSync()})}
 function mergeBy(local,server,key){var m={};server.forEach(function(s){m[String(s[key])]=s});local.forEach(function(l){var k=String(l[key]);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
 /* Fusion por campo. ANTES la copia del servidor reemplazaba entera a la local
    y se perdian las fotos, las observaciones, las firmas y el inspector (el
@@ -882,6 +949,11 @@ function fusionInsp(l,srv){
   }
   if(!lleno(r.inspector))r.inspector=srv.inspector;
   if(srv.snap)r.snap=srv.snap;              // el servidor manda: puede haberlos congelado él
+  /* v1.22: con número oficial, las respuestas del servidor mandan (son las del QR).
+     Antes ganaban las de la tablet y un cambio hecho después de emitir se
+     colaba en los hallazgos del certificado reimpreso. */
+  var srvResp=srv.ans&&Object.keys(srv.ans).length;
+  if(srvResp&&lleno(srv.codigo)){r.ans=srv.ans;r.fuentes=srv.fuentes||{}}
   if(!r.ans||!Object.keys(r.ans).length)r.ans=srv.ans;
   if(!r.fuentes||!Object.keys(r.fuentes).length)r.fuentes=srv.fuentes;
   if(!(r.recs&&r.recs.length))r.recs=srv.recs;
@@ -1826,6 +1898,9 @@ function nuevaInspeccion(estId){
 }
 function vInspeccion(v){
   if(!FORM){navTo("dashboard");return}
+  /* v1.22: un concepto con número oficial no se edita. El servidor no acepta el
+     cambio y salía un PDF con el mismo número y QR pero otro resultado. */
+  if(FORM.estado==="finalizada"&&estaValidado(FORM)){VIEW="certificado";render();return}
   FORM.modo="completa";
   if(FORM._step==null)FORM._step=0;
   var est=DB.establecimientos.find(function(x){return x.id===FORM.establecimientoId});
@@ -2186,7 +2261,7 @@ function renderThumbs(id,c){
   });
 }
 var _sv;function scheduleSave(){clearTimeout(_sv);_sv=setTimeout(saveInsp,400)}
-function saveInsp(){if(!FORM)return;if(["_nom","_dir","_rep","_nit","_raz","_tel","_act"].some(function(k){return FORM[k]!==undefined}))syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
+function saveInsp(){if(!FORM)return;if(VIEW==="inspeccion"&&FORM.estado==="finalizada"&&estaValidado(FORM)){numeroLlego(FORM);return}if(["_nom","_dir","_rep","_nit","_raz","_tel","_act"].some(function(k){return FORM[k]!==undefined}))syncEst();var i=DB.inspecciones.findIndex(function(x){return x.id===FORM.id});if(i<0)DB.inspecciones.unshift(FORM);else DB.inspecciones[i]=FORM;persist()}
 /* ===================== UBICACION DE LA INSPECCION =====================
    La inspeccion se hace EN el establecimiento: se toma la ubicacion sola al
    abrir el paso Datos y, al generar el concepto, se le asigna al
@@ -2289,6 +2364,13 @@ function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
   $("#vd").textContent=r.got+"/"+r.tot+" campos · X "+r.X+" · Y "+r.Y+" · "+r.raw+"/"+r.max+" pts";
 }
 function finalizar(){
+  /* v1.22: si mientras se editaba el concepto recibió su número oficial, ya no
+     se recalcula: el servidor no aceptaría el cambio. */
+  var ya=DB.inspecciones.filter(function(x){return x.id===FORM.id})[0];
+  if(estaValidado(FORM)||(ya&&estaValidado(ya))){if(ya&&ya!==FORM){FORM=ya}VIEW="certificado";render();
+    modal("Concepto ya emitido",'<p class="note">Este concepto recibió su número oficial mientras lo editabas, así que el cambio no se aplica. Si tiene un error, el administrador lo elimina y se hace una inspección nueva.</p>',"Entendido",function(){return true});return}
+  /* Si una copia anterior esperaba en la cola, sale ANTES de cualquier envío. */
+  var idF=FORM.id;QUEUE=QUEUE.filter(function(op){return !(op.a==="guardarInspeccion"&&op.p&&op.p.inspeccion&&op.p.inspeccion.idCliente===idF)});saveQ();
   saveInsp();aplicarGpsInsp();var r=compute(FORM);
   /* "Foto" de los datos del negocio al expedir: el certificado y su QR
      mostrarán SIEMPRE estos, aunque la ficha cambie después de dueño. */
@@ -2305,7 +2387,13 @@ function finalizar(){
   if(esOnline()){
     var e=DB.establecimientos.filter(function(x){return x.id===FORM.establecimientoId})[0];
     if(e)pushEst(e);
-    emitirConcepto(FORM);
+    /* Si la copia anterior ya iba viajando, se espera a que llegue (máx. 25 s):
+       el servidor responderá con la que guardó y adoptarServidor la aplica. */
+    var F=FORM, intentos=0;
+    (function emitirCuandoSeaSeguro(){
+      var viaja=_enVuelo&&_enVuelo.a==="guardarInspeccion"&&_enVuelo.p&&_enVuelo.p.inspeccion&&_enVuelo.p.inspeccion.idCliente===idF;
+      if(viaja&&intentos++<50){setTimeout(emitirCuandoSeaSeguro,500);return}
+      emitirConcepto(F)})();
   }
 }
 /* Pide al servidor el número oficial y el distintivo firmado. Sin ellos el
@@ -2319,6 +2407,7 @@ function emitirConcepto(f){
       var c=res.codigo||(res.inspeccion&&res.inspeccion.codigo);
       var g=res.sig||(res.inspeccion&&res.inspeccion.sig);
       var l=DB.inspecciones.filter(function(x){return x.id===destino.id})[0]||destino;
+      adoptarServidor(l,res);
       if(c)l.codigo=c; if(g)l.sig=g; l._sync=true;
       if(FORM&&FORM.id===destino.id){FORM.codigo=l.codigo;FORM.sig=l.sig;FORM._sync=true}
       persist();
@@ -2398,7 +2487,7 @@ function vCertificado(v){
 
   var act=el("div");act.style.cssText="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px";
   act.innerHTML='<button class="btn btn-p" id="pdf">⤓ Descargar certificado (PDF)</button>'+
-    '<button class="btn btn-g" id="edit">← Editar la inspección</button>'+
+    (validado?'':'<button class="btn btn-g" id="edit">← Editar la inspección</button>')+
     '<button class="btn btn-g btn-sm" id="borrarC" style="color:var(--rojo)">🗑 Eliminar</button>'+
     '<button class="btn btn-g btn-sm" id="done" style="margin-left:auto">Listo</button>';
   v.appendChild(act);
@@ -2420,7 +2509,8 @@ function vCertificado(v){
     emitirConcepto(FORM).then(function(ok){ if(!ok){be.disabled=false;be.textContent="Emitir ahora"} });
   });
   $("#pdf",act).addEventListener("click",function(){makePDF(r,est)});
-  $("#edit",act).addEventListener("click",function(){VIEW="inspeccion";render()});
+  if($("#edit",act))$("#edit",act).addEventListener("click",function(){VIEW="inspeccion";render()});
+  if(validado)act.insertAdjacentHTML("beforeend",'<p class="note" style="flex-basis:100%;margin:0">Este concepto ya tiene número oficial y no se puede editar. Si tiene un error, el administrador lo elimina y se hace una inspección nueva.</p>');
   $("#borrarC",act).addEventListener("click",function(){eliminarConcepto(FORM)});
   $("#done",act).addEventListener("click",function(){navTo("conceptos")});
 }
@@ -2749,7 +2839,7 @@ function armarPDF(r,est,firmaI,firmaR){
       var b64=d.output("datauristring");
       api("guardarCertificado",{codigo:FORM.codigo,base64:b64}).then(function(res){
         if(res&&res.ok){ var vivo=DB.inspecciones.filter(function(x){return x.id===F.id})[0]||F; vivo.pdfUrl=res.url; persist(); }
-        else toast("El PDF no se guardó en Drive: descárgalo otra vez con señal para que el QR lo abra.");
+        else toast(/^Solo quien/.test(String(res&&res.error||""))?mensajeServidor(res.error):"El PDF no se guardó en Drive: descárgalo otra vez con señal para que el QR lo abra.");
       }).catch(function(){toast("El PDF no se guardó en Drive: descárgalo otra vez con señal para que el QR lo abra.")});
     }catch(e){}
   }
@@ -2769,7 +2859,7 @@ function eliminarConcepto(insp,alTerminar){
   var aviso=emitido
     ? '<p class="note" style="color:var(--rojo)"><b>Este concepto ya fue emitido</b> con el número <span class="mono">'+esc(insp.codigo)+'</span>. '+
       'Si el ciudadano tiene el certificado impreso, su QR dejará de validar.</p>'+
-      '<p class="note">Se borra también del servidor y de las demás tablets.</p>'
+      (SES&&SES.demo?'<p class="note">Es un dato de ejemplo: solo se quita de esta demostración.</p>':'<p class="note">Se borra también del servidor y de las demás tablets.</p>')
     : '<p class="note">Es un borrador que nunca se emitió. Se borra solo de esta tablet.</p>';
   modal("Eliminar concepto",
     aviso+'<p class="note" style="margin-top:8px">Establecimiento: <b>'+esc(est.nombre||"(sin establecimiento)")+'</b> · '+fmt(insp.fecha)+'</p>',
@@ -3692,6 +3782,7 @@ function leerPin(){return $$("#pin input").map(function(x){return x.value}).join
 function limpiarPin(){$$("#pin input").forEach(function(x){x.value=""})}
 
 function afterLogin(){
+  _avisoSesion=false;
   try{sessionStorage.setItem(SESK,JSON.stringify(SES))}catch(e){}
   try{localStorage.setItem("cbvi_rt_ultimo_correo",(SES&&SES.email)||"")}catch(e){}
   $("#login").hidden=true;$("#app").hidden=false;
@@ -3701,9 +3792,12 @@ function afterLogin(){
 }
 function demoLogin(){
   SES={role:"admin",name:"Modo demostración",email:"",demo:true};
-  if(!DB.establecimientos.length){DB=seed();if(!DB.barridos)DB.barridos=[];persist()}
+  /* v1.22: ANTES, si el equipo ya tenía datos, la demostración entraba como
+     administrador sobre esos datos reales, sin PIN. Ahora siempre usa los de
+     ejemplo, solo en memoria. */
+  DB=seed();
   afterLogin();
-  toast("Modo demostración: los datos son de ejemplo y quedan solo en este dispositivo");
+  toast("Modo demostración: datos de ejemplo que se descartan al salir o recargar");
 }
 
 $("#btnLogin").addEventListener("click",function(){
@@ -3780,7 +3874,9 @@ $("#verDemo").addEventListener("click",function(ev){
 });
 
 function logout(){
+  var eraDemo=!!(SES&&SES.demo);
   SES=null;try{sessionStorage.removeItem(SESK)}catch(e){}
+  if(eraDemo){DB=cargarDB();FORM=null}     // se descarta lo de ejemplo
   $("#app").hidden=true;$("#login").hidden=false;limpiarPin();NAVHIST=[];updateSync();
 }
 
@@ -3830,7 +3926,7 @@ initTheme();
 try{
   var ses=JSON.parse(sessionStorage.getItem(SESK));
   if(ses&&ses.role){
-    SES=ses;$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync();
+    SES=ses;if(SES.demo)DB=seed();$("#login").hidden=true;$("#app").hidden=false;VIEW="dashboard";render();updateSync();
     setTimeout(avisoVersion,450);
     if(esOnline()){chequearServidor();pullAll().then(function(){flush();flushFotos()})}
   }
