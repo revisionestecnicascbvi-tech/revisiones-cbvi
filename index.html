@@ -363,6 +363,16 @@
   .opt.sel.good{background:var(--verde);border-color:var(--verde);color:#fff}
   .opt.sel.bad{background:var(--rojo);border-color:var(--rojo);color:#fff}
   .opt.sel.warn{background:var(--ambar);border-color:var(--ambar);color:#241a00}
+  /* v1.24: "No aplica" no suma ni resta; borde punteado para no confundirlo con un NO. */
+  .opt.na{border-style:dashed;border-color:var(--line-strong)}
+  .opt.na.sel{background:var(--gris-bg);color:var(--ink);border:2px dashed var(--ink)}
+  .nanote{margin-top:6px}
+  /* v1.24: pregunta sin responder a la que se llegó desde "Faltan N preguntas". */
+  .item.itfalta{background:var(--ambar-bg);box-shadow:inset 4px 0 0 var(--ambar)}
+  .faltalist{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px;min-width:0}
+  .faltalist .row-item{min-width:0}
+  .faltalist .row-item .meta{flex:1;min-width:0}
+  .faltalist .row-item small{display:block;margin-top:2px;overflow-wrap:anywhere}
   .itools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .mini{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:var(--r-sm);min-height:38px;padding:0 12px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
   @media (hover:hover) and (pointer:fine){.mini:hover{border-color:var(--ink);color:var(--ink)}}
@@ -647,9 +657,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="logos.js?v=1.23"></script>
-<script src="form-inspeccion.js?v=1.23"></script>
-<script src="guias.js?v=1.23"></script>
+<script src="logos.js?v=1.24"></script>
+<script src="form-inspeccion.js?v=1.24"></script>
+<script src="guias.js?v=1.24"></script>
 <script>
 (function(){
 "use strict";
@@ -661,8 +671,13 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.23";
+var APP_VERSION="1.24";
 var APP_VERSION_NOTAS=[
+  "v1.24: El concepto ya no se puede generar con preguntas sin responder: la app muestra cuántas faltan en cada módulo y lleva directo a ellas.",
+  "v1.24: Mientras llenas el formulario, el puntaje dice «Provisional» y cuántas preguntas faltan, en vez de «riesgo alto» desde la primera respuesta.",
+  "v1.24: «No aplica» se ve con borde punteado y avisa que no suma ni resta. Opciones nuevas: «La anterior no dejó requerimientos» (módulo 3) y «No almacena mercancía» (módulo 5).",
+  "v1.24: Dibujos nuevos en «¿Cómo lo reviso?»: personal (módulo 2), emergencias del último año (módulo 3) y cuándo aplican los módulos 8 y 9.",
+  "v1.24: 25 preguntas que no tenían ayuda ahora traen su explicación (plan de emergencias, brigada, póliza, luces, puertas cortafuego y otras).",
   "v1.23: Al entrar, si el correo o el PIN no coinciden, el mensaje es el mismo. Tras varios intentos fallidos con un correo hay que esperar unos minutos antes de volver a intentar.",
   "v1.23: Si el servidor no acepta algún envío, el inicio lo muestra y puedes copiar el detalle para el administrador. Antes quedaba escondido.",
   "v1.23: Si la memoria del equipo se está llenando, la app avisa antes de que deje de guardar, y avisa en el momento si algo no se pudo guardar.",
@@ -1354,12 +1369,14 @@ function hallazgosDe(f){
 }
 function compute(f){
   var intermedia=f.modo==="intermedia";
-  var X=0,Y=0,got=0,tot=0,recs=[],sumMax=0,sumVal=0;
+  /* faltan (v1.24): preguntas visibles sin responder, en orden. Antes contaban
+     0 en silencio y el concepto se podía generar con 3 respuestas. */
+  var X=0,Y=0,got=0,tot=0,recs=[],sumMax=0,sumVal=0,faltan=[];
   MOD.forEach(function(m){
     var toggleNo=false, modVal=0, modMax=0;
     if(m.toggle){ var tv=f.ans[m.toggle.id];
       var tInc=!intermedia||INTERT.has(m.toggle.id);
-      if(tInc){tot++; if(tv)got++;}
+      if(tInc){tot++; if(tv)got++; else faltan.push({m:m.id,id:m.toggle.id,q:m.toggle.label});}
       if(tv==="NO"){toggleNo=true; modVal+=m.toggle.noScore; modMax+=m.toggle.noScore;}
     }
     if(!toggleNo){ m.items.forEach(function(it){
@@ -1379,14 +1396,14 @@ function compute(f){
            caracterizacion (edificacion nueva, area, fuentes de ignicion...)
            suman al puntaje pero no son un "no cumple" para el propietario. */
         if(it.tipo!=="fuentes"&&p!=null&&p<mx&&(!CONTEXTO.has(it.id)||(oa&&oa.hallazgo)))recs.push(mkHallazgo(f,m,it,f.ans[it.id]));
-      }
+      } else faltan.push({m:m.id,id:it.id,q:it.label});
     });}
     if(m.clase==="agravante")X+=modVal; else if(m.clase==="reductor")Y+=modVal;
     sumMax+=modMax; sumVal+=modVal;
   });
   var raw=sumVal, max=sumMax||1, s100=Math.round(raw/max*100);
   var band=(META.matriz||[]).find(function(b){return s100>=b.min&&s100<=b.max})||{riesgo:"—",favorable:false,texto:""};
-  return {X:X,Y:Y,raw:raw,max:max,s100:s100,band:band,got:got,tot:tot,recs:recs,intermedia:intermedia};
+  return {X:X,Y:Y,raw:raw,max:max,s100:s100,band:band,got:got,tot:tot,recs:recs,intermedia:intermedia,faltan:faltan};
 }
 
 /* ======================================================= NAV */
@@ -2068,7 +2085,7 @@ function vInspeccion(v){
   });
   if($("#pv",nav))$("#pv",nav).addEventListener("click",function(){FORM._step--;render();window.scrollTo(0,0)});
   if($("#nx",nav))$("#nx",nav).addEventListener("click",function(){FORM._step++;render();window.scrollTo(0,0)});
-  if($("#gen",nav))$("#gen",nav).addEventListener("click",function(){var r=compute(FORM);if(r.got<3){toast("Diligencia la inspección primero");return}finalizar()});
+  if($("#gen",nav))$("#gen",nav).addEventListener("click",function(){if(listoParaConcepto())finalizar()});
   buildScorebar();refreshScore();
 }
 function renderDatos(body,est){
@@ -2237,15 +2254,17 @@ function renderModuleStep(body,m){
   applyDeps(wrap);
 }
 function renderResumen(body,est){
-  var r=compute(FORM);var fav=r.band.favorable;
-  var col=r.got?(fav?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):"var(--gris)";
+  var r=compute(FORM);var fav=r.band.favorable, falta=r.faltan.length;
+  var col=(r.got&&!falta)?(fav?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):(falta&&r.got?"var(--ambar)":"var(--gris)");
   var c=el("div","card pad");
   c.innerHTML='<div class="metacard"><div class="ring" style="--p:'+(r.got?r.s100:0)+'"><div class="in"><b>'+(r.got?r.s100:0)+'</b><small>/100</small></div></div>'+
-    '<div class="metalist"><div style="font-family:var(--ff-h);font-size:18px;color:'+col+'">'+(r.got?(fav?"Concepto FAVORABLE":"No favorable — riesgo "+String(r.band.riesgo).toLowerCase()):"Faltan campos por diligenciar")+'</div>'+
+    '<div class="metalist"><div style="font-family:var(--ff-h);font-size:18px;color:'+col+'">'+(falta?textoFaltan(falta):(fav?"Concepto FAVORABLE":"No favorable — riesgo "+String(r.band.riesgo).toLowerCase()))+'</div>'+
     '<p class="note">'+r.got+' de '+r.tot+' campos aplicables · X '+r.X+' · Y '+r.Y+' · '+r.raw+'/'+r.max+' pts</p>'+
-    '<p class="note">'+esc(r.band.texto||"")+'</p>'+
+    (falta?'<p class="note">Resultado provisional: lo que falta cuenta como cero.</p>':'<p class="note">'+esc(r.band.texto||"")+'</p>')+
     (r.recs&&r.recs.length?'<p class="note"><b>'+r.recs.length+'</b> hallazgo(s) para recomendar en el concepto.</p>':'')+'</div></div>'+
-    '<p class="note" style="margin-top:14px">Revisa y pulsa <b>Generar concepto</b> para el certificado con QR.</p>';
+    (falta?'<p class="note" style="margin-top:14px">Responde lo que falta para poder generar el concepto. Toca un módulo para ir directo:</p>'+faltanHTML(r)
+          :'<p class="note" style="margin-top:14px">Revisa y pulsa <b>Generar concepto</b> para el certificado con QR.</p>');
+  if(falta)enlazarFaltan(c);
   body.appendChild(c);
 }
 function buildScorebar(){
@@ -2261,17 +2280,38 @@ function buildScorebar(){
   medir();
   if(window.ResizeObserver)new ResizeObserver(medir).observe(sb);
   document.body.classList.add("has-scorebar");
-  $("#sbGen",sb).addEventListener("click",function(){var r=compute(FORM);if(r.got<3){toast("Diligencia la inspección primero");return}finalizar()});
+  $("#sbGen",sb).addEventListener("click",function(){if(listoParaConcepto())finalizar()});
 }
+/* v1.24: el concepto solo sale con todo respondido. Lo que falta contaba 0 sin
+   aparecer como hallazgo, y con número oficial ya no se puede corregir. */
+function textoFaltan(n){return n===1?"Falta 1 pregunta":("Faltan "+n+" preguntas")}
+function faltanHTML(r){var g={};r.faltan.forEach(function(x){(g[x.m]=g[x.m]||[]).push(x)});
+  return '<div class="faltalist">'+MOD.filter(function(m){return g[m.id]}).map(function(m){var l=g[m.id];
+    return '<button type="button" class="row-item" data-fm="'+esc(m.id)+'"><div class="meta"><b>'+esc(m.titulo.replace(/^Módulo\s*(\d+)\.\s*/,"M$1 · "))+'</b>'+
+      '<small>'+(l.length===1?"1 sin responder":(l.length+" sin responder"))+' · '+esc(l[0].q)+'</small></div><span aria-hidden="true">→</span></button>'}).join("")+'</div>'}
+function irAFaltante(mid){var idx=-1;MOD.forEach(function(m,i){if(m.id===mid)idx=i});if(idx<0||!FORM)return;
+  FORM._step=idx+1;render();
+  setTimeout(function(){if(!FORM)return;var r=compute(FORM),primero=null;
+    r.faltan.forEach(function(x){if(x.m!==mid)return;var e=document.querySelector('[data-it="'+x.id+'"]');
+      if(e&&e.offsetParent!==null){e.classList.add("itfalta");if(!primero)primero=e}});
+    if(primero)primero.scrollIntoView({block:"center"})},60)}
+function enlazarFaltan(root,antes){Array.prototype.slice.call(root.querySelectorAll("[data-fm]")).forEach(function(b){
+  b.addEventListener("click",function(){if(antes)antes();irAFaltante(b.dataset.fm)})})}
+function listoParaConcepto(){var r=compute(FORM);if(!r.faltan.length)return true;
+  modal(textoFaltan(r.faltan.length),'<p class="note">El concepto se genera con todo el formulario respondido: lo que falte contaría como cero y no saldría como hallazgo. Toca un módulo para ir a lo que falta.</p>'+faltanHTML(r),
+    "Ir a la primera",function(){irAFaltante(r.faltan[0].m);return true});
+  var mr=$("#modalRoot");enlazarFaltan(mr,function(){cerrarModal(mr)});
+  return false}
 function renderToggle(m){
-  var it=el("div","item");
+  var it=el("div","item");it.dataset.it=m.toggle.id;
   it.innerHTML='<div class="q"><b>'+esc(m.toggle.label)+'</b></div>';
   var gt=GUIAS[m.toggle.id]||m.toggle.nota;
   if(gt)it.insertAdjacentHTML("beforeend",'<div class="guia">'+esc(gt)+'</div>');
+  guiaBoton(m.toggle.id,it);
   var opts=el("div","opts");
   [["SI","Sí, aplica"],["NO","No aplica"]].forEach(function(p){
     var o=el("button","opt",p[1]);if(FORM.ans[m.toggle.id]===p[0])o.classList.add("sel");
-    o.addEventListener("click",function(){FORM.ans[m.toggle.id]=p[0];scheduleSave();$$(".opt",opts).forEach(function(x){x.classList.remove("sel")});o.classList.add("sel");applyToggle(m,o.closest(".card"));refreshScore()});
+    o.addEventListener("click",function(){FORM.ans[m.toggle.id]=p[0];scheduleSave();$$(".opt",opts).forEach(function(x){x.classList.remove("sel")});o.classList.add("sel");it.classList.remove("itfalta");applyToggle(m,o.closest(".card"));refreshScore()});
     opts.appendChild(o);
   });
   it.appendChild(opts);return it;
@@ -2291,6 +2331,24 @@ function guiaHTML(d){if(!d)return "";
   if(d.tips&&d.tips.length)h+='<ul class="gtips">'+li(d.tips)+'</ul>';
   if(d.ref)h+='<p class="gref">Referencia: '+esc(d.ref)+'</p>';
   return h}
+/* Botón "¿Cómo lo reviso?" (v1.24: también en "¿Aplica el módulo?"). */
+function guiaBoton(id,wrap){
+  var topic=ITEM_TOPIC[id];
+  if(!topic||!DIAGRAMS[topic])return;
+  var gb=el("button","guidebtn");gb.type="button";gb.innerHTML="◉ ¿Cómo lo reviso?";gb.setAttribute("aria-expanded","false");
+  var box=el("div","guidebox");box.hidden=true;
+  /* El SVG es contenido fijo de guias.js (sin datos del usuario); todo
+     texto pasa por esc(). Se arma al abrir: 80+ ítems no cargan 80 SVG. */
+  gb.addEventListener("click",function(){
+    if(!box.dataset.ok){box.innerHTML=guiaHTML(DIAGRAMS[topic]);box.dataset.ok="1"}
+    box.hidden=!box.hidden;gb.setAttribute("aria-expanded",box.hidden?"false":"true");
+    gb.innerHTML=box.hidden?"◉ ¿Cómo lo reviso?":"◉ Ocultar guía"});
+  wrap.appendChild(gb);wrap.appendChild(box);
+}
+/* Clase de un botón de respuesta. "No aplica" (na) va con borde punteado: no
+   suma ni resta, y así no se confunde con un NO. */
+function clsOpt(o,sel,mx){var c="opt"+(o.na?" na":"");
+  if(sel)c+=" sel"+(o.p===mx?" good":(o.p===0?" bad":""));return c}
 function renderItem(m,it){
   var wrap=el("div","item");wrap.dataset.it=it.id;
   if(it.dependsOn)wrap.dataset.dep="1";
@@ -2298,18 +2356,7 @@ function renderItem(m,it){
   wrap.innerHTML='<div class="q">'+esc(it.label)+(it.score!==false&&it.tipo!=="fuentes"&&it.tipo!=="texto"?' <span class="note">(máx '+itemMax(it)+')</span>':'')+'</div>';
   var g=GUIAS[it.id]||it.nota;
   if(g)wrap.insertAdjacentHTML("beforeend",'<div class="guia">'+esc(g)+'</div>');
-  var topic=ITEM_TOPIC[it.id];
-  if(topic&&DIAGRAMS[topic]){
-    var gb=el("button","guidebtn");gb.type="button";gb.innerHTML="◉ ¿Cómo lo reviso?";gb.setAttribute("aria-expanded","false");
-    var box=el("div","guidebox");box.hidden=true;
-    /* El SVG es contenido fijo de guias.js (sin datos del usuario); todo
-       texto pasa por esc(). Se arma al abrir: 80+ ítems no cargan 80 SVG. */
-    gb.addEventListener("click",function(){
-      if(!box.dataset.ok){box.innerHTML=guiaHTML(DIAGRAMS[topic]);box.dataset.ok="1"}
-      box.hidden=!box.hidden;gb.setAttribute("aria-expanded",box.hidden?"false":"true");
-      gb.innerHTML=box.hidden?"◉ ¿Cómo lo reviso?":"◉ Ocultar guía"});
-    wrap.appendChild(gb);wrap.appendChild(box);
-  }
+  guiaBoton(it.id,wrap);
   if(EJEMPLOS[it.id]){
     var eb=el("button","ejbtn");eb.type="button";eb.innerHTML="💬 Ejemplo";
     var ebx=el("div","ejbox");ebx.hidden=true;ebx.textContent=EJEMPLOS[it.id];
@@ -2325,12 +2372,16 @@ function renderItem(m,it){
       lab.appendChild(cb);lab.appendChild(el("span","",fn));fg.appendChild(lab)});
     wrap.appendChild(fg);
   } else {
-    var opts=el("div","opts");
-    it.opts.forEach(function(o){if(o.oculta&&FORM.ans[it.id]!==o.v)return;var mx=itemMax(it);var b=el("button","opt",o.l||o.v);
-      if(FORM.ans[it.id]===o.v)b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));
-      b.addEventListener("click",function(){FORM.ans[it.id]=o.v;scheduleSave();$$(".opt",opts).forEach(function(x){x.className="opt"});b.className="opt sel "+(o.p===mx?"good":(o.p===0?"bad":""));applyDeps(wrap.parentNode);refreshScore()});
+    var opts=el("div","opts"), bts=[], mx=itemMax(it);
+    var nn=el("p","note nanote","Esta respuesta no suma ni resta: queda fuera del puntaje.");
+    /* En m7_requiere el aviso de la pregunta madre ya lo dice (todo el módulo sale). */
+    var notaNA=function(){var oa=optDe(it,FORM.ans[it.id]);nn.hidden=!(oa&&oa.na)||it.id==="m7_requiere"};
+    it.opts.forEach(function(o){if(o.oculta&&FORM.ans[it.id]!==o.v)return;var b=el("button",clsOpt(o,FORM.ans[it.id]===o.v,mx),o.l||o.v);b.type="button";
+      bts.push([b,o]);
+      b.addEventListener("click",function(){FORM.ans[it.id]=o.v;scheduleSave();bts.forEach(function(q){q[0].className=clsOpt(q[1],q[1]===o,mx)});wrap.classList.remove("itfalta");notaNA();applyDeps(wrap.parentNode);refreshScore()});
       opts.appendChild(b)});
     wrap.appendChild(opts);
+    notaNA();wrap.appendChild(nn);
   }
   if(GATES.has(it.id)){var dn=el("div","depnote");dn.hidden=true;dn.setAttribute("aria-live","polite");wrap.appendChild(dn)}
   var tools=el("div","itools");
@@ -2488,10 +2539,13 @@ function datosCert(f,e){
   return o;
 }
 function refreshScore(){var r=compute(FORM);var mg=$("#mg");if(!mg)return;
-  var col=r.got?(r.band.favorable?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):"var(--gris)";
+  /* v1.24: mientras falte algo el resultado es provisional (lo que falta cuenta
+     0): antes decía "riesgo alto" desde la primera respuesta. */
+  var falta=r.faltan.length;
+  var col=(r.got&&!falta)?(r.band.favorable?"var(--verde)":(r.band.riesgo==="MEDIO"?"var(--ambar)":"var(--rojo)")):"var(--gris)";
   mg.style.setProperty("--p",r.s100);mg.style.setProperty("--c",col);$("#mgv").textContent=r.got?r.s100:"0";
-  $("#vr").textContent=r.got?(r.band.favorable?"Concepto FAVORABLE":"No favorable — riesgo "+String(r.band.riesgo).toLowerCase()):"Diligencia la inspección";
-  $("#vr").style.color=r.got?col:"var(--ink)";
+  $("#vr").textContent=!r.got?"Diligencia la inspección":falta?("Provisional · "+textoFaltan(falta).toLowerCase()):(r.band.favorable?"Concepto FAVORABLE":"No favorable — riesgo "+String(r.band.riesgo).toLowerCase());
+  $("#vr").style.color=(r.got&&!falta)?col:"var(--ink)";
   $("#vd").textContent=r.got+"/"+r.tot+" campos · X "+r.X+" · Y "+r.Y+" · "+r.raw+"/"+r.max+" pts";
 }
 function finalizar(){

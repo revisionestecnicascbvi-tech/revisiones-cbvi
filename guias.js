@@ -34,7 +34,7 @@ window.GUIAS = {
   "m8_ilumnorma":"Revisa la etiqueta: autonomía de 90 minutos o más. Al prenderse deben dejar ver el piso de toda la ruta.",
   "m8_monitoreo":"Puede ser vigilancia, panel o cámara, o una persona responsable durante toda la jornada.",
   "m9_briclase":"Marca la que diga el certificado.",
-  "m3_cumple":"¿Arreglaron lo recomendado en la visita anterior? Si es la primera visita, marca «Primera visita»: no suma, no resta ni sale como hallazgo.",
+  "m3_cumple":"¿Arreglaron lo recomendado en la visita anterior? Si es la primera visita, marca «Primera visita»; si la anterior no dejó nada por corregir, «La anterior no dejó requerimientos». Las dos no suman, no restan ni salen como hallazgo.",
   "m3_emerg":"¿Hubo incendio u otra emergencia en el último año?",
   "m3_reporte":"Pide el documento o la constancia del reporte. Si no hubo emergencias ni riesgos que reportar, marca «No aplica».",
   "m3_sistemas":"¿Funcionaron extintores, alarmas y salidas? Si no hizo falta usarlos (ej. accidente laboral), marca «No se necesitaron»: no suma ni resta.",
@@ -44,7 +44,7 @@ window.GUIAS = {
   "m4_suelo":"¿El uso del suelo permite esta actividad aquí? (consulta POT/planeación).",
   "m4_altura":"Número de pisos sobre el nivel de la calle.",
   "m4_areapiso":"Área aproximada de cada piso en m² (usa el flexómetro).",
-  "m5_almac":"Altura a la que apilan la mercancía. Más de 3 m dificulta apagar y evacuar. Si no guardan mercancía, marca 0 - 3 m.",
+  "m5_almac":"Altura a la que apilan la mercancía. Más de 3 m dificulta apagar y evacuar. Si no guardan mercancía, marca «No almacena mercancía».",
   "m5_fuentes":"Marca SOLO lo que veas presente. «Eléctricas» no es tener una toma normal: márcala solo si hay instalación o equipos mal usados o sin protección cerca de material que arda. Si no hay ninguna fuente, no marques nada: la pregunta de activación se da por Bajo.",
   "m5_activ":"¿Qué tan probable es que esas fuentes enciendan algo? (cercanía a combustibles).",
   "m5_inflam":"Mira lo que hay dentro, no la estructura (esa ya se califica en Tipo de construcción). Baja: poco que arda, sobre todo metal, vidrio o cerámica. Media: cartón, papel, madera o ropa en cantidad normal y ordenados. Alta: líquidos o gases inflamables, espuma, icopor, o mucho material suelto.",
@@ -62,7 +62,7 @@ window.GUIAS = {
   "m7_instal":"Colgados a la altura correcta (ver diagrama).",
   "m7_recarga":"Mira la etiqueta: recarga de menos de 1 año y manómetro en verde.",
   "m7_fisico":"Sin golpes, óxido, manguera rota ni seguro suelto.",
-  "m8_aplica":"Criterio CBVI: marca que no aplica solo si caben hasta 25 personas, la salida da directo a la calle a nivel del piso y se llega a ella en 15 m o menos. Si dudas, sí aplica.",
+  "m8_aplica":"Criterio CBVI: marca que no aplica solo si caben hasta 25 personas, la salida da directo a la calle a nivel del piso y se llega a ella en 15 m o menos. Si dudas, sí aplica. Ojo: aquí «No aplica» SÍ suma: da los 45 puntos del módulo.",
   "m8_egreso":"¿Hay una ruta continua y libre desde cualquier punto hasta la calle? Si la única salida pasa por cocina o bodega, tiene candado o termina en un encierro, marca NO.",
   "m8_visible":"Señal de SALIDA visible (ver diagrama).",
   "m8_despej":"Rutas y salidas sin cajas, mesas ni candados (ver diagrama).",
@@ -74,11 +74,37 @@ window.GUIAS = {
   "m8_luces":"¿Hay lámparas de emergencia instaladas?",
   "m8_descext":"La gente debe terminar saliendo a la calle o a un sitio seguro.",
   "m8_escext":"Si es de un solo piso y no las necesita, marca «No aplica».",
-  "m9_aplica":"Criterio CBVI: el Decreto 1072 obliga a todo empleador a tener plan. Marca que no aplica solo si lo atiende el mismo dueño, sin empleados, y el riesgo es bajo. Si dudas, sí aplica.",
+  "m9_aplica":"Criterio CBVI: el Decreto 1072 obliga a todo empleador a tener plan. Marca que no aplica solo si lo atiende el mismo dueño, sin empleados, y el riesgo es bajo. Si dudas, sí aplica. Ojo: aquí «No aplica» SÍ suma: da los 18 puntos del módulo.",
   "m9_plan":"Documento con qué hacer en emergencia, rutas y responsables.",
   "m9_simul":"Pide fecha y evidencia (fotos, lista de asistencia). El Decreto 1072 pide mínimo uno al año.",
   "m9_brigada":"¿Hay personas capacitadas para primera respuesta?",
-  "m10_seguro":"¿Tienen póliza de incendio vigente? Si respondes NO, la cobertura y la aseguradora se omiten."
+  "m10_seguro":"¿Tienen póliza de incendio vigente? Si respondes NO, la cobertura y la aseguradora se omiten.",
+  /* v1.24: ayudas para las preguntas que no tenían. */
+  "m3_tipo":"Marca la más grave del último año. Si hubo varias, anota las otras en ✎ Nota.",
+  "m3_detuvo":"SI si tuvieron que cerrar o parar el trabajo por esa emergencia, aunque fuera un solo día.",
+  "m4_lic":"Pide la licencia de construcción o la de la última reforma. Si no existe o es de otra dirección, marca NO. No sale como hallazgo: es un dato de la edificación.",
+  "m4_actsub":"SI si en el sótano funciona otro negocio o se atiende público de otra actividad (ej. parqueadero o bodega de otro). Guardar mercancía del mismo local no cuenta.",
+  "m8_anchoesc":"Mide entre pasamanos, en el punto más angosto. Si en la ruta no hay escaleras, marca «No aplica». Menos de 0,90 m sale como hallazgo.",
+  "m8_anchoramp":"Mide el paso libre de la rampa, en el punto más angosto. Si en la ruta no hay rampas, marca «No aplica». Menos de 0,90 m sale como hallazgo.",
+  "m8_cierre":"Abre la puerta y suéltala: debe cerrarse sola y quedar ajustada. Si la amarran, la calzan o le quitaron el brazo, marca NO.",
+  "m8_autoensayo":"Busca en la lámpara una luz o rótulo de auto-ensayo (auto-test): se prueba sola cada cierto tiempo. Si solo tiene el botón manual de TEST, marca NO.",
+  "m8_proced":"Pide el procedimiento escrito: qué se revisa (señales, lámparas, salidas), cada cuánto y quién lo hace.",
+  "m8_procaño":"Pide los registros llenos de los últimos 12 meses: listas de chequeo, informes o facturas de mantenimiento con fecha.",
+  "m9_r_inc":"Busca en el plan el análisis de riesgos: el incendio debe estar, con su procedimiento.",
+  "m9_r_fugas":"Aplica si usan gas (también pipeta de cocina) u otras sustancias que puedan fugarse. Si no usan nada de eso, marca «No aplica».",
+  "m9_r_derr":"Aplica si manejan combustibles, aceites o químicos en cantidad. Si no, marca «No aplica».",
+  "m9_r_expl":"Aplica si hay cilindros de gas, combustibles, pólvora o polvos que puedan explotar. Si no hay nada de eso, marca «No aplica».",
+  "m9_r_bleve":"Aplica si hay cilindros o tanques de gas a presión, incluida la pipeta de la cocina. Sin ellos, marca «No aplica».",
+  "m9_s_emp":"Pregunta a un empleado al azar por dónde sale y dónde se reúne. Si no sabe, el plan no está socializado: marca NO.",
+  "m9_s_bom":"Pide la constancia de que el plan se entregó o se revisó con el Cuerpo de Bomberos.",
+  "m9_s_com":"Pide evidencia de que los vecinos o el público conocen lo que les toca: acta de reunión, aviso o circular.",
+  "m9_s_soc":"Pide la constancia de que se compartió con Defensa Civil, Cruz Roja, gestión del riesgo u otro organismo de socorro.",
+  "m9_bricert":"Pide el certificado de la brigada: debe decir la clase o el nivel y quién la certificó. Un curso suelto de primeros auxilios no es certificación.",
+  "m9_brinivel":"El plan de emergencias dice qué nivel necesita la brigada. Marca SI si el certificado tiene ese nivel o uno mayor.",
+  "m9_bribom":"Mira quién firma el certificado. Marca SI solo si lo expidió un cuerpo de bomberos.",
+  "m9_s_bri":"Pregúntale a un brigadista qué hace si hay un incendio: debe conocer su papel en el plan.",
+  "m10_poliza":"Lee en la póliza la actividad y la dirección aseguradas. Si dice otra actividad (ej. vivienda) u otra dirección, marca NO.",
+  "m10_aseg":"Escribe el nombre de la aseguradora tal como aparece en la póliza."
 };
 
 /* Atajos: el inspector elige el tipo de negocio y la app pone ocupación + riesgo */
@@ -112,7 +138,11 @@ window.OCUP_QUICK = [
    quedan globales); solo S y T siguen globales por compatibilidad.
    ========================================================================= */
 window.ITEM_TOPIC = {
+  /* M2 */ "m2_num":"empleados","m2_comp":"empleados",
   /* M3 */ "m3_cumple":"antecedentes","m3_reporte":"antecedentes",
+           "m3_emerg":"emergencias","m3_tipo":"emergencias","m3_detuvo":"emergencias","m3_sistemas":"emergencias",
+  /* ¿Aplica el módulo? (v1.24): deciden 45 y 18 puntos de una vez. */
+           "m8_aplica":"aplica_m8","m9_aplica":"aplica_m9",
   /* M4 */ "m4_nueva":"licencias","m4_nsr":"licencias","m4_remod":"licencias","m4_lic":"licencias","m4_suelo":"licencias",
            "m4_tipo":"estructura","m4_propv":"propagacion","m4_proph":"propagacion",
            "m4_altura":"edificacion","m4_areapiso":"edificacion","m4_nsub":"edificacion","m4_areasub":"edificacion","m4_actsub":"edificacion",
@@ -181,6 +211,14 @@ window.DIAGRAMS = (function(){
   /* x,y = centro de la rueda sobre el piso */
   function silla(x,y){return '<circle cx="'+x+'" cy="'+(y-11)+'" r="11"/><circle cx="'+(x-2)+'" cy="'+(y-42)+'" r="5"/>'+
     '<path d="M'+(x-2)+' '+(y-36)+' V'+(y-19)+' H'+(x+13)+' V'+(y-6)+' H'+(x+20)+'"/>'}
+  /* Árbol de decisión (v1.24): recuadro con renglones [texto, tamaño, peso, color]
+     y flechas con su rótulo ("sí" / "no"). */
+  function pregunta(x,y,w,h,ls){var o=rc(x,y,w,h,{r:4,f:"var(--surface)"}), y0=y+h/2-(ls.length-1)*6.5+4;
+    ls.forEach(function(l,i){o+=tx(x+10,y0+i*13,l[0],{s:l[1]||11,w:l[2]||600,c:l[3]})});return o}
+  function flechaV(x,y1,y2,t){return '<path d="M'+x+' '+y1+' V'+y2+' M'+(x-5)+' '+(y2-7)+' L'+x+' '+y2+' L'+(x+5)+' '+(y2-7)+'"/>'+(t?tx(x+8,(y1+y2)/2+4,t,{s:10,c:MU}):'')}
+  function flechaH(x1,y,x2,t){return flecha(x1,y,x2)+(t?tx((x1+x2)/2-2,y-8,t,{s:10,c:MU,a:"middle"}):'')}
+  function aplica(x,y,w,h,ls){var o=rc(x,y,w,h,{r:4,c:AM,w:2.4}), y0=y+h/2-(ls.length-1)*7+4;
+    ls.forEach(function(l,i){o+=tx(x+w/2,y0+i*14,l[0],{s:l[1]||10,w:l[2]||600,c:l[3],a:"middle"})});return o}
 
   return {
   antecedentes:{titulo:"Visita anterior",
@@ -188,7 +226,7 @@ window.DIAGRAMS = (function(){
       [["Señalizar salida","ya está instalada"],["Recargar extintor","hay factura"],["Despejar pasillo","hoy está libre"]],
       [["Señalizar salida","sigue sin señal"],["Recargar extintor","dicen, sin prueba"],["Despejar pasillo","sigue con cajas"]],
       "Corregido","Sigue igual",32),
-    pasos:["Busca el negocio en la app (renovación) o pide al dueño el concepto de la visita pasada.","Toma la lista de hallazgos de esa visita y revísalos uno por uno en el local.","Si es la primera vez que el CBVI lo revisa, marca «Primera visita»: no suma, no resta y no sale como hallazgo.","Reporte a la autoridad: si no hubo emergencias ni riesgos que reportar, marca «No aplica»."],
+    pasos:["Busca el negocio en la app (renovación) o pide al dueño el concepto de la visita pasada.","Toma la lista de hallazgos de esa visita y revísalos uno por uno en el local.","Si es la primera vez que el CBVI lo revisa, marca «Primera visita»; si la visita anterior no dejó nada por corregir, «La anterior no dejó requerimientos». Las dos no suman, no restan y no salen como hallazgo.","Reporte a la autoridad: si no hubo emergencias ni riesgos que reportar, marca «No aplica»."],
     cumple:["Todo lo pedido la vez pasada está corregido.","Hay evidencia: factura de recarga, señal instalada, foto, documento."],
     noCumple:["Uno o más hallazgos de la visita anterior siguen igual.","Dicen que lo arreglaron pero no hay cómo comprobarlo."]},
 
@@ -530,7 +568,70 @@ window.DIAGRAMS = (function(){
       "Sirve","No sirve",28),
     pasos:["Pide la póliza o su carátula (primera hoja).","Mira las fechas de vigencia: el día de hoy debe estar dentro.","Verifica que «incendio» esté en los amparos y que la dirección y la actividad sean las de este local.","Anota la aseguradora. Si no tienen póliza, responde NO: las demás preguntas del seguro se omiten."],
     cumple:["Póliza vigente con amparo de incendio.","Dirección y actividad asegurada coinciden con el local."],
-    noCumple:["Póliza vencida o solo de otros riesgos (robo, responsabilidad civil).","Asegura otra dirección u otra actividad (ej. vivienda cuando es bodega)."]}
+    noCumple:["Póliza vencida o solo de otros riesgos (robo, responsabilidad civil).","Asegura otra dirección u otra actividad (ej. vivienda cuando es bodega)."]},
+
+  /* ---- v1.24: dibujos de las preguntas que no tenían ---- */
+  empleados:{titulo:"Personal del establecimiento",
+    svg:svg(tx(80,16,"¿Cuántos trabajan?",{s:11,a:"middle"})+
+      persona(22,70)+persona(45,70)+persona(68,70)+persona(91,70)+persona(114,70)+persona(137,70)+
+      cotah(88,14,146,"todos, con el dueño")+
+      rc(6,104,46,24,{r:3,c:VE})+tx(29,120,"1-10",{s:11,c:VE,w:700,a:"middle"})+
+      rc(57,104,46,24,{r:3,c:AM})+tx(80,120,"11-50",{s:11,c:AM,w:700,a:"middle"})+
+      rc(108,104,46,24,{r:3,c:RO})+tx(131,120,"51+",{s:11,c:RO,w:700,a:"middle"})+
+      tx(80,144,"menos gente, sale más rápido",{s:9.5,c:MU,a:"middle"})+
+      MID+
+      tx(240,16,"¿Alguien con dificultad",{s:11,a:"middle"})+tx(240,29,"para moverse?",{s:11,a:"middle"})+
+      ln(176,100,304,100,{c:MU,w:1.4})+
+      '<g stroke="'+AM+'">'+silla(206,100)+'</g>'+persona(262,100,1.3,AM)+ln(276,76,282,100,{c:AM})+
+      tx(240,122,"silla, muletas, bastón",{s:10,c:AM,a:"middle"})+tx(240,135,"o lesión que lo frene",{s:10,c:AM,a:"middle"}),150),
+    pasos:["Cuenta a todas las personas que trabajan en el turno con más gente, incluido el dueño si atiende.","Incluye a los fijos aunque no sean de nómina (vigilante, aseo). Los clientes no: esos van en el aforo del módulo 8.","Pregunta si alguien del personal usa silla de ruedas, muletas o bastón, o tiene una lesión que no lo deje salir rápido."],
+    okT:"Menor riesgo", noT:"Mayor riesgo",
+    cumple:["Pocas personas trabajando al tiempo: se evacúa rápido.","Todos pueden salir por sus propios medios."],
+    noCumple:["51 o más personas trabajando al tiempo.","Alguien necesita ayuda para evacuar: el plan debe decir quién lo ayuda."]},
+
+  emergencias:{titulo:"Emergencias del último año",
+    svg:svg(tx(80,16,"¿Hubo emergencias",{s:11,a:"middle"})+tx(80,29,"en el último año?",{s:11,a:"middle"})+
+      ln(14,78,146,78)+ln(14,72,14,84)+ln(146,72,146,84)+
+      '<path d="M96 74 C82 62 92 50 96 36 C104 48 114 54 106 70 C104 76 99 77 96 74 Z" fill="'+EX+'" stroke="'+EX+'"/>'+
+      '<path d="M98 72 C92 66 96 60 98 54 C102 60 105 64 102 70 Z" fill="'+AM+'" stroke="none"/>'+
+      tx(14,98,"hace 1 año",{s:10,c:MU})+tx(146,98,"hoy",{s:10,c:MU,a:"end"})+
+      tx(80,120,"incendio, fuga, derrame,",{s:10,c:MU,a:"middle"})+tx(80,133,"corto, accidente laboral",{s:10,c:MU,a:"middle"})+
+      MID+
+      tx(240,16,"¿Funcionaron",{s:11,a:"middle"})+tx(240,29,"los equipos?",{s:11,a:"middle"})+
+      ext(208,110,1.1)+'<circle cx="208" cy="86" r="5" fill="var(--surface)" stroke="'+VE+'"/><path d="M208 86 l3 -3" stroke="'+VE+'" stroke-width="1.6"/>'+
+      ext(272,110,1.1)+'<circle cx="272" cy="86" r="5" fill="var(--surface)" stroke="'+RO+'"/><path d="M272 86 l-4 1" stroke="'+RO+'" stroke-width="1.6"/>'+
+      si(168,136,"Funcionó")+no(258,136,"Falló"),150),
+    pasos:["Pregunta: en el último año, ¿hubo aquí incendio, cortocircuito, fuga de gas, derrame o accidente de trabajo?","Si hubo, pide detalles: qué pasó, si tuvieron que cerrar y si usaron extintores, alarma o salidas.","Si los equipos no hicieron falta (ej. una cortada), marca «No se necesitaron»: no suma ni resta.","Busca huellas: hollín, cables nuevos, extintor descargado, paredes reparadas."],
+    okT:"Menor riesgo", noT:"Mayor riesgo",
+    cumple:["Sin emergencias en el último año.","Si hubo: los equipos funcionaron y se reportó a la autoridad."],
+    noCumple:["Hubo emergencia y el negocio tuvo que parar.","Los extintores, la alarma o la salida no sirvieron cuando hicieron falta."]},
+
+  aplica_m8:{titulo:"¿Aplica el módulo 8?",
+    svg:svg(pregunta(8,8,200,30,[["¿Caben 25 personas o menos?"]])+flechaV(60,38,50,"sí")+
+      pregunta(8,50,200,36,[["¿La puerta da directo a la"],["calle, a nivel del piso?"]])+flechaV(60,86,98,"sí")+
+      pregunta(8,98,200,36,[["¿Se llega a la salida en"],["15 m o menos?"]])+flechaV(60,134,150,"las 3 sí")+
+      pregunta(8,150,200,36,[["NO APLICA",12,700],["45 puntos, sin más preguntas",10,500,MU]])+
+      flechaH(208,23,232,"no")+flechaH(208,68,232,"no")+flechaH(208,116,232,"no")+
+      aplica(232,8,82,126,[["SÍ APLICA",12,700,AM],["responde",10,500],["todo el",10,500],["módulo",10,500]])+
+      tx(160,206,"Si dudas, marca que sí aplica.",{s:11,w:700,c:AM,a:"middle"}),214),
+    pasos:["Cuenta cuántas personas caben al tiempo en la hora pico: clientes más trabajadores.","Mira si la puerta da directo a la calle, sin escaleras, pasillo común ni reja de otro en medio.","Camina desde el punto más lejano del local hasta la salida: deben ser 15 m o menos.","Si las tres respuestas son SÍ, marca «No aplica». Si alguna es NO, o dudas, marca «Sí, aplica»."],
+    okT:"No aplica si", noT:"Sí aplica si",
+    cumple:["Se cumplen las tres condiciones a la vez."],
+    noCumple:["Caben más de 25 personas.","Hay que subir, bajar o pasar por otro espacio para salir.","El punto más lejano queda a más de 15 m de la salida."],
+    ref:"Criterio CBVI · NSR-10 Título K"},
+
+  aplica_m9:{titulo:"¿Aplica el módulo 9?",
+    svg:svg(pregunta(8,8,200,30,[["¿Tiene al menos un empleado?"]])+flechaH(208,23,232,"sí")+flechaV(60,38,52,"no")+
+      pregunta(8,52,200,48,[["¿El riesgo es bajo?"],["sin gas, químicos ni mucho",10,500,MU],["material que arda",10,500,MU]])+flechaH(208,76,232,"no")+
+      flechaV(60,100,116,"sí")+
+      pregunta(8,116,200,36,[["NO APLICA",12,700],["18 puntos, sin más preguntas",10,500,MU]])+
+      aplica(232,8,82,92,[["SÍ APLICA",12,700,AM],["revisa",10,500],["el plan",10,500],["Dec. 1072",9,500,MU]])+
+      tx(160,172,"Si dudas, marca que sí aplica.",{s:11,w:700,c:AM,a:"middle"}),180),
+    pasos:["Pregunta si hay empleados, aunque sea uno, con contrato o por días.","Si lo atiende solo el dueño, mira el riesgo: sin gas, químicos ni mucho material que arda, es bajo.","Si tiene empleados o el riesgo no es bajo, marca «Sí, aplica» y revisa el plan."],
+    okT:"No aplica si", noT:"Sí aplica si",
+    cumple:["Lo atiende solo el dueño, sin empleados.","Y el riesgo es bajo."],
+    noCumple:["Hay al menos un empleado: el Decreto 1072 le exige plan.","Hay gas, químicos, combustibles o mucho material que arda."],
+    ref:"Decreto 1072 de 2015 · Criterio CBVI"}
   };
 })();
 

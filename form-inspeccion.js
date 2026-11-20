@@ -100,7 +100,9 @@ window.MODULOS = [
          certificado como hallazgo "no cumplió lo de la visita anterior" a un
          negocio que nunca había tenido visita. Ahora queda fuera del puntaje. */
       { id:"m3_cumple", label:"Se evidencia el cumplimiento de los requerimientos generados en la inspección anterior.", tipo:"sino",
-        opts:[{v:"SI",p:1},{v:"NO",p:0},NA("Primera visita")] },
+        /* v1.24: si la visita anterior salió sin nada que corregir, no hay
+           "cumplimiento" que medir: antes había que marcar SI. */
+        opts:[{v:"SI",p:1},{v:"NO",p:0},NA("Primera visita"),NA("Sin requerimientos","La anterior no dejó requerimientos")] },
       { id:"m3_emerg",  label:"El establecimiento o edificación presentó emergencias en el último año.", tipo:"sino", opts:SINO(0,1) },
       { id:"m3_reporte",label:"Hay evidencia de que la emergencia o el riesgo del establecimiento se reportó a la autoridad competente.", tipo:"sino", opts:[{v:"SI",p:1},{v:"NO",p:0},NA("N/A","No aplica")] },
       { id:"m3_tipo",   label:"Tipo de emergencia ocurrida en el establecimiento o edificación.", tipo:"select", score:false, dependsOn:{item:"m3_emerg",value:"SI"},
@@ -153,7 +155,9 @@ window.MODULOS = [
     id: "m5", titulo: "Módulo 5. Condiciones generales de riesgo de incendio", clase: "agravante", max: 19,
     items: [
       { id:"m5_almac", label:"Altura de almacenamiento de las mercancías.", tipo:"select",
-        opts:[{v:"0 - 3 m",p:1},{v:"> 3 m",p:0}] },
+        /* v1.24: sin mercancía no hay arrume: vale lo mismo que "0 - 3 m" (antes la
+           guía decía marcar esa opción, y quedaba registrada una altura que no existe). */
+        opts:[{v:"0 - 3 m",p:1},{v:"> 3 m",p:0},{v:"No almacena",p:1,l:"No almacena mercancía"}] },
       { id:"m5_fuentes", label:"Fuentes de ignición que se pueden observar.", tipo:"fuentes",
         maxPuntos:14, puntosPorAusencia:1,
         nota:"1 punto por cada fuente NO presente (máx 14). Marque las fuentes observadas.",
