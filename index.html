@@ -17,7 +17,7 @@
 <link rel="icon" href="icon192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha384-c6Rcwz4e4CITMbu/NBmnNS8yN2sC3cUElMEMfP3vqqKFp7GOYaaBBCqmaWBjmkjb" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
   /* ===== Sistema de diseño — "Acta oficial de campo" (ver DESIGN.md) =====
@@ -643,13 +643,13 @@
 <div class="toast" id="toast"></div>
 <div id="modalRoot"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="logos.js?v=1.22"></script>
-<script src="form-inspeccion.js?v=1.22"></script>
-<script src="guias.js?v=1.22"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js" integrity="sha384-dPowQo9uxJU703klzvnG+vzLHQDNmO/zREXw6BhCMupB54CE70wj6SWOGVPySK3s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="logos.js?v=1.23"></script>
+<script src="form-inspeccion.js?v=1.23"></script>
+<script src="guias.js?v=1.23"></script>
 <script>
 (function(){
 "use strict";
@@ -661,8 +661,14 @@ var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){r
    CACHE de sw.js (cbvi-revisiones-vX-YY) y con el ?v= de los <script>.
    Las notas se le muestran al usuario en el aviso de actualizacion:
    NUNCA pongas aqui datos sensibles ni detalles de infraestructura. */
-var APP_VERSION="1.22";
+var APP_VERSION="1.23";
 var APP_VERSION_NOTAS=[
+  "v1.23: Al entrar, si el correo o el PIN no coinciden, el mensaje es el mismo. Tras varios intentos fallidos con un correo hay que esperar unos minutos antes de volver a intentar.",
+  "v1.23: Si el servidor no acepta algún envío, el inicio lo muestra y puedes copiar el detalle para el administrador. Antes quedaba escondido.",
+  "v1.23: Si la memoria del equipo se está llenando, la app avisa antes de que deje de guardar, y avisa en el momento si algo no se pudo guardar.",
+  "v1.23: Los censos de todos los inspectores se ven en todas las tablets, y lo que el administrador elimina desaparece también de los demás equipos.",
+  "v1.23: Con señal débil la app abre más rápido: si la red tarda, usa lo que ya tiene guardado.",
+  "v1.23: Las fallas de la app se reportan solas al administrador, sin los datos de las inspecciones.",
   "v1.22: La demostración usa siempre datos de ejemplo y no muestra ni cambia lo que hay guardado en este equipo.",
   "v1.22: Un concepto que ya tiene número oficial no se puede editar. Si tiene un error, el administrador lo elimina y se hace una inspección nueva.",
   "v1.22: Si tu sesión deja de ser válida con envíos pendientes, la app te avisa y los guarda hasta que vuelvas a entrar; antes se podían perder.",
@@ -790,7 +796,18 @@ var _t;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show
 function load(){try{return JSON.parse(localStorage.getItem(LS))}catch(e){return null}}
 /* v1.22: en la demostración no se guarda nada: trabaja con datos de ejemplo en
    memoria y los datos reales del equipo ni se muestran ni se tocan. */
-function persist(){if(SES&&SES.demo)return;try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}}
+function persist(){if(SES&&SES.demo)return;try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){faltaEspacio("los datos")}}
+/* v1.23: antes, con la memoria llena, la app dejaba de guardar SIN avisar y se
+   perdía el trabajo del día. Ahora lo dice en el momento y avisa antes, al 80 %. */
+var ALMACEN_MAX=5000000, _avisoLleno=false;   // ~5 millones de caracteres: el tope habitual del navegador
+var _usoMem={t:0,n:0};
+function usoAlmacen(fresco){if(!fresco&&Date.now()-_usoMem.t<30000)return _usoMem.n;var n=0;try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);n+=k.length+(localStorage.getItem(k)||"").length}}catch(e){}_usoMem={t:Date.now(),n:n};return n}
+function faltaEspacio(que){if(_avisoLleno)return;_avisoLleno=true;
+  try{anotarError("error","Memoria llena al guardar "+que,"uso "+usoAlmacen(true))}catch(e){}
+  setTimeout(function(){modal("Este equipo se quedó sin espacio",
+    '<p class="note"><b>Lo último que hiciste no quedó guardado en este equipo.</b></p>'+
+    '<p class="note">Con señal, pulsa Sincronizar (⟳) para que suban las fotos pendientes y se libere espacio. Si el aviso vuelve, avísale al administrador antes de seguir trabajando.</p>',
+    "Entendido",function(){return true})},60)}
 function defcfg(){return {metaRevisiones:12,metaRenovaciones:6,metaBarrido:30,vigenciaMeses:12,cobroActivo:false,tarifas:[{nivel:"Impacto 1",valor:97000},{nivel:"Impacto 2",valor:196000},{nivel:"Impacto 3",valor:327000}]}}
 function emptyDB(){return {establecimientos:[],inspecciones:[],barridos:[],config:defcfg()}}
 function cargarDB(){var d=load()||emptyDB();
@@ -803,20 +820,50 @@ var DB=cargarDB();
 var BACKEND_URL="https://script.google.com/macros/s/AKfycbzXkG5Kw1kapPK1dwL55PdhUwCrkZP0Qmdok84rE7PpO-iWl4pIR8-u-yuZrS73T3Kp/exec";
 var QK="cbvi_rt_queue_v1";
 function loadQ(){try{return JSON.parse(localStorage.getItem(QK))||[]}catch(e){return[]}}
-function saveQ(){try{localStorage.setItem(QK,JSON.stringify(QUEUE))}catch(e){}}
+function saveQ(){try{localStorage.setItem(QK,JSON.stringify(QUEUE))}catch(e){faltaEspacio("la cola de envíos")}}
 var QUEUE=loadQ(), _flushing=false, _avisoSesion=false;
+/* ===== v1.23: las fallas de la app llegan al administrador (hoja Errores y
+   correo diario). Solo el mensaje técnico, la versión y la pantalla: nunca el
+   contenido del formulario. Se guardan hasta 20 y se envían con señal. ===== */
+var EQK="cbvi_rt_errores_v1", _errVistos={}, _enviandoErr=false;
+function sinCitas(x){return String(x||"").replace(/"[^"]*"/g,'"…"').replace(/'[^']*'/g,"'…'")}   // lo citado puede traer datos de una persona
+function anotarError(tipo,mensaje,detalle){
+  if(SES&&SES.demo)return;   // la demostración no reporta nada
+  var m=sinCitas(mensaje).slice(0,300);
+  if(!m||/Failed to fetch|NetworkError|Load failed|network error/i.test(m))return;   // falta de señal: no es una falla
+  var k=tipo+"|"+m; if(_errVistos[k])return; _errVistos[k]=1;
+  try{var l=JSON.parse(localStorage.getItem(EQK))||[]; if(l.length>=20)return;
+    l.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),tipo:tipo,version:APP_VERSION,vista:String(VIEW||""),mensaje:m,detalle:sinCitas(detalle).slice(0,500)});
+    localStorage.setItem(EQK,JSON.stringify(l))}catch(e){
+    /* memoria llena: no cabe ni el aviso; se manda directo si hay señal */
+    if(esOnline()&&navigator.onLine!==false)api("reportarError",{errores:[{id:Date.now().toString(36),tipo:tipo,version:APP_VERSION,vista:String(VIEW||""),mensaje:m,detalle:""}]}).catch(function(){});return}
+  enviarErrores()}
+function enviarErrores(){
+  if(_enviandoErr||!esOnline()||navigator.onLine===false)return;
+  var l;try{l=JSON.parse(localStorage.getItem(EQK))||[]}catch(e){l=[]}if(!l.length)return;
+  _enviandoErr=true;
+  var ids={};l.forEach(function(x){ids[x.id]=1});
+  api("reportarError",{errores:l}).then(function(res){_enviandoErr=false;
+    if(res&&res.ok){try{var r=(JSON.parse(localStorage.getItem(EQK))||[]).filter(function(x){return !ids[x.id]});
+      if(r.length)localStorage.setItem(EQK,JSON.stringify(r));else localStorage.removeItem(EQK)}catch(e){}}}).catch(function(){_enviandoErr=false})}
+window.addEventListener("error",function(ev){var m=(ev&&ev.message)||"";if(!m||/^Script error\.?$/i.test(m))return;
+  anotarError("error",m+(ev.filename?(" @ "+String(ev.filename).split("/").pop().split("?")[0]+":"+ev.lineno):""),ev.error&&ev.error.stack)});
+window.addEventListener("unhandledrejection",function(ev){var r=ev&&ev.reason,m=(r&&r.message)||String(r||"");
+  if(m)anotarError("error","Promesa sin manejar: "+m,r&&r.stack)});
 var RQK="cbvi_rt_rechazos_v1";
+function leerRechazos(){try{return JSON.parse(localStorage.getItem(RQK))||[]}catch(e){return[]}}
 function guardarRechazo(op,err){
-  try{var l=JSON.parse(localStorage.getItem(RQK))||[];
+  try{var l=leerRechazos();
     l.push({a:op.a,p:op.p,error:String(err||""),fecha:new Date().toISOString()});
     localStorage.setItem(RQK,JSON.stringify(l.slice(-50)))}catch(e){}
+  anotarError("rechazo",op.a+": "+String(err||""),"");     // al administrador va solo la acción y el motivo, no los datos
   toast(("El servidor no aceptó un envío ("+op.a+"): "+mensajeServidor(err)).slice(0,190))}
 function esOnline(){return !!(SES&&SES.pase)}
 /* El servidor responde "Acción desconocida: X" cuando la versión PUBLICADA
    del backend es más vieja que esta app (guardar el código en Apps Script NO
    lo publica). En vez de un mensaje críptico, se explica qué hacer. */
 var SERVIDOR_VIEJO=false;
-var BACKEND_MIN="1.7";
+var BACKEND_MIN="1.11";
 function mensajeServidor(err){
   var e=String(err||"");
   if(/Acci[oó]n desconocida/i.test(e)){
@@ -850,6 +897,12 @@ function flush(){if(_flushing||!esOnline()||navigator.onLine===false||!QUEUE.len
      alguien filtra la cola (finalizar), shift() se llevaba otra acción. */
   var quitar=function(){var ix=QUEUE.indexOf(op);if(ix>=0)QUEUE.splice(ix,1);saveQ()};
   var fin=function(){_flushing=false;_enVuelo=null};
+  /* v1.23: si el SERVIDOR eliminó esa ficha o ese censo (otro administrador), su
+     envío pendiente no se manda: lo volvería a crear. Solo lo que consta como
+     eliminado allá; lo que falta aquí por otra razón (memoria llena, borrado
+     local) se envía igual, porque la cola puede ser la única copia. */
+  var pid=op.a==="crearEstablecimiento"?op.p&&op.p.establecimiento&&op.p.establecimiento.id:(op.a==="censar"?op.p&&op.p.barrido&&(op.p.barrido.idCliente||op.p.barrido.id):null);
+  if(pid&&leerBorrados().indexOf(String(pid))>=0){quitar();fin();updateSync();flush();return}
   api(op.a,op.p).then(function(res){
     /* v1.22: con la sesión vencida o desactivada el envío NO se descarta: queda en
        cola hasta que la persona vuelva a entrar. Antes se perdía sin aviso. */
@@ -863,10 +916,19 @@ function flush(){if(_flushing||!esOnline()||navigator.onLine===false||!QUEUE.len
     /* Rechazo definitivo (datos que el servidor nunca aceptará): antes se borraba
        sin rastro. Ahora se guarda aparte para poder revisarlo. */
     if(!res.ok)guardarRechazo(op,res.error);
-    if(res.ok&&op.a==="guardarInspeccion"&&res.inspeccion){var l=DB.inspecciones.find(function(x){return x.id===op.p.inspeccion.idCliente});if(l){var adop=adoptarServidor(l,res,true);l.codigo=res.inspeccion.codigo;l.sig=res.inspeccion.sig;l._sync=true;persist();numeroLlego(l,adop)}}
+    if(res.ok&&op.a==="guardarInspeccion"&&res.inspeccion){var l=DB.inspecciones.find(function(x){return x.id===op.p.inspeccion.idCliente});if(l){var adop=adoptarServidor(l,res,true);l.codigo=res.inspeccion.codigo;l.sig=res.inspeccion.sig;l._sync=true;
+      /* v1.23: si el servidor corrigió la fecha (reloj de la tablet mal puesto), el PDF usa la corregida */
+      var sf=new Date(res.inspeccion.fecha).getTime(), lf=new Date(l.fecha).getTime(), sv=new Date(res.inspeccion.vigenciaHasta).getTime();
+      if(!isNaN(sf)&&(isNaN(lf)||Math.abs(sf-lf)>60000)){
+        if(res.fechaCorregida||Math.abs(sf-lf)>86400000)toast("La fecha de este equipo está mal: el concepto quedó con la fecha del servidor. Revisa la hora del equipo.");
+        l.fecha=new Date(sf).toISOString();if(!isNaN(sv))l.vigenciaHasta=new Date(sv).toISOString();
+        if(FORM&&FORM.id===l.id&&FORM!==l){FORM.fecha=l.fecha;FORM.vigenciaHasta=l.vigenciaHasta}}
+      persist();numeroLlego(l,adop)}}
+    if(res.ok&&op.a==="crearEstablecimiento"&&res.establecimiento&&res.establecimiento.codigo){var ee=DB.establecimientos.find(function(x){return x.id===res.establecimiento.id});
+      if(ee&&ee.codigo!==res.establecimiento.codigo){ee.codigo=res.establecimiento.codigo;persist()}}
     if(res&&res.ok&&op.a==="guardarInspeccion"&&FORM&&VIEW==="certificado"){
       var cur=DB.inspecciones.filter(function(x){return x.id===FORM.id})[0];
-      if(cur&&cur.codigo&&cur.codigo!==FORM.codigo){FORM.codigo=cur.codigo;FORM.sig=cur.sig;render()}
+      if(cur&&cur.codigo&&(cur.codigo!==FORM.codigo||cur.fecha!==FORM.fecha)){FORM.codigo=cur.codigo;FORM.sig=cur.sig;FORM.fecha=cur.fecha;FORM.vigenciaHasta=cur.vigenciaHasta;render()}
     }
     quitar();fin();updateSync();flush()}).catch(function(){fin();updateSync()})}
 var _reintCola=null, _enVuelo=null;
@@ -904,14 +966,51 @@ function numeroLlego(l,yaAviso){
   FORM=l;VIEW="certificado";render();window.scrollTo(0,0);
   if(!yaAviso)modal("Concepto ya emitido",'<p class="note">Este concepto recibió su número oficial mientras lo editabas. Se muestra la versión que quedó registrada; los cambios posteriores no se aplican. Si tiene un error, el administrador lo elimina y se hace una inspección nueva.</p>',"Entendido",function(){return true})}
 function pullAll(){if(!esOnline())return Promise.resolve();setSync("Sincronizando…","pend");
-  return Promise.all([api("listarEstablecimientos").catch(function(){return{}}),api("listarInspecciones").catch(function(){return{}}),api("getConfig").catch(function(){return{}})]).then(function(r){
-    if(r[0]&&r[0].ok&&r[0].establecimientos)DB.establecimientos=mergeBy(DB.establecimientos,r[0].establecimientos.map(estFromServer),"id");
+  return Promise.all([api("listarEstablecimientos").catch(function(){return{}}),api("listarInspecciones").catch(function(){return{}}),api("getConfig").catch(function(){return{}}),api("listarBarridos").catch(function(){return{}})]).then(function(r){
+    /* v1.23: los datos de ejemplo de demostraciones viejas (antes de 1.22) se
+       mezclaban con los reales. Sus id (e1…e8, i1…i7, b1…b3) nunca son reales. */
+    var EJ=/^(e[1-8]|i[1-7]|b[1-3])$/;
+    if(DB._ejemplo!==undefined||DB.establecimientos.some(function(x){return EJ.test(String(x.id))})){
+      DB.establecimientos=DB.establecimientos.filter(function(x){return !EJ.test(String(x.id))});
+      DB.inspecciones=DB.inspecciones.filter(function(x){return !EJ.test(String(x.id))});
+      DB.barridos=(DB.barridos||[]).filter(function(x){return !EJ.test(String(x.id))})}
+    _quitados=0;_retenidos=0;
+    if(r[0]&&r[0].ok&&r[0].establecimientos)DB.establecimientos=mergeConBorrados(DB.establecimientos,r[0].establecimientos.map(estFromServer),"id");
     if(r[1]&&r[1].ok&&r[1].inspecciones)DB.inspecciones=mergeInsp(DB.inspecciones,r[1].inspecciones);
     if(r[2]&&r[2].ok&&r[2].config)DB.config=Object.assign(defcfg(),r[2].config);
+    /* v1.23: antes los censos nunca bajaban: cada tablet veía solo los suyos. */
+    if(r[3]&&r[3].ok&&r[3].barridos)DB.barridos=mergeConBorrados(DB.barridos||[],r[3].barridos.map(barridoDeServidor),"idCliente");
+    if(_quitados)toast(_quitados===1?"Se quitó 1 registro que el administrador eliminó":"Se quitaron "+_quitados+" registros que el administrador eliminó");
+    if(_retenidos){toast("El servidor devolvió muchos menos datos de lo normal: no se borró nada de este equipo. Avísale al administrador.");
+      anotarError("error","Pull con "+_retenidos+" registros ausentes: no se quitaron","")}
+    enviarErrores();
     DB._ejemplo=false;
     if(FORM&&VIEW==="inspeccion"){var cur=DB.inspecciones.filter(function(x){return x.id===FORM.id})[0];
       if(cur&&cur!==FORM&&estaValidado(cur)){persist();updateSync();numeroLlego(cur);return}}
     persist();updateSync();if(!$("#app").hidden)render()}).catch(function(){updateSync()})}
+/* v1.23: como mergeBy, pero lo que YA se había visto en el servidor (_visto) y
+   ahora no está, es porque el administrador lo eliminó: se quita también aquí.
+   Lo que nunca llegó al servidor (recién creado, sin señal) se conserva siempre. */
+var _quitados=0, _retenidos=0, BSK="cbvi_rt_borrados_v1";
+function leerBorrados(){try{return JSON.parse(localStorage.getItem(BSK))||[]}catch(e){return[]}}
+function anotarBorrados(l){if(!l.length)return;try{var v=leerBorrados().concat(l.map(String));localStorage.setItem(BSK,JSON.stringify(v.slice(-500)))}catch(e){}}
+/* Cuántos se pueden quitar de una vez. Si el servidor devuelve la lista vacía o
+   le faltan muchos (pestaña renombrada, hoja equivocada, error), NO se borra
+   nada: la tablet es el único lugar con fotos, firmas y observaciones. */
+function puedeQuitar(nQuitar,nVistos,nServer){return nQuitar>0&&nServer>0&&nQuitar<=Math.max(10,Math.floor(nVistos*0.2))}
+function mergeConBorrados(local,server,key){var m={},loc={},kf=function(x){return String(x[key]||x.id)};
+  local.forEach(function(l){loc[kf(l)]=l});
+  server.forEach(function(s){var k=kf(s);s._visto=1;
+    var l=loc[k];if(l&&l.fotoThumb&&!s.fotoThumb)s.fotoThumb=l.fotoThumb;   // la miniatura del censo solo vive en la tablet
+    m[k]=s});
+  var fuera=[],vistos=0;
+  local.forEach(function(l){if(l._visto)vistos++;var k=kf(l);if(m[k])return;if(l._visto){fuera.push(l);return}m[k]=l});
+  if(fuera.length){if(puedeQuitar(fuera.length,vistos,server.length)){_quitados+=fuera.length;anotarBorrados(fuera.map(function(l){return l.idCliente||l.id}).concat(fuera.map(function(l){return l.id})))}
+    else{_retenidos+=fuera.length;fuera.forEach(function(l){m[kf(l)]=l})}}
+  return Object.keys(m).map(function(k){return m[k]})}
+function barridoDeServidor(b){var o=Object.assign({},b);o.id=String(b.id||b.idCliente);o.idCliente=String(b.idCliente||b.id);
+  ["lat","lng","certVence","observacion","barrio","direccion"].forEach(function(k){if(o[k]==null)o[k]=""});
+  if(o.fecha&&typeof o.fecha!=="string")o.fecha=new Date(o.fecha).toISOString();return o}
 function mergeBy(local,server,key){var m={};server.forEach(function(s){m[String(s[key])]=s});local.forEach(function(l){var k=String(l[key]);if(!m[k])m[k]=l});return Object.keys(m).map(function(k){return m[k]})}
 /* Fusion por campo. ANTES la copia del servidor reemplazaba entera a la local
    y se perdian las fotos, las observaciones, las firmas y el inspector (el
@@ -965,8 +1064,13 @@ function fusionInsp(l,srv){
 function mergeInsp(local,server){
   var loc={}; local.forEach(function(l){loc[String(l.idCliente||l.id)]=l});
   var out={};
-  server.forEach(function(s){var srv=insDeServidor(s), l=loc[srv.id]; out[srv.id]=l?fusionInsp(l,srv):srv});
-  local.forEach(function(l){var k=String(l.idCliente||l.id); if(!out[k])out[k]=l});
+  server.forEach(function(s){var srv=insDeServidor(s), l=loc[srv.id]; out[srv.id]=l?fusionInsp(l,srv):srv; out[srv.id]._visto=1});
+  /* v1.23: si ya se había visto en el servidor y ya no está, lo eliminó el
+     administrador. Con el mismo freno que mergeConBorrados ante listas vacías. */
+  var fuera=[],vistos=0;
+  local.forEach(function(l){if(l._visto)vistos++;var k=String(l.idCliente||l.id); if(out[k])return; if(l._visto){fuera.push(l);return} out[k]=l});
+  if(fuera.length){if(puedeQuitar(fuera.length,vistos,server.length))_quitados+=fuera.length;
+    else{_retenidos+=fuera.length;fuera.forEach(function(l){out[String(l.idCliente||l.id)]=l})}}
   return Object.keys(out).map(function(k){return out[k]});
 }
 function tryj(s){try{return JSON.parse(s)}catch(e){return (typeof s==="object"&&s)?s:{}}}
@@ -983,7 +1087,7 @@ function pushEst(e){enqueue("crearEstablecimiento",estToServer(e))}
    Si no hay señal, esperan ahí hasta que vuelva. */
 var FQK="cbvi_rt_fotoq_v1";
 function loadFQ(){try{return JSON.parse(localStorage.getItem(FQK))||[]}catch(e){return[]}}
-function saveFQ(){try{localStorage.setItem(FQK,JSON.stringify(FOTOQ))}catch(e){avisoEspacio()}}
+function saveFQ(){try{localStorage.setItem(FQK,JSON.stringify(FOTOQ))}catch(e){avisoEspacio();faltaEspacio("una foto")}}
 var FOTOQ=loadFQ(), _subiendo=false, _avisoEsp=false;
 function avisoEspacio(){ if(_avisoEsp)return; _avisoEsp=true;
   toast("La tablet se está quedando sin espacio. Sincroniza para liberar fotos."); }
@@ -1396,6 +1500,17 @@ function vDashboard(v){
   var c=counts(), cfg=DB.config;
   var mes=mesInsp().length, barr=censoMes();
   var metaTotal=cfg.metaRevisiones+cfg.metaRenovaciones, pct=Math.min(100,Math.round(mes/Math.max(1,metaTotal)*100));
+  /* v1.23: envíos que el servidor no aceptó y memoria del equipo */
+  var rech=leerRechazos();
+  if(rech.length){var zr=el("div","pendbanner clickable");zr.style.marginBottom="16px";
+    zr.innerHTML='<b>⚠ '+rech.length+(rech.length===1?' envío que el servidor no aceptó':' envíos que el servidor no aceptó')+'</b>'+
+      '<p>Quedaron guardados en este equipo. Tócalo para ver cuáles y copiar el detalle para el administrador.</p>';
+    zr.setAttribute("role","button");zr.tabIndex=0;
+    zr.addEventListener("click",modalRechazos);zr.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();modalRechazos()}});v.appendChild(zr)}
+  var uso=usoAlmacen()/ALMACEN_MAX;
+  if(uso>=0.8){v.insertAdjacentHTML("beforeend",'<div class="pendbanner" style="margin-bottom:16px"><b>⚠ La memoria de la app en este equipo está al '+Math.min(99,Math.round(uso*100))+' %</b>'+
+    '<p>Con señal, pulsa Sincronizar (⟳) para subir las fotos pendientes. Si no baja, avísale al administrador: cuando se llene, la app no podrá guardar.</p></div>');
+    if(uso>=0.9)anotarError("error","Memoria de la app al "+Math.round(uso*100)+" %","")}
   if(DB._ejemplo)v.insertAdjacentHTML("beforeend",'<div style="margin-bottom:14px"><span class="seedtag">● Datos de ejemplo — bórralos cuando cargues los reales</span></div>');
   /* Servidor desactualizado: guardar el código en Apps Script no lo publica. */
   if(SERVIDOR_VIEJO&&esOnline()){
@@ -1459,6 +1574,22 @@ function vDashboard(v){
     var lg=el("div","listgrid");prox.forEach(function(o){lg.appendChild(estRow(o.e))});v.appendChild(lg);
     $("#goVenc").addEventListener("click",function(){navTo("vencimientos")});}
 }
+function modalRechazos(){
+  var l=leerRechazos();if(!l.length){toast("No hay envíos rechazados");return}
+  var nombres={crearEstablecimiento:"Ficha de establecimiento",censar:"Censo",guardarInspeccion:"Concepto",setConfig:"Metas"};
+  modal("Envíos que el servidor no aceptó",
+    '<p class="note">No se borraron: siguen en este equipo. Copia el detalle y envíaselo al administrador para que lo revise.</p>'+
+    '<ul style="margin:10px 0 0 18px;line-height:1.6;font-size:14px">'+l.slice().reverse().map(function(x){
+      return '<li><b>'+esc(nombres[x.a]||x.a)+'</b> · '+esc(fmt(x.fecha))+'<br><span class="note">'+esc(x.error)+'</span></li>'}).join("")+'</ul>'+
+    '<label class="lbl" for="rechTxt" style="margin-top:12px">Detalle para copiar</label>'+
+    '<textarea id="rechTxt" readonly style="min-height:90px;font-family:var(--ff-m);font-size:12px">'+esc(JSON.stringify(l))+'</textarea>',
+    "Cerrar",function(){return true},
+    {texto:"Descartar todos",clase:"btn-danger",accion:function(){
+      setTimeout(function(){modal("Descartar los envíos rechazados",
+        '<p class="note">Se borran de este equipo y no se podrán recuperar. Hazlo solo si ya copiaste el detalle o el administrador te lo indicó.</p>',
+        "Descartar",function(){try{localStorage.removeItem(RQK)}catch(e){}toast("Envíos rechazados descartados");render();return true})},120);
+      return true}});
+  var ta=$("#rechTxt");if(ta)ta.addEventListener("focus",function(){ta.select()})}
 function tile(v,k,col,ic){var t=el("div","tile");t.style.setProperty("--c",col);
   t.innerHTML='<div class="v">'+v+'</div><div class="k">'+(ic?'<i aria-hidden="true">'+ic+'</i>':'')+esc(k)+'</div>';return t}
 function metaRow(lbl,v,m){var p=Math.min(100,Math.round(v/Math.max(1,m)*100));return '<div class="metarow"><div class="t"><span>'+esc(lbl)+'</span><b>'+v+'/'+m+'</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}
@@ -2911,14 +3042,16 @@ function eliminarEstablecimiento(e,alTerminar){
      3. Si la cámara no se puede abrir (el APK no tiene ese permiso), se toma
         una FOTO del QR con la cámara normal y se lee de la foto.
    Siempre queda la opción de escribirlo a mano. */
-var JSQR_URL="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
+/* v1.23: jsQR.js (archivo real del paquete) con huella de integridad. El .min.js
+   lo generaba jsDelivr al vuelo: podía cambiar y no admite huella fija. */
+var JSQR_URL="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js", JSQR_SRI="sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx";
 var _jsqrCargando=null;
 function cargarJsQR(){
   if(window.jsQR) return Promise.resolve(window.jsQR);
   if(_jsqrCargando) return _jsqrCargando;
   _jsqrCargando=new Promise(function(ok,fail){
     var s=document.createElement("script");
-    s.src=JSQR_URL; s.async=true;
+    s.src=JSQR_URL; s.async=true; s.integrity=JSQR_SRI; s.crossOrigin="anonymous";
     s.onload=function(){ window.jsQR?ok(window.jsQR):fail(new Error("jsQR no cargó")) };
     s.onerror=function(){ fail(new Error("sin red para el lector")) };
     document.head.appendChild(s);
@@ -3204,7 +3337,7 @@ function vMetas(v){
       '<div><label class="lbl">Vigencia del concepto (meses)</label><input id="mV" type="number" value="'+cfg.vigenciaMeses+'"></div></div>'+
       '<div style="margin-top:14px"><button class="btn btn-p btn-sm" id="saveMeta">Guardar metas</button></div>';
     v.appendChild(f);
-    $("#saveMeta").addEventListener("click",function(){cfg.metaRevisiones=+$("#mR").value||0;cfg.metaRenovaciones=+$("#mN").value||0;cfg.metaBarrido=+$("#mB").value||0;cfg.vigenciaMeses=+$("#mV").value||12;persist();if(esOnline())enqueue("setConfig",{config:{metaRevisiones:cfg.metaRevisiones,metaRenovaciones:cfg.metaRenovaciones,metaBarrido:cfg.metaBarrido,vigenciaMeses:cfg.vigenciaMeses}});toast("Metas actualizadas");render()});
+    $("#saveMeta").addEventListener("click",function(){cfg.metaRevisiones=+$("#mR").value||0;cfg.metaRenovaciones=+$("#mN").value||0;cfg.metaBarrido=+$("#mB").value||0;cfg.vigenciaMeses=Math.min(24,Math.max(1,+$("#mV").value||12));persist();if(esOnline())enqueue("setConfig",{config:{metaRevisiones:cfg.metaRevisiones,metaRenovaciones:cfg.metaRenovaciones,metaBarrido:cfg.metaBarrido,vigenciaMeses:cfg.vigenciaMeses}});toast("Metas actualizadas");render()});
   } else {
     v.insertAdjacentHTML("beforeend",'<div class="card pad"><p class="note">🔒 Solo el administrador puede cambiar las metas. Así nadie las baja a su conveniencia.</p></div>');
   }
@@ -3784,7 +3917,8 @@ function limpiarPin(){$$("#pin input").forEach(function(x){x.value=""})}
 function afterLogin(){
   _avisoSesion=false;
   try{sessionStorage.setItem(SESK,JSON.stringify(SES))}catch(e){}
-  try{localStorage.setItem("cbvi_rt_ultimo_correo",(SES&&SES.email)||"")}catch(e){}
+  if(SES&&!SES.demo){try{localStorage.setItem("cbvi_rt_ultimo_correo",SES.email||"")}catch(e){}}
+  setTimeout(enviarErrores,2000);
   $("#login").hidden=true;$("#app").hidden=false;
   VIEW="dashboard";NAVHIST=[];render();updateSync();
   setTimeout(avisoVersion,450);          // aviso de actualizacion (regla: siempre avisar el cambio)
@@ -3854,12 +3988,9 @@ $("#btnEnviarSol").addEventListener("click",function(){
     if(res&&res.ok){
       $("#loginEmail").value=em;
       try{localStorage.setItem("cbvi_rt_ultimo_correo",em)}catch(e){}
-      if(res.yaExiste){
-        msgSol("ok","<b>Tu correo ya tiene acceso.</b><br>Entra con tu PIN. Si no lo recuerdas, pídeselo al administrador.");
-      } else {
-        $("#sNom").value="";
-        msgSol("ok","<b>Solicitud enviada.</b><br>El administrador la verá en su panel. Cuando te apruebe te entregará tu PIN; entonces pulsa <b>Entrar</b> y usa tu correo <b>"+esc(em)+"</b> con ese PIN.");
-      }
+      /* v1.23: el servidor responde igual exista o no el correo (no delata quién tiene acceso). */
+      $("#sNom").value="";
+      msgSol("ok","<b>Solicitud recibida.</b><br>El administrador la verá en su panel y, si te aprueba, te entregará tu PIN. Entonces pulsa <b>Entrar</b> y usa tu correo <b>"+esc(em)+"</b> con ese PIN. Si ya tenías acceso, entra directamente con tu PIN.");
     } else {
       msgSol("err",esc(mensajeServidor(res&&res.error)));
     }
@@ -3931,7 +4062,7 @@ try{
     if(esOnline()){chequearServidor();pullAll().then(function(){flush();flushFotos()})}
   }
 }catch(e){}
-window.addEventListener("online",function(){updateSync();flush();flushFotos()});
+window.addEventListener("online",function(){updateSync();flush();flushFotos();enviarErrores()});
 window.addEventListener("offline",function(){updateSync()});
 /* accesos directos del ícono instalado */
 try{
